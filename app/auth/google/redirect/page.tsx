@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function GoogleRedirectPage() {
+// Componente interno que usa useSearchParams
+function GoogleRedirectContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const code = searchParams.get('code');
@@ -50,5 +51,14 @@ export default function GoogleRedirectPage() {
         <div className="flex items-center justify-center h-screen">
             <p>Procesando autenticación de Google...</p>
         </div>
+    );
+}
+
+// Componente principal que envuelve el contenido en Suspense
+export default function GoogleRedirectPage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center h-screen">Cargando...</div>}>
+            <GoogleRedirectContent />
+        </Suspense>
     );
 }
