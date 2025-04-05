@@ -13,7 +13,7 @@ const BrutalHeading = ({
 }: BrutalHeadingProps) => {
   return (
     <Component
-      className={`font-bold text-[#002C5B] uppercase tracking-tight relative inline-block ${className}`}
+      className={`font-bold text-[#002C5B] uppercase tracking-tight relative ${className}`}
       {...props}
     >
       {children}

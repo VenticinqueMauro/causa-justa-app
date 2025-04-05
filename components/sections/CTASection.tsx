@@ -13,10 +13,10 @@ const CTASection = () => {
           Únete a nuestra comunidad de donantes y organizaciones que están cambiando el mundo, una causa a la vez
         </p>
         <div className="mt-10 flex flex-col gap-4 sm:flex-row justify-center">
-          <BrutalButton variant="white" className="text-base">
+          <BrutalButton variant="white" className="text-base" href="/register?role=BENEFICIARY">
             Iniciar una causa
           </BrutalButton>
-          <BrutalButton variant="dark" className="text-base">
+          <BrutalButton variant="dark" className="text-base" href="/campaigns">
             Explorar causas
           </BrutalButton>
         </div>

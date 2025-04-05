@@ -23,10 +23,10 @@ const Header = () => {
           <BrutalLink href="#">Contacto</BrutalLink>
         </nav>
         <div className="flex items-center gap-4">
-          <BrutalButton variant="outline" className="hidden md:flex">
+          <BrutalButton variant="outline" className="hidden md:flex" href="/login">
             Iniciar sesión
           </BrutalButton>
-          <BrutalButton variant="primary">Registrarse</BrutalButton>
+          <BrutalButton variant="primary" href="/register">Registrarse</BrutalButton>
         </div>
       </div>
     </header>

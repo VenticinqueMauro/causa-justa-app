@@ -1,14 +1,17 @@
 import React from "react";
+import Link from "next/link";
 
 interface BrutalButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "outline" | "white" | "dark";
   className?: string;
+  href?: string;
 }
 
 const BrutalButton = ({
   children,
   className = "",
   variant = "primary",
+  href,
   ...props
 }: BrutalButtonProps) => {
   const baseStyles =
@@ -27,8 +30,20 @@ const BrutalButton = ({
       "border-[#EDFCA7] bg-transparent text-[#EDFCA7] shadow-[1px_1px_#EDFCA7,2px_2px_#EDFCA7,3px_3px_#EDFCA7,4px_4px_#EDFCA7,5px_5px_0px_0px_#EDFCA7]",
   };
 
+  const combinedClassName = `${baseStyles} ${variantStyles[variant]} ${className}`;
+
+  // Si se proporciona href, renderizar como Link
+  if (href) {
+    return (
+      <Link href={href} className={combinedClassName} {...(props as any)}>
+        {children}
+      </Link>
+    );
+  }
+
+  // Si no hay href, renderizar como botón normal
   return (
-    <button className={`${baseStyles} ${variantStyles[variant]} ${className}`} {...props}>
+    <button className={combinedClassName} {...props}>
       {children}
     </button>
   );
