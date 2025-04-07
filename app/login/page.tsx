@@ -1,10 +1,9 @@
-// app/register/page.tsx
-import { Suspense } from 'react';
-import RegisterForm from '@/components/auth/RegisterForm';
+// app/login/page.tsx
+import LoginForm from '@/components/auth/LoginForm';
 import BrutalHeading from '@/components/ui/BrutalHeading';
 import BrutalSection from '@/components/ui/BrutalSection';
 
-export default function RegisterPage() {
+export default function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col container mx-auto px-4">
       <main className="flex-1 py-10">
@@ -13,15 +12,13 @@ export default function RegisterPage() {
             <div className="max-w-2xl mx-auto">
               <div className="text-center mb-6">
                 <BrutalHeading className="text-3xl md:text-4xl">
-                  Registro de Usuario
+                  Iniciar Sesión
                 </BrutalHeading>
               </div>
               <p className="text-center mb-8 text-[#002C5B]/80">
-                Únete a nuestra plataforma para hacer la diferencia. <br />Puedes registrarte como donante o beneficiario.
+                Accede a tu cuenta para continuar con tu experiencia en la plataforma.
               </p>
-              <Suspense fallback={<div className="text-center p-4">Cargando formulario...</div>}>
-                <RegisterForm />
-              </Suspense>
+              <LoginForm />
             </div>
           </div>
         </BrutalSection>

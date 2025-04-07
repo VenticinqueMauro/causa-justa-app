@@ -1,9 +1,20 @@
+'use client';
+
 import React from "react";
-import { Heart } from "lucide-react";
+import { Heart, User, LogOut } from "lucide-react";
 import BrutalButton from "../ui/BrutalButton";
 import BrutalLink from "../ui/BrutalLink";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Header = () => {
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    // No es necesario redirigir, ya que el cambio en el estado de autenticación
+    // hará que el componente se vuelva a renderizar
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b-2 border-[#002C5B] bg-[#ECECE2] shadow-[0_4px_0_0_rgba(0,44,91,0.2)]">
       <div className="container mx-auto px-4 flex h-16 items-center justify-between">
@@ -22,12 +33,40 @@ const Header = () => {
           <BrutalLink href="#">Sobre nosotros</BrutalLink>
           <BrutalLink href="#">Contacto</BrutalLink>
         </nav>
-        <div className="flex items-center gap-4">
-          <BrutalButton variant="outline" className="hidden md:flex" href="/login">
-            Iniciar sesión
-          </BrutalButton>
-          <BrutalButton variant="primary" href="/register">Registrarse</BrutalButton>
-        </div>
+        
+        {/* Mostrar botones de login/registro o menú de usuario según el estado de autenticación */}
+        {isLoading ? (
+          // Mostrar un espacio reservado mientras se carga el estado de autenticación
+          <div className="w-[180px] h-10"></div>
+        ) : isAuthenticated ? (
+          // Usuario autenticado: mostrar información del usuario y botón de cerrar sesión
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#002C5B] bg-white">
+                <User className="h-4 w-4 text-[#002C5B]" />
+              </div>
+              <span className="hidden md:block text-sm font-medium text-[#002C5B]">
+                {user?.fullName || 'Usuario'}
+              </span>
+            </div>
+            <BrutalButton 
+              variant="outline" 
+              className="text-sm"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4 mr-1" />
+              <span className="hidden md:inline">Cerrar sesión</span>
+            </BrutalButton>
+          </div>
+        ) : (
+          // Usuario no autenticado: mostrar botones de login/registro
+          <div className="flex items-center gap-4">
+            <BrutalButton variant="outline" className="hidden md:flex" href="/login">
+              Iniciar sesión
+            </BrutalButton>
+            <BrutalButton variant="primary" href="/register">Registrarse</BrutalButton>
+          </div>
+        )}
       </div>
     </header>
   );

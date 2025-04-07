@@ -25,6 +25,18 @@ export interface RegisterFormState {
   };
 }
 
+// Tipado para el estado del formulario de login
+export interface LoginFormState {
+  success: boolean;
+  message: string | null;
+  data?: any; // Datos del usuario y token de acceso
+  errors?: {
+    email?: string[];
+    password?: string[];
+    _form?: string[]; // Errores generales del formulario
+  };
+}
+
 // Tipo para el estado de verificación de email
 export interface VerifyEmailState {
   success: boolean;
@@ -133,6 +145,76 @@ export async function registerUser(
       success: false,
       message: 'Error de conexión. No se pudo completar el registro.',
       errors: { _form: ['Error de conexión. No se pudo completar el registro.'] }
+    };
+  }
+}
+
+// Esquema de validación para el login con Zod
+const LoginSchema = z.object({
+  email: z.string().email({ message: "Ingresa un correo electrónico válido" }).trim(),
+  password: z.string().min(1, { message: "La contraseña es requerida" }),
+});
+
+export async function loginUser(
+  prevState: LoginFormState, 
+  formData: FormData
+): Promise<LoginFormState> {
+
+  // 1. Validar los datos del formulario usando Zod
+  const validatedFields = LoginSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+  });
+
+  // Si la validación falla, devolver los errores
+  if (!validatedFields.success) {
+    console.log("Validation Errors:", validatedFields.error.flatten().fieldErrors);
+    return {
+      success: false,
+      message: "Error de validación. Por favor, revisa los campos.",
+      errors: validatedFields.error.flatten().fieldErrors,
+    };
+  }
+
+  // 2. Si la validación es exitosa, proceder con la llamada a la API
+  const { email, password } = validatedFields.data;
+  
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_NEST_API_URL}auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+      credentials: 'include', // Para manejar cookies
+    });
+
+    const data = await response.json();
+
+    // 3. Manejar la respuesta de la API
+    if (!response.ok) {
+      // Devolver error específico de la API si está disponible
+      return {
+        success: false,
+        message: data.message || 'Credenciales incorrectas',
+        errors: { _form: [data.message || 'Credenciales incorrectas'] }
+      };
+    }
+
+    // 4. Login exitoso: devolver estado de éxito
+    return {
+      success: true,
+      message: "¡Inicio de sesión exitoso!",
+      data: data, // Incluir los datos del usuario y el token
+    };
+
+  } catch (error) {
+    console.error('Error al iniciar sesión (catch):', error);
+    // Devolver error genérico de conexión o servidor
+    return {
+      success: false,
+      message: 'Error de conexión. No se pudo completar el inicio de sesión.',
+      errors: { _form: ['Error de conexión. No se pudo completar el inicio de sesión.'] }
     };
   }
 }
