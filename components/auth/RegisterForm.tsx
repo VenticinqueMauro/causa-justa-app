@@ -64,13 +64,18 @@ export default function RegisterForm() {
       if (formState.success) {
         setToastMessage(formState.message);
         setToastType('success');
+        setShouldShowToast(true);
       } else {
-        const errorMsg = formState.errors?._form?.[0] || formState.message || 'Error en el registro.';
-        setToastMessage(errorMsg);
-        setToastType('error');
+        // Para errores de validación de contraseña, no mostrar toast
+        const isPasswordError = formState.errors?.password && formState.errors.password.length > 0;
+        
+        if (!isPasswordError) {
+          const errorMsg = formState.errors?._form?.[0] || formState.message || 'Error en el registro.';
+          setToastMessage(errorMsg);
+          setToastType('error');
+          setShouldShowToast(true);
+        }
       }
-      // Activar el toast
-      setShouldShowToast(true);
     }
   }, [formState]); // Dependencia estable
 
@@ -112,7 +117,9 @@ export default function RegisterForm() {
     <div className="bg-white border-2 border-[#002C5B] p-6 shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]">
       {formState.errors?._form && (
         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-          {formState.errors._form.join(', ')}
+          {formState.errors._form.map((error: string, index: number) => (
+            <p key={index} className="mb-1 last:mb-0">{error}</p>
+          ))}
         </div>
       )}
 
@@ -166,15 +173,25 @@ export default function RegisterForm() {
             id="password"
             name="password"
             required
-            minLength={6}
+            minLength={8}
             onChange={handlePasswordChange}
-            aria-describedby="password-error"
+            aria-describedby="password-requirements password-error"
             className={`w-full px-3 py-2 border-2 ${formState.errors?.password ? 'border-red-500' : 'border-[#002C5B]'} focus:outline-none focus:ring-2 focus:ring-[#EDFCA7]`}
-            placeholder="Mínimo 6 caracteres"
+            placeholder="Contraseña segura"
           />
-          <div id="password-error" aria-live="polite" aria-atomic="true">
+          <div id="password-requirements" className="mt-2 text-xs text-[#002C5B]/70">
+            <p className="mb-1">La contraseña debe cumplir con los siguientes requisitos:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Al menos 8 caracteres</li>
+              <li>Al menos una letra mayúscula (A-Z)</li>
+              <li>Al menos una letra minúscula (a-z)</li>
+              <li>Al menos un número (0-9)</li>
+              <li>Al menos un carácter especial (@, $, !, %, *, ?, &)</li>
+            </ul>
+          </div>
+          <div id="password-error" aria-live="polite" aria-atomic="true" className="mt-2">
             {formState.errors?.password && formState.errors.password.map((error: string) => (
-              <p className="mt-1 text-sm text-red-600" key={error}>{error}</p>
+              <p className="text-sm text-red-600" key={error}>{error}</p>
             ))}
           </div>
         </div>
@@ -190,7 +207,7 @@ export default function RegisterForm() {
             value={confirmPassword}
             onChange={handleConfirmPasswordChange}
             required
-            minLength={6}
+            minLength={8}
             aria-describedby="confirmPassword-error"
             className={`w-full px-3 py-2 border-2 ${confirmPasswordError ? 'border-red-500' : 'border-[#002C5B]'} focus:outline-none focus:ring-2 focus:ring-[#EDFCA7]`}
             placeholder="Repite tu contraseña"

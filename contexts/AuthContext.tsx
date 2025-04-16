@@ -64,8 +64,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           });
 
           if (response.ok) {
-            const userData = await response.json();
-            setUser(userData);
+            try {
+              // Verificar si la respuesta tiene contenido antes de intentar parsearla
+              const text = await response.text();
+              if (text) {
+                const userData = JSON.parse(text);
+                setUser(userData);
+              } else {
+                console.warn('Respuesta vacía de auth/me');
+                setUser(null);
+              }
+            } catch (parseError) {
+              console.warn('Error al parsear respuesta JSON:', parseError);
+              setUser(null);
+            }
             setIsLoading(false);
             return;
           }
@@ -76,19 +88,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Si el primer intento falló, intentamos sin credentials para entornos de desarrollo/prueba
         // Esto no enviará cookies pero permitirá que la app funcione en desarrollo
-        const fallbackResponse = await fetch(`${baseUrl}auth/me`, {
-          method: 'GET',
-          // Sin credentials: 'include' para evitar problemas de CORS
-          headers: {
-            'Content-Type': 'application/json'
+        try {
+          const fallbackResponse = await fetch(`${baseUrl}auth/me`, {
+            method: 'GET',
+            // Sin credentials: 'include' para evitar problemas de CORS
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+  
+          if (fallbackResponse.ok) {
+            try {
+              // Verificar si la respuesta tiene contenido antes de intentar parsearla
+              const text = await fallbackResponse.text();
+              if (text) {
+                const userData = JSON.parse(text);
+                setUser(userData);
+              } else {
+                console.warn('Respuesta vacía de auth/me (fallback)');
+                setUser(null);
+              }
+            } catch (parseError) {
+              console.warn('Error al parsear respuesta JSON (fallback):', parseError);
+              setUser(null);
+            }
+          } else {
+            // Si hay un error, el usuario no está autenticado
+            setUser(null);
           }
-        });
-
-        if (fallbackResponse.ok) {
-          const userData = await fallbackResponse.json();
-          setUser(userData);
-        } else {
-          // Si hay un error, el usuario no está autenticado
+        } catch (error) {
+          console.warn('Error en la solicitud fallback:', error);
           setUser(null);
         }
       } catch (error) {

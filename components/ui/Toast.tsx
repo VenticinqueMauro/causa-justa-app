@@ -90,12 +90,23 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastType[]>([])
 
   const showToast = (message: string, type: "success" | "error" | "info") => {
+    console.log('ToastProvider.showToast llamado con:', { message, type });
     const id = Math.random().toString(36).substring(2, 9)
-    setToasts((prev) => [...prev, { id, message, type }])
+    console.log('Generado ID de toast:', id);
+    setToasts((prev) => {
+      const newToasts = [...prev, { id, message, type }];
+      console.log('Nuevo estado de toasts:', newToasts);
+      return newToasts;
+    })
   }
 
   const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id))
+    console.log('Removiendo toast con ID:', id);
+    setToasts((prev) => {
+      const newToasts = prev.filter((toast) => toast.id !== id);
+      console.log('Estado de toasts después de remover:', newToasts);
+      return newToasts;
+    })
   }
 
   return (
@@ -113,8 +124,10 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
 export const useToast = () => {
   const context = React.useContext(ToastContext)
   if (context === undefined) {
+    console.error("useToast llamado fuera de un ToastProvider");
     throw new Error("useToast must be used within a ToastProvider")
   }
+  console.log('useToast hook utilizado correctamente');
   return context
 }
 
