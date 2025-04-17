@@ -10,6 +10,8 @@ import { useAuth } from '@/contexts/AuthContext';
 const Header = () => {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
 
+  console.log(user)
+
   const handleLogout = async () => {
     logout();
   };

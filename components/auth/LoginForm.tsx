@@ -54,11 +54,20 @@ export default function LoginForm() {
 
         // Si el inicio de sesión fue exitoso, actualizar el contexto de autenticación
         if (formState.data) {
+          console.log('Login exitoso, token recibido:', formState.data.access_token);
+          
+          // SOLUCIÓN DIRECTA: Guardar el token en localStorage
+          localStorage.setItem('token', formState.data.access_token);
+          console.log('Token guardado en localStorage');
+          
+          // Actualizar el contexto de autenticación
           login(formState.data.access_token, formState.data.user);
+          
+          // Redirigir al usuario a la página principal después de un inicio de sesión exitoso
+          setTimeout(() => {
+            router.push('/');
+          }, 500); // Pequeño retraso para asegurar que el contexto se actualice antes de la redirección
         }
-
-        // Redirigir al usuario a la página principal después de un inicio de sesión exitoso
-        router.push('/');
       } else {
         const errorMsg = formState.errors?._form?.[0] || formState.message || 'Error en el inicio de sesión.';
         setToastMessage(errorMsg);
