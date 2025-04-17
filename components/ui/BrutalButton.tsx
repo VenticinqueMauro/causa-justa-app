@@ -3,6 +3,7 @@ import Link from "next/link";
 
 interface BrutalButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "outline" | "white" | "dark";
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
   className?: string;
   href?: string;
 }
@@ -11,11 +12,20 @@ const BrutalButton = ({
   children,
   className = "",
   variant = "primary",
+  size = "md",
   href,
   ...props
 }: BrutalButtonProps) => {
   const baseStyles =
-    "px-8 py-2 border-2 uppercase transition duration-200 text-sm font-bold tracking-wide shadow-brutal cursor-pointer hover:translate-x-[5px] hover:translate-y-[5px] hover:shadow-none active:translate-x-[5px] active:translate-y-[5px] active:shadow-none";
+    "border-2 uppercase transition duration-200 font-bold tracking-wide shadow-brutal cursor-pointer hover:translate-x-[5px] hover:translate-y-[5px] hover:shadow-none active:translate-x-[5px] active:translate-y-[5px] active:shadow-none";
+    
+  const sizeStyles = {
+    xs: "px-2 py-1 text-xs",
+    sm: "px-4 py-1.5 text-sm",
+    md: "px-8 py-2 text-sm",
+    lg: "px-10 py-2.5 text-base",
+    xl: "px-12 py-3 text-lg",
+  };
 
   const variantStyles = {
     primary:
@@ -30,7 +40,7 @@ const BrutalButton = ({
       "border-[#EDFCA7] bg-transparent text-[#EDFCA7] shadow-[1px_1px_#EDFCA7,2px_2px_#EDFCA7,3px_3px_#EDFCA7,4px_4px_#EDFCA7,5px_5px_0px_0px_#EDFCA7]",
   };
 
-  const combinedClassName = `${baseStyles} ${variantStyles[variant]} ${className}`;
+  const combinedClassName = `${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} ${className}`;
 
   // Si se proporciona href, renderizar como Link
   if (href) {

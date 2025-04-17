@@ -1,18 +1,17 @@
 'use client';
 
-import React from "react";
-import { Heart, User, LogOut } from "lucide-react";
-import BrutalButton from "../ui/BrutalButton";
-import BrutalLink from "../ui/BrutalLink";
-import { useAuth } from "@/contexts/AuthContext";
+import React, { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { LogOut, Menu, User, X, KeyRound, ChevronDown, Heart } from 'lucide-react';
+import BrutalButton from '@/components/ui/BrutalButton';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Header = () => {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
 
   const handleLogout = async () => {
-    await logout();
-    // No es necesario redirigir, ya que el cambio en el estado de autenticación
-    // hará que el componente se vuelva a renderizar
+    logout();
   };
 
   return (
@@ -28,35 +27,20 @@ const Header = () => {
           </div>
         </div>
         <nav className="hidden md:flex items-center gap-8">
-          <BrutalLink href="#">Causas</BrutalLink>
-          <BrutalLink href="#">Cómo funciona</BrutalLink>
-          <BrutalLink href="#">Sobre nosotros</BrutalLink>
-          <BrutalLink href="#">Contacto</BrutalLink>
+          <Link href="#" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80">Causas</Link>
+          <Link href="#" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80">Cómo funciona</Link>
+          <Link href="#" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80">Sobre nosotros</Link>
+          <Link href="#" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80">Contacto</Link>
         </nav>
-        
+
         {/* Mostrar botones de login/registro o menú de usuario según el estado de autenticación */}
         {isLoading ? (
           // Mostrar un espacio reservado mientras se carga el estado de autenticación
           <div className="w-[180px] h-10"></div>
         ) : isAuthenticated ? (
-          // Usuario autenticado: mostrar información del usuario y botón de cerrar sesión
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#002C5B] bg-white">
-                <User className="h-4 w-4 text-[#002C5B]" />
-              </div>
-              <span className="hidden md:block text-sm font-medium text-[#002C5B]">
-                {user?.fullName || 'Usuario'}
-              </span>
-            </div>
-            <BrutalButton 
-              variant="outline" 
-              className="text-sm"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4 mr-1" />
-              <span className="hidden md:inline">Cerrar sesión</span>
-            </BrutalButton>
+          // Usuario autenticado: mostrar menú desplegable con opciones de usuario
+          <div className="flex items-center gap-4 relative">
+            <UserDropdownMenu user={user} handleLogout={handleLogout} />
           </div>
         ) : (
           // Usuario no autenticado: mostrar botones de login/registro
@@ -69,6 +53,71 @@ const Header = () => {
         )}
       </div>
     </header>
+  );
+};
+
+// Componente de menú desplegable para usuario autenticado
+const UserDropdownMenu = ({ user, handleLogout }: { user: any, handleLogout: () => void }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+  // Cerrar el menú al hacer clic fuera de él
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      {/* Botón para abrir/cerrar el menú */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 py-2 px-3 border-2 border-[#002C5B] bg-white text-[#002C5B] shadow-[3px_3px_0_0_rgba(0,44,91,0.8)] hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none transition-all cursor-pointer"
+      >
+        <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#002C5B] bg-white">
+          <User className="h-4 w-4 text-[#002C5B]" />
+        </div>
+        <span className="hidden md:block text-sm font-medium">
+          {user?.fullName || 'Usuario'}
+        </span>
+        <ChevronDown className="h-4 w-4 ml-1" />
+      </button>
+
+      {/* Menú desplegable */}
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-48 bg-white border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)] z-10">
+          <div className="py-1">
+            <Link
+              href="/auth/change-password"
+              className="flex items-center px-4 py-2 text-sm text-[#002C5B] hover:bg-[#EDFCA7] transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <KeyRound className="h-4 w-4 mr-2" />
+              Cambiar contraseña
+            </Link>
+            <button
+              onClick={() => {
+                handleLogout();
+                setIsOpen(false);
+              }}
+              className="flex items-center w-full text-left px-4 py-2 text-sm text-[#002C5B] hover:bg-[#EDFCA7] transition-colors"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
