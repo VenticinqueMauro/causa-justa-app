@@ -7,6 +7,7 @@ import BrutalButton from '@/components/ui/BrutalButton';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/Toast';
 import { useAuth } from '@/contexts/AuthContext';
+import GoogleButton from './GoogleButton';
 
 const initialState: LoginFormState = {
   success: false,
@@ -50,12 +51,12 @@ export default function LoginForm() {
       if (formState.success) {
         setToastMessage(formState.message);
         setToastType('success');
-        
+
         // Si el inicio de sesión fue exitoso, actualizar el contexto de autenticación
         if (formState.data) {
           login(formState.data.access_token, formState.data.user);
         }
-        
+
         // Redirigir al usuario a la página principal después de un inicio de sesión exitoso
         router.push('/');
       } else {
@@ -79,11 +80,22 @@ export default function LoginForm() {
 
   return (
     <div className="bg-white border-2 border-[#002C5B] p-6 shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]">
+      <div className="flex justify-end mb-4">
+        <a href="/" className="text-sm text-[#002C5B] hover:underline flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Volver al inicio
+        </a>
+      </div>
+
       {formState.errors?._form && (
         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
           {formState.errors._form.join(', ')}
         </div>
       )}
+
+
 
       <form action={formAction} className="space-y-4">
         <div>
@@ -134,7 +146,17 @@ export default function LoginForm() {
         </div>
 
         <SubmitButton />
-
+        <div className="relative mb-4">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-[#002C5B]/20"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-[#002C5B]/60">O continúa con</span>
+          </div>
+        </div>
+        <div className="mb-6">
+          <GoogleButton text="Iniciar sesión con Google" />
+        </div>
         <div className="text-center mt-4">
           <p className="text-sm text-[#002C5B]/80">
             ¿No tienes una cuenta?{' '}

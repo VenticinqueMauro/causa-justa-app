@@ -52,18 +52,18 @@ export const Toast: React.FC<ToastProps> = ({ message, type = "info", onClose = 
 
   return (
     <div
-      className={`fixed top-4 right-4 z-50 ${styles.bg} border-4 ${styles.border} shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] transform transition-all duration-200 ease-in-out`}
+      className={`fixed bottom-4 right-4 z-50 ${styles.bg} border-2 ${styles.border} shadow-[3px_3px_0px_0px_rgba(0,0,0,0.7)] transform transition-all duration-200 ease-in-out max-w-xs`}
     >
-      <div className="flex items-center justify-between p-3">
+      <div className="flex items-center justify-between p-2">
         <div className="flex items-center">
-          <span className={`font-bold ${styles.text} text-lg`}>{message}</span>
+          <span className={`font-medium ${styles.text} text-sm`}>{message}</span>
         </div>
         <button
           onClick={handleClose}
-          className={`ml-4 p-1 ${styles.button} border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,0.8)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.8)] transition-all`}
+          className={`ml-2 p-0.5 ${styles.button} border border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,0.7)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all`}
           aria-label="Close"
         >
-          <X size={18} />
+          <X size={14} />
         </button>
       </div>
     </div>

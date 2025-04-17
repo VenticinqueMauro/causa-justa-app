@@ -6,6 +6,7 @@ import { registerUser, RegisterFormState } from '@/app/actions/authActions';
 import BrutalButton from '@/components/ui/BrutalButton';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/Toast';
+import PasswordRequirements from './PasswordRequirements';
 
 const initialState: RegisterFormState = {
   success: false,
@@ -49,6 +50,9 @@ export default function RegisterForm() {
   // Estado local para el campo de confirmar contraseña (no enviado al servidor)
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
+  
+  // Estado para la contraseña (para la validación en tiempo real)
+  const [password, setPassword] = useState('');
 
   // Actualizar el rol inicial si viene como parámetro en la URL
   useEffect(() => {
@@ -100,12 +104,15 @@ export default function RegisterForm() {
     }
   };
 
-  // Función para limpiar el error de confirmación si la contraseña principal cambia
-  const handlePasswordChange = () => {
+  // Función para manejar cambios en la contraseña principal
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+    
+    // Verificar si la confirmación de contraseña coincide
     const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement | null;
     if (confirmPasswordInput && confirmPasswordInput.value !== '') {
-      const passwordInput = document.getElementById('password') as HTMLInputElement | null;
-      if (passwordInput && passwordInput.value !== confirmPasswordInput.value) {
+      if (value !== confirmPasswordInput.value) {
         setConfirmPasswordError('Las contraseñas no coinciden');
       } else {
         setConfirmPasswordError(null);
@@ -115,6 +122,15 @@ export default function RegisterForm() {
 
   return (
     <div className="bg-white border-2 border-[#002C5B] p-6 shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]">
+      <div className="flex justify-end mb-4">
+        <a href="/" className="text-sm text-[#002C5B] hover:underline flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Volver al inicio
+        </a>
+      </div>
+
       {formState.errors?._form && (
         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
           {formState.errors._form.map((error: string, index: number) => (
@@ -179,16 +195,8 @@ export default function RegisterForm() {
             className={`w-full px-3 py-2 border-2 ${formState.errors?.password ? 'border-red-500' : 'border-[#002C5B]'} focus:outline-none focus:ring-2 focus:ring-[#EDFCA7]`}
             placeholder="Contraseña segura"
           />
-          <div id="password-requirements" className="mt-2 text-xs text-[#002C5B]/70">
-            <p className="mb-1">La contraseña debe cumplir con los siguientes requisitos:</p>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Al menos 8 caracteres</li>
-              <li>Al menos una letra mayúscula (A-Z)</li>
-              <li>Al menos una letra minúscula (a-z)</li>
-              <li>Al menos un número (0-9)</li>
-              <li>Al menos un carácter especial (@, $, !, %, *, ?, &)</li>
-            </ul>
-          </div>
+          {/* Componente interactivo de requisitos de contraseña */}
+          <PasswordRequirements password={password} />
           <div id="password-error" aria-live="polite" aria-atomic="true" className="mt-2">
             {formState.errors?.password && formState.errors.password.map((error: string) => (
               <p className="text-sm text-red-600" key={error}>{error}</p>

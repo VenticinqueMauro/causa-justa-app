@@ -6,6 +6,7 @@ import { useActionState } from 'react';
 import { resetPassword, ResetPasswordState } from '@/app/actions/authActions';
 import BrutalButton from '@/components/ui/BrutalButton';
 import { useToast } from '@/components/ui/Toast';
+import PasswordRequirements from './PasswordRequirements';
 
 const initialState: ResetPasswordState = {
   success: false,
@@ -39,6 +40,11 @@ export default function ResetPasswordForm({ token }: { token: string }) {
   const [shouldShowToast, setShouldShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  
+  // Estado para la contraseña (para la validación en tiempo real)
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
 
   // Efecto para detectar cambios en formState y preparar el toast
   useEffect(() => {
@@ -95,20 +101,21 @@ export default function ResetPasswordForm({ token }: { token: string }) {
               name="password"
               required
               minLength={8}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                // Verificar si la confirmación de contraseña coincide
+                if (confirmPassword && e.target.value !== confirmPassword) {
+                  setConfirmPasswordError('Las contraseñas no coinciden');
+                } else if (confirmPassword) {
+                  setConfirmPasswordError(null);
+                }
+              }}
               aria-describedby="password-requirements password-error"
               className={`w-full px-3 py-2 border-2 ${formState.errors?.password ? 'border-red-500' : 'border-[#002C5B]'} focus:outline-none focus:ring-2 focus:ring-[#EDFCA7]`}
               placeholder="Ingresa tu nueva contraseña"
             />
-            <div id="password-requirements" className="mt-2 text-xs text-[#002C5B]/70">
-              <p className="mb-1">La contraseña debe cumplir con los siguientes requisitos:</p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Al menos 8 caracteres</li>
-                <li>Al menos una letra mayúscula (A-Z)</li>
-                <li>Al menos una letra minúscula (a-z)</li>
-                <li>Al menos un número (0-9)</li>
-                <li>Al menos un carácter especial (!@#$%^&*)</li>
-              </ul>
-            </div>
+            {/* Componente interactivo de requisitos de contraseña */}
+            <PasswordRequirements password={password} />
             <div id="password-error" aria-live="polite" aria-atomic="true" className="mt-2">
               {formState.errors?.password && formState.errors.password.map((error: string) => (
                 <p className="text-sm text-red-600" key={error}>{error}</p>
@@ -126,9 +133,20 @@ export default function ResetPasswordForm({ token }: { token: string }) {
               name="confirmPassword"
               required
               minLength={8}
-              className="w-full px-3 py-2 border-2 border-[#002C5B] focus:outline-none focus:ring-2 focus:ring-[#EDFCA7]"
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (password && e.target.value !== password) {
+                  setConfirmPasswordError('Las contraseñas no coinciden');
+                } else {
+                  setConfirmPasswordError(null);
+                }
+              }}
+              className={`w-full px-3 py-2 border-2 ${confirmPasswordError ? 'border-red-500' : 'border-[#002C5B]'} focus:outline-none focus:ring-2 focus:ring-[#EDFCA7]`}
               placeholder="Confirma tu nueva contraseña"
             />
+            {confirmPasswordError && (
+              <p className="mt-1 text-sm text-red-600">{confirmPasswordError}</p>
+            )}
           </div>
 
           <SubmitButton />

@@ -15,7 +15,7 @@ const BrutalButton = ({
   ...props
 }: BrutalButtonProps) => {
   const baseStyles =
-    "px-8 py-2 border-2 uppercase transition duration-200 text-sm font-bold tracking-wide shadow-brutal hover:translate-x-[5px] hover:translate-y-[5px] hover:shadow-none active:translate-x-[5px] active:translate-y-[5px] active:shadow-none";
+    "px-8 py-2 border-2 uppercase transition duration-200 text-sm font-bold tracking-wide shadow-brutal cursor-pointer hover:translate-x-[5px] hover:translate-y-[5px] hover:shadow-none active:translate-x-[5px] active:translate-y-[5px] active:shadow-none";
 
   const variantStyles = {
     primary:

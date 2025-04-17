@@ -2,12 +2,14 @@
 
 import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Componente interno que usa useSearchParams
 function GoogleRedirectContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const code = searchParams.get('code');
+    const { login } = useAuth();
 
     useEffect(() => {
         async function handleGoogleRedirect() {
@@ -31,9 +33,24 @@ function GoogleRedirectContent() {
 
                     // Guardar el token en localStorage para futuras peticiones
                     localStorage.setItem('token', data.access_token);
+                    
+                    // Actualizar el contexto de autenticación si hay datos de usuario
+                    if (data.user) {
+                        // Guardar información temporal del usuario para la selección de rol
+                        sessionStorage.setItem('googleUserData', JSON.stringify(data.user));
+                        
+                        // Actualizar el contexto de autenticación
+                        login(data.access_token, data.user);
+                    }
 
-                    // Redireccionar al usuario a la página principal o dashboard
-                    router.push('/');
+                    // Verificar si el usuario necesita seleccionar un rol
+                    if (data.needsRoleSelection) {
+                        // Redireccionar al usuario a la página de selección de rol
+                        router.push('/auth/google/role-selection');
+                    } else {
+                        // Si no necesita seleccionar rol, ir directamente a la página principal
+                        router.push('/');
+                    }
                 } else {
                     console.error('Error al procesar la autenticación');
                     router.push('/login');
