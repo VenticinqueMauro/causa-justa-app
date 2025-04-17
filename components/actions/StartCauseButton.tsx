@@ -1,0 +1,268 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { AlertCircle, PlusCircle, X } from 'lucide-react';
+import BrutalButton from '@/components/ui/BrutalButton';
+
+type StartCauseButtonProps = {
+  variant?: 'primary' | 'secondary' | 'outline' | 'white' | 'dark';
+  size?: 'sm' | 'md' | 'lg' | 'xs';
+  className?: string;
+  showIcon?: boolean;
+  text?: string;
+  iconPosition?: 'left' | 'right';
+};
+
+export default function StartCauseButton({
+  variant = 'secondary',
+  size = 'md',
+  className = '',
+  showIcon = true,
+  text = 'Iniciar una causa',
+  iconPosition = 'left'
+}: StartCauseButtonProps) {
+  const { user, isAuthenticated, getToken } = useAuth();
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showMpConnectButton, setShowMpConnectButton] = useState(false);
+  const router = useRouter();
+
+  // Verificar conexión con MercadoPago
+  const checkMercadoPagoConnection = async (token: string) => {
+    try {
+      // Primero verificamos si hay un estado guardado en localStorage
+      const mpConnectedInStorage = localStorage.getItem('mp_connected');
+      if (mpConnectedInStorage === 'true') {
+        console.log('Conexión con MercadoPago encontrada en localStorage');
+        return true;
+      }
+      
+      console.log('Verificando conexión con MercadoPago en el servidor...');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_NEST_API_URL}mercadopago/status`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Clonar respuesta para mostrar el texto completo
+      const responseText = await response.clone().text();
+      console.log('Respuesta de MercadoPago/status:', responseText);
+
+      if (response.ok) {
+        try {
+          // Intentar parsear la respuesta
+          const data = responseText ? JSON.parse(responseText) : {};
+          console.log('Datos parseados de MercadoPago/status:', data);
+          
+          // Verificar si está conectado
+          const isConnected = data.isConnected || false;
+          console.log('¿Está conectado a MercadoPago según el servidor?', isConnected);
+          
+          // Si está conectado, guardar en localStorage para futuras verificaciones
+          if (isConnected) {
+            localStorage.setItem('mp_connected', 'true');
+          } else {
+            // Si no está conectado, asegurarse de que no haya un valor incorrecto en localStorage
+            localStorage.removeItem('mp_connected');
+          }
+          
+          return isConnected;
+        } catch (parseError) {
+          console.error('Error al parsear respuesta de MercadoPago/status:', parseError);
+          localStorage.removeItem('mp_connected');
+          return false;
+        }
+      } else {
+        console.error(`Error en MercadoPago/status (${response.status}):`, response.statusText);
+        localStorage.removeItem('mp_connected');
+        return false;
+      }
+    } catch (error) {
+      console.error('Error al verificar conexión de Mercado Pago:', error);
+      localStorage.removeItem('mp_connected');
+      return false;
+    }
+  };
+  
+  // Conectar MercadoPago
+  const connectMercadoPago = async () => {
+    const token = await getToken();
+    if (!token) {
+      setErrorMessage('Error de autenticación. Por favor, inicia sesión nuevamente.');
+      setShowErrorModal(true);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_NEST_API_URL}mercadopago/connect`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Para debug
+      console.log('Respuesta del servidor:', await response.clone().text());
+      
+      if (response.ok) {
+        // Intentamos parsear la respuesta como JSON
+        try {
+          const text = await response.text();
+          const data = text ? JSON.parse(text) : {};
+          
+          // Verificamos si la respuesta contiene la URL de redirección en cualquier formato
+          if (data.redirectUrl) {
+            window.location.href = data.redirectUrl;
+            return;
+          } else if (data.redirect_url) {
+            window.location.href = data.redirect_url;
+            return;
+          } else if (data.url) {
+            window.location.href = data.url;
+            return;
+          } else if (typeof data === 'string' && data.includes('http')) {
+            // En caso de que la respuesta sea directamente la URL
+            window.location.href = data;
+            return;
+          }
+          
+          // Si llegamos aquí, no encontramos una URL válida en la respuesta
+          console.error('Respuesta sin URL válida:', data);
+          setErrorMessage('La respuesta del servidor no contiene una URL de redirección válida.');
+        } catch (parseError) {
+          console.error('Error al parsear la respuesta JSON:', parseError);
+          setErrorMessage('Error al procesar la respuesta del servidor. Intenta nuevamente.');
+        }
+      } else {
+        console.error(`Error del servidor (${response.status}):`, response.statusText);
+        setErrorMessage(`Error del servidor (${response.status}): ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Error al conectar con Mercado Pago:', error);
+      setErrorMessage('Error de conexión con Mercado Pago. Intenta nuevamente.');
+    }
+    
+    setShowErrorModal(true);
+  };
+  
+  // Manejar clic en "Iniciar una causa"
+  const handleStartCause = async () => {
+    // Paso 1: Verificar si está logeado
+    if (!isAuthenticated || !user) {
+      console.log('Usuario no autenticado, redirigiendo a login');
+      router.push('/login?redirect=create-cause');
+      return;
+    }
+    
+    // Paso 2: Verificar si es BENEFICIARY
+    if (user.role !== 'BENEFICIARY') {
+      console.log(`Usuario con rol incorrecto: ${user.role}, mostrando error`);
+      setErrorMessage(`Solo los beneficiarios pueden iniciar una causa. Tu rol actual es: ${user.role}`);
+      setShowMpConnectButton(false);
+      setShowErrorModal(true);
+      return;
+    }
+    
+    // Paso 3: Verificar conexión con MercadoPago
+    const token = await getToken();
+    if (!token) {
+      console.log('No se pudo obtener el token, mostrando error');
+      setErrorMessage('Error de autenticación. Por favor, inicia sesión nuevamente.');
+      setShowMpConnectButton(false);
+      setShowErrorModal(true);
+      return;
+    }
+    
+    console.log('Verificando conexión de MercadoPago para usuario:', user.email);
+    // Limpiar localStorage para forzar verificación con el servidor
+    localStorage.removeItem('mp_connected');
+    const isConnected = await checkMercadoPagoConnection(token);
+    console.log('Resultado de verificación de MercadoPago:', isConnected);
+    
+    if (!isConnected) {
+      console.log('Usuario no conectado a MercadoPago, mostrando modal');
+      setErrorMessage('Debes conectar tu cuenta de Mercado Pago para crear una causa.');
+      setShowMpConnectButton(true);
+      setShowErrorModal(true);
+      return;
+    }
+    
+    // Todo en orden, redirigir al formulario de creación
+    console.log('Usuario verificado y conectado a MercadoPago, redirigiendo a /create-cause');
+    router.push('/create-cause');
+  };
+
+  // Renderizar el botón con el ícono en la posición correcta
+  const renderButtonContent = () => {
+    if (!showIcon) return text;
+    
+    return iconPosition === 'left' ? (
+      <>
+        <PlusCircle className="h-4 w-4 mr-1" />
+        {text}
+      </>
+    ) : (
+      <>
+        {text}
+        <PlusCircle className="h-4 w-4 ml-1" />
+      </>
+    );
+  };
+
+  return (
+    <>
+      <BrutalButton
+        variant={variant}
+        size={size}
+        className={`flex items-center ${className}`}
+        onClick={handleStartCause}
+      >
+        {renderButtonContent()}
+      </BrutalButton>
+
+      {/* Modal de error */}
+      {showErrorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="relative w-full max-w-md bg-white border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)] p-6">
+            <button 
+              onClick={() => setShowErrorModal(false)} 
+              className="absolute right-2 top-2 text-[#002C5B] hover:text-[#002C5B]/80"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            
+            <div className="mb-4 flex items-center">
+              <AlertCircle className="h-6 w-6 text-red-500 mr-2" />
+              <h3 className="text-lg font-bold text-[#002C5B]">Atención</h3>
+            </div>
+            
+            <p className="mb-6 text-[#002C5B]">{errorMessage}</p>
+            
+            <div className="flex justify-end gap-3">
+              {showMpConnectButton && (
+                <BrutalButton
+                  variant="secondary"
+                  onClick={() => {
+                    connectMercadoPago();
+                    setShowErrorModal(false);
+                  }}
+                >
+                  Conectar MercadoPago
+                </BrutalButton>
+              )}
+              <BrutalButton
+                variant="outline"
+                onClick={() => setShowErrorModal(false)}
+              >
+                Entendido
+              </BrutalButton>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

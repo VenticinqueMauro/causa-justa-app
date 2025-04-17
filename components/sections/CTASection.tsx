@@ -1,6 +1,7 @@
 import React from "react";
 import BrutalSection from "../ui/BrutalSection";
 import BrutalButton from "../ui/BrutalButton";
+import StartCauseButton from "../actions/StartCauseButton";
 
 const CTASection = () => {
   return (
@@ -13,9 +14,13 @@ const CTASection = () => {
           Únete a nuestra comunidad de donantes y organizaciones que están cambiando el mundo, una causa a la vez
         </p>
         <div className="mt-10 flex flex-col gap-4 sm:flex-row justify-center">
-          <BrutalButton variant="white" className="text-base" href="/register?role=BENEFICIARY">
-            Iniciar una causa
-          </BrutalButton>
+          <StartCauseButton 
+            variant="white" 
+            size="md"
+            className="text-base" 
+            showIcon={true}
+            iconPosition="left"
+          />
           <BrutalButton variant="dark" className="text-base" href="/campaigns">
             Explorar causas
           </BrutalButton>
