@@ -264,7 +264,7 @@ const UserDropdownMenu = ({ user, handleLogout }: { user: any, handleLogout: () 
 
       {/* Menú desplegable */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)] z-10">
+        <div className="absolute right-0 mt-3 w-48 bg-white border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)] z-10">
           <div className="py-1">
             <Link
               href="/auth/change-password"

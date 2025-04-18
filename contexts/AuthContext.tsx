@@ -50,55 +50,94 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (typeof window === 'undefined') return;
       setIsLoading(true);
 
+      // Cargar datos de localStorage primero para una experiencia más rápida
+      const token = localStorage.getItem('auth_token');
+      const storedUser = localStorage.getItem('auth_user');
+      
+      // Si tenemos un usuario almacenado, establecerlo temporalmente mientras verificamos
+      // Esto evita redirecciones innecesarias si hay problemas de conexión
+      if (token && storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser); // Establecer usuario desde localStorage inmediatamente
+        } catch (e) {
+          console.warn('Error parsing stored user data:', e);
+        }
+      }
+
       const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
       if (!apiUrl) {
         console.warn(
-          'NEXT_PUBLIC_NEST_API_URL not defined — skipping auth check'
+          'NEXT_PUBLIC_NEST_API_URL not defined — usando datos almacenados localmente'
         );
-        setUser(null);
+        // No limpiamos los datos almacenados, usamos lo que tenemos
         setIsLoading(false);
         return;
       }
       const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
 
-      // Cargar de localStorage
-      const token = localStorage.getItem('auth_token');
-      const storedUser = localStorage.getItem('auth_user');
-
       if (token) {
         try {
+          // Establecer un timeout para la solicitud
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos de timeout
+          
           const resp = await fetch(`${baseUrl}auth/me`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
             },
+            signal: controller.signal
+          }).catch(err => {
+            console.warn('Network error during auth check:', err);
+            // Si hay un error de red, mantenemos los datos almacenados localmente
+            // pero marcamos que la carga ha terminado
+            clearTimeout(timeoutId);
+            return null;
           });
+          
+          clearTimeout(timeoutId);
 
-          if (resp.ok) {
+          if (resp && resp.ok) {
             const text = await resp.text();
-            const userData: User = text
-              ? JSON.parse(text)
-              : JSON.parse(storedUser || 'null');
-
-            setUser(userData);
-            return;
-          } else {
+            if (text) {
+              try {
+                const userData: User = JSON.parse(text);
+                setUser(userData);
+                // Actualizar datos en localStorage
+                localStorage.setItem('auth_user', JSON.stringify(userData));
+              } catch (parseError) {
+                console.error('Error parsing user data:', parseError);
+                // Usar datos almacenados si hay error de parsing
+                if (storedUser) {
+                  try {
+                    setUser(JSON.parse(storedUser));
+                  } catch (e) {
+                    setUser(null);
+                  }
+                }
+              }
+            }
+          } else if (resp) {
             console.warn(
               `Auth check failed (${resp.status}) — clearing token`
             );
             localStorage.removeItem('auth_token');
             localStorage.removeItem('auth_user');
+            setUser(null);
           }
+          // Si resp es null, significa que hubo un error de red
+          // En ese caso, mantenemos los datos almacenados localmente
         } catch (err) {
           console.error('Error validating token:', err);
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('auth_user');
+          // No eliminamos los datos locales en caso de error de red
+          // para permitir el uso offline
         }
+      } else {
+        // Si no hay token, no hay sesión válida
+        setUser(null);
       }
-
-      // Si llegamos acá, no hay sesión válida
-      setUser(null);
     };
 
     checkAuth().finally(() => {

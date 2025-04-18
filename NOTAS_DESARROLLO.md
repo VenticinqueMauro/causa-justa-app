@@ -1,7 +1,7 @@
 # Notas de Desarrollo - Causa Justa App
 
 ## Fecha: 16 de abril de 2025
-## Última actualización: 17 de abril de 2025 (12:35)
+## Última actualización: 18 de abril de 2025 (10:28)
 
 ## Estado actual del proyecto
 
@@ -36,12 +36,12 @@
 - ❌ Eliminar usuario (DELETE /users/{id})
 
 #### Campañas
-- ❌ Crear campaña (POST /campaigns)
+- ⚠️ Crear campaña (POST /campaigns) - Implementado en frontend, pendiente de pruebas completas
 - ❌ Obtener todas las campañas verificadas (GET /campaigns)
 - ❌ Obtener todas las campañas (admin) (GET /campaigns/admin/all)
 - ❌ Obtener campaña por ID o slug (GET /campaigns/{idOrSlug})
 - ❌ Verificar campaña (admin) (PATCH /campaigns/{id}/verify)
-- ❌ Subir imágenes para campaña (POST /campaigns/images/upload)
+- ✅ Subir imágenes para campaña (POST /campaigns/images/upload)
 
 #### Integración con MercadoPago
 - ✅ Conectar cuenta (GET /mercadopago/connect)
@@ -54,7 +54,7 @@
 
 ### Páginas pendientes de implementar
 - ❌ Página de campañas (listado y detalle)
-- ❌ Página de creación/edición de campañas
+- ⚠️ Página de creación/edición de campañas - Implementada la creación, pendiente edición
 - ❌ Panel de administración
 - ❌ Página "Cómo funciona"
 - ❌ Página "Sobre nosotros"
@@ -66,10 +66,11 @@
 
 1. Implementar el reenvío de correo de verificación
 2. ✅ Implementar la autenticación con Google
-3. Implementar la gestión de campañas (listado, detalle, creación)
+3. ⚠️ Implementar la gestión de campañas (listado, detalle, creación) - Creación implementada, pendiente listado y detalle
 4. ✅ Desarrollar la integración con MercadoPago (Conexión y verificación implementadas)
 5. Crear el panel de administración
 6. Implementar las páginas informativas
+7. Mejorar la experiencia de usuario para donantes que quieran crear campañas (solicitud de cambio de rol)
 
 ## Notas técnicas
 
@@ -95,6 +96,16 @@
   3. Verificar si el usuario tiene una cuenta de MercadoPago conectada
 - Se utiliza localStorage para almacenar el estado de conexión con MercadoPago para optimizar las verificaciones
 - Se ha mejorado el manejo de errores para proporcionar mensajes claros al usuario
+
+### Creación de campañas
+- Se ha implementado el formulario completo de creación de campañas con validaciones
+- Se ha mejorado la experiencia de usuario con funcionalidades como:
+  - Mostrar el monto en palabras para mejor comprensión
+  - Formateo automático de números con separadores de miles
+  - Cálculo de comisiones y monto neto a recibir
+  - Interfaz de "chips" para gestionar etiquetas
+  - Autocompletado de información del creador con datos del usuario
+- Pendiente: Implementar redirección a solicitud de cambio de rol cuando un usuario donante intenta crear una campaña
 
 ## Prioridades
 

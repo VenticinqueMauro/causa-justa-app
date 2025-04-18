@@ -40,7 +40,11 @@ export default function StartCauseButton({
       }
       
       console.log('Verificando conexión con MercadoPago en el servidor...');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_NEST_API_URL}mercadopago/status`, {
+      // Asegurarse de que la URL termine con /
+      const baseUrl = process.env.NEXT_PUBLIC_NEST_API_URL || '';
+      const apiUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+      
+      const response = await fetch(`${apiUrl}mercadopago/status`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -57,8 +61,8 @@ export default function StartCauseButton({
           const data = responseText ? JSON.parse(responseText) : {};
           console.log('Datos parseados de MercadoPago/status:', data);
           
-          // Verificar si está conectado
-          const isConnected = data.isConnected || false;
+          // Verificar si está conectado - la API devuelve 'connected' en lugar de 'isConnected'
+          const isConnected = data.connected || data.isConnected || false;
           console.log('¿Está conectado a MercadoPago según el servidor?', isConnected);
           
           // Si está conectado, guardar en localStorage para futuras verificaciones
@@ -150,6 +154,9 @@ export default function StartCauseButton({
   
   // Manejar clic en "Iniciar una causa"
   const handleStartCause = async () => {
+    console.log('=== INICIO PROCESO INICIAR CAUSA ===');
+    console.log('Datos del usuario:', { isAuthenticated, user });
+    
     // Paso 1: Verificar si está logeado
     if (!isAuthenticated || !user) {
       console.log('Usuario no autenticado, redirigiendo a login');
@@ -158,6 +165,7 @@ export default function StartCauseButton({
     }
     
     // Paso 2: Verificar si es BENEFICIARY
+    console.log('Rol del usuario:', user.role);
     if (user.role !== 'BENEFICIARY') {
       console.log(`Usuario con rol incorrecto: ${user.role}, mostrando error`);
       setErrorMessage(`Solo los beneficiarios pueden iniciar una causa. Tu rol actual es: ${user.role}`);
@@ -167,6 +175,7 @@ export default function StartCauseButton({
     }
     
     // Paso 3: Verificar conexión con MercadoPago
+    console.log('Obteniendo token para verificar MercadoPago');
     const token = await getToken();
     if (!token) {
       console.log('No se pudo obtener el token, mostrando error');
@@ -178,7 +187,10 @@ export default function StartCauseButton({
     
     console.log('Verificando conexión de MercadoPago para usuario:', user.email);
     // Limpiar localStorage para forzar verificación con el servidor
+    console.log('Limpiando localStorage para forzar verificación con el servidor');
     localStorage.removeItem('mp_connected');
+    
+    console.log('Llamando a checkMercadoPagoConnection');
     const isConnected = await checkMercadoPagoConnection(token);
     console.log('Resultado de verificación de MercadoPago:', isConnected);
     
@@ -192,7 +204,17 @@ export default function StartCauseButton({
     
     // Todo en orden, redirigir al formulario de creación
     console.log('Usuario verificado y conectado a MercadoPago, redirigiendo a /create-cause');
-    router.push('/create-cause');
+    
+    try {
+      // Guardar en localStorage antes de redirigir
+      localStorage.setItem('mp_connected', 'true');
+      console.log('Estado de MercadoPago guardado en localStorage antes de redirigir');
+      
+      // Redirigir a la página de creación de causa
+      router.push('/create-cause');
+    } catch (error) {
+      console.error('Error al redirigir a /create-cause:', error);
+    }
   };
 
   // Renderizar el botón con el ícono en la posición correcta
@@ -222,7 +244,7 @@ export default function StartCauseButton({
       <BrutalButton
         variant={variant}
         size={size}
-        className={`flex items-center ${className}`}
+        className={`flex items-center cursor ${className}`}
         onClick={handleStartCause}
       >
         {renderButtonContent()}
