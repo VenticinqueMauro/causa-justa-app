@@ -199,15 +199,20 @@ export default function StartCauseButton({
   const renderButtonContent = () => {
     if (!showIcon) return text;
     
+    // Si no hay texto, solo mostrar el ícono
+    if (!text) {
+      return <PlusCircle className="h-4 w-4" />;
+    }
+    
     return iconPosition === 'left' ? (
       <>
-        <PlusCircle className="h-4 w-4 mr-1" />
-        {text}
+        <PlusCircle className="h-4 w-4 mr-2" />
+        <span>{text}</span>
       </>
     ) : (
       <>
-        {text}
-        <PlusCircle className="h-4 w-4 ml-1" />
+        <span>{text}</span>
+        <PlusCircle className="h-4 w-4 ml-2" />
       </>
     );
   };
