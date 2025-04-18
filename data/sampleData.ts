@@ -1,28 +1,90 @@
 import React from "react";
+import { Campaign, CampaignCategory, CampaignStatus } from "@/types/campaign";
 
-export const campaigns = [
+export const campaigns: Campaign[] = [
   {
+    id: "1",
     title: "Reconstrucción escuela rural",
-    description:
-      "Ayuda a reconstruir una escuela rural dañada por las inundaciones recientes en la provincia de Córdoba.",
-    image: "/placeholder.svg?height=225&width=400",
-    raised: 15000,
-    goal: 25000,
+    slug: "reconstruccion-escuela-rural",
+    description: "Ayuda a reconstruir una escuela rural dañada por las inundaciones recientes en la provincia de Córdoba.",
+    shortDescription: "Reconstrucción de escuela dañada por inundaciones",
+    category: CampaignCategory.EDUCATION,
+    goalAmount: 25000,
+    images: ["/placeholder.svg?height=225&width=400"],
+    location: {
+      city: "Villa María",
+      province: "Córdoba",
+      country: "Argentina"
+    },
+    recipient: {
+      name: "Escuela Rural N°25",
+      age: undefined,
+      condition: "Dañada por inundaciones"
+    },
+    creator: {
+      relation: "Director",
+      contact: "director@escuela25.edu.ar"
+    },
+    tags: ["educación", "reconstrucción", "inundaciones"],
+    status: CampaignStatus.VERIFIED,
+    createdAt: "2025-04-01T10:00:00Z",
+    updatedAt: "2025-04-02T14:30:00Z"
   },
   {
+    id: "2",
     title: "Equipamiento médico para hospital",
+    slug: "equipamiento-medico-hospital",
     description: "Contribuye a la compra de equipamiento médico esencial para el Hospital Infantil de Buenos Aires.",
-    image: "/placeholder.svg?height=225&width=400",
-    raised: 28000,
-    goal: 30000,
+    shortDescription: "Equipamiento médico para Hospital Infantil",
+    category: CampaignCategory.HEALTH,
+    goalAmount: 30000,
+    images: ["/placeholder.svg?height=225&width=400"],
+    location: {
+      city: "Buenos Aires",
+      province: "Buenos Aires",
+      country: "Argentina"
+    },
+    recipient: {
+      name: "Hospital Infantil",
+      age: undefined,
+      condition: "Necesita equipamiento"
+    },
+    creator: {
+      relation: "Jefe de Departamento",
+      contact: "jefe@hospitalinfantil.org"
+    },
+    tags: ["salud", "niños", "equipamiento"],
+    status: CampaignStatus.VERIFIED,
+    createdAt: "2025-03-15T09:00:00Z",
+    updatedAt: "2025-03-16T11:45:00Z"
   },
   {
-    title: "Alimentos para comedores comunitarios",
-    description:
-      "Tu donación ayudará a proveer alimentos a 10 comedores comunitarios que asisten a más de 500 niños diariamente.",
-    image: "/placeholder.svg?height=225&width=400",
-    raised: 12000,
-    goal: 20000,
+    id: "3",
+    title: "Comedores comunitarios",
+    slug: "alimentos-comedores-comunitarios",
+    description: "Tu donación ayudará a proveer alimentos a 10 comedores comunitarios que asisten a más de 500 niños diariamente.",
+    shortDescription: "Alimentos para comedores comunitarios",
+    category: CampaignCategory.FOOD,
+    goalAmount: 20000,
+    images: ["/placeholder.svg?height=225&width=400"],
+    location: {
+      city: "Rosario",
+      province: "Santa Fe",
+      country: "Argentina"
+    },
+    recipient: {
+      name: "Red de Comedores Comunitarios",
+      age: undefined,
+      condition: "Asistencia alimentaria"
+    },
+    creator: {
+      relation: "Coordinador",
+      contact: "coordinador@redcomedores.org"
+    },
+    tags: ["alimentos", "niños", "comedores"],
+    status: CampaignStatus.VERIFIED,
+    createdAt: "2025-02-20T14:00:00Z",
+    updatedAt: "2025-02-21T16:30:00Z"
   },
 ];
 
