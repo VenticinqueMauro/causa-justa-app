@@ -126,7 +126,7 @@ export default function DashboardClient({
       <aside 
         className={`fixed inset-y-0 left-0 z-30 w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <div className="flex items-center justify-between h-16 px-6 border-b bg-gray-700 text-white">
+        <Link href="/" className="flex items-center justify-between h-16 px-6 border-b bg-gray-700 text-white">
           <div className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center border-2 border-white bg-white shadow-[2px_2px_0_0_rgba(255,255,255,0.3)]">
                 <Heart className="h-5 w-5 text-[#002C5B]" />
@@ -144,7 +144,7 @@ export default function DashboardClient({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
           </button>
-        </div>
+        </Link>
         
         <div className="p-4 border-b bg-gray-50">
           <div className="flex items-center space-x-3">
