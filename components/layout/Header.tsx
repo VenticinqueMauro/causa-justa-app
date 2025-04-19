@@ -107,7 +107,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b-2 border-[#002C5B] bg-[#ECECE2] shadow-[0_4px_0_0_rgba(0,44,91,0.2)]">
+      <header className="sticky top-0 z-40 w-full border-b-2 border-[#002C5B] bg-gray-100 shadow-[0_4px_0_0_rgba(0,44,91,0.2)]">
         <div className="container mx-auto px-4 flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
@@ -172,7 +172,7 @@ const Header = () => {
         
         {/* Mobile menu - slide down when open */}
         <div 
-          className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out border-t-2 border-[#002C5B]/20 bg-[#ECECE2] ${mobileMenuOpen ? 'max-h-64' : 'max-h-0'}`}
+          className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out border-t-2 border-[#002C5B]/20 bg-gray-100 ${mobileMenuOpen ? 'max-h-64' : 'max-h-0'}`}
         >
           <div className="container mx-auto px-4 py-3">
             <nav className="flex flex-col space-y-3">
