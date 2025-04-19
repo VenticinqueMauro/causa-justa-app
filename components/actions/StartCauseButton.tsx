@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { AlertCircle, PlusCircle, X } from 'lucide-react';
+import { AlertCircle, PlusCircle, X, ArrowRight } from 'lucide-react';
 import BrutalButton from '@/components/ui/BrutalButton';
+import { useToast } from '@/components/ui/Toast';
 
 type StartCauseButtonProps = {
   variant?: 'primary' | 'secondary' | 'outline' | 'white' | 'dark';
@@ -23,22 +24,18 @@ export default function StartCauseButton({
   text = 'Iniciar una causa',
   iconPosition = 'left'
 }: StartCauseButtonProps) {
-  const { user, isAuthenticated, getToken } = useAuth();
+  const { user, isAuthenticated, getToken, login } = useAuth();
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showMpConnectButton, setShowMpConnectButton] = useState(false);
+  const [showRoleChangeButton, setShowRoleChangeButton] = useState(false);
+  const [isChangingRole, setIsChangingRole] = useState(false);
   const router = useRouter();
+  const { showToast } = useToast();
 
-  // Verificar conexión con MercadoPago
+  // Verificar conexión con MercadoPago - siempre consultar al backend
   const checkMercadoPagoConnection = async (token: string) => {
-    try {
-      // Primero verificamos si hay un estado guardado en localStorage
-      const mpConnectedInStorage = localStorage.getItem('mp_connected');
-      if (mpConnectedInStorage === 'true') {
-        console.log('Conexión con MercadoPago encontrada en localStorage');
-        return true;
-      }
-      
+    try {      
       console.log('Verificando conexión con MercadoPago en el servidor...');
       // Asegurarse de que la URL termine con /
       const baseUrl = process.env.NEXT_PUBLIC_NEST_API_URL || '';
@@ -65,28 +62,17 @@ export default function StartCauseButton({
           const isConnected = data.connected || data.isConnected || false;
           console.log('¿Está conectado a MercadoPago según el servidor?', isConnected);
           
-          // Si está conectado, guardar en localStorage para futuras verificaciones
-          if (isConnected) {
-            localStorage.setItem('mp_connected', 'true');
-          } else {
-            // Si no está conectado, asegurarse de que no haya un valor incorrecto en localStorage
-            localStorage.removeItem('mp_connected');
-          }
-          
           return isConnected;
         } catch (parseError) {
           console.error('Error al parsear respuesta de MercadoPago/status:', parseError);
-          localStorage.removeItem('mp_connected');
           return false;
         }
       } else {
         console.error(`Error en MercadoPago/status (${response.status}):`, response.statusText);
-        localStorage.removeItem('mp_connected');
         return false;
       }
     } catch (error) {
       console.error('Error al verificar conexión de Mercado Pago:', error);
-      localStorage.removeItem('mp_connected');
       return false;
     }
   };
@@ -168,7 +154,13 @@ export default function StartCauseButton({
     console.log('Rol del usuario:', user.role);
     if (user.role !== 'BENEFICIARY') {
       console.log(`Usuario con rol incorrecto: ${user.role}, mostrando error`);
-      setErrorMessage(`Solo los beneficiarios pueden iniciar una causa. Tu rol actual es: ${user.role}`);
+      if (user.role === 'DONOR') {
+        setErrorMessage(`Solo los beneficiarios pueden iniciar una causa. Tu rol actual es: ${user.role}. ¿Deseas cambiar tu rol a BENEFICIARY?`);
+        setShowRoleChangeButton(true);
+      } else {
+        setErrorMessage(`Solo los beneficiarios pueden iniciar una causa. Tu rol actual es: ${user.role}`);
+        setShowRoleChangeButton(false);
+      }
       setShowMpConnectButton(false);
       setShowErrorModal(true);
       return;
@@ -186,10 +178,6 @@ export default function StartCauseButton({
     }
     
     console.log('Verificando conexión de MercadoPago para usuario:', user.email);
-    // Limpiar localStorage para forzar verificación con el servidor
-    console.log('Limpiando localStorage para forzar verificación con el servidor');
-    localStorage.removeItem('mp_connected');
-    
     console.log('Llamando a checkMercadoPagoConnection');
     const isConnected = await checkMercadoPagoConnection(token);
     console.log('Resultado de verificación de MercadoPago:', isConnected);
@@ -205,11 +193,7 @@ export default function StartCauseButton({
     // Todo en orden, redirigir al formulario de creación
     console.log('Usuario verificado y conectado a MercadoPago, redirigiendo a /create-cause');
     
-    try {
-      // Guardar en localStorage antes de redirigir
-      localStorage.setItem('mp_connected', 'true');
-      console.log('Estado de MercadoPago guardado en localStorage antes de redirigir');
-      
+    try {      
       // Redirigir a la página de creación de causa
       router.push('/create-cause');
     } catch (error) {
@@ -237,6 +221,117 @@ export default function StartCauseButton({
         <PlusCircle className="h-4 w-4 ml-2" />
       </>
     );
+  };
+
+  // Función para manejar el cambio de rol de DONOR a BENEFICIARY
+  const handleRoleChange = async () => {
+    setIsChangingRole(true);
+    try {
+      // Obtener el token de acceso
+      const token = await getToken();
+      
+      if (!token) {
+        showToast('Error: No se encontró el token de autenticación', 'error');
+        setIsChangingRole(false);
+        return;
+      }
+
+      // Enviar solicitud para actualizar el rol del usuario
+      const baseUrl = process.env.NEXT_PUBLIC_NEST_API_URL || '';
+      const apiUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+      
+      const response = await fetch(`${apiUrl}auth/update-role`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ role: 'BENEFICIARY' })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        showToast(data.message || 'Error al actualizar el rol', 'error');
+        setIsChangingRole(false);
+        return;
+      }
+
+      // Éxito: mostrar mensaje
+      showToast('¡Rol actualizado correctamente! Ahora eres un Beneficiario', 'success');
+      
+      // Actualizar el contexto de autenticación con el usuario actualizado
+      if (user) {
+        // Obtener la información actualizada del usuario desde el backend
+        try {
+          const userResponse = await fetch(`${apiUrl}auth/me`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (userResponse.ok) {
+            // Verificar que la respuesta no está vacía
+            const responseText = await userResponse.text();
+            console.log('Respuesta de auth/me:', responseText);
+            
+            if (responseText && responseText.trim() !== '') {
+              try {
+                const userData = JSON.parse(responseText);
+                // Actualizar el contexto con los datos actualizados del backend
+                login(token, userData);
+              } catch (jsonError) {
+                console.error('Error al parsear respuesta JSON:', jsonError);
+                // Usar actualización local como fallback
+                const updatedUserData = {
+                  ...user,
+                  role: 'BENEFICIARY'
+                };
+                login(token, updatedUserData);
+              }
+            } else {
+              console.warn('Respuesta vacía de auth/me, usando actualización local');
+              const updatedUserData = {
+                ...user,
+                role: 'BENEFICIARY'
+              };
+              login(token, updatedUserData);
+            }
+          } else {
+            console.warn(`Error en auth/me (${userResponse.status}): ${userResponse.statusText}`);
+            // Si no se puede obtener la información actualizada, usar la actualización local
+            const updatedUserData = {
+              ...user,
+              role: 'BENEFICIARY'
+            };
+            login(token, updatedUserData);
+          }
+        } catch (userError) {
+          console.error('Error al obtener datos actualizados del usuario:', userError);
+          // Fallback a actualización local
+          const updatedUserData = {
+            ...user,
+            role: 'BENEFICIARY'
+          };
+          login(token, updatedUserData);
+        }
+      }
+      
+      // Cerrar el modal
+      setShowErrorModal(false);
+      setIsChangingRole(false);
+      
+      // Esperar un momento y luego intentar iniciar la causa nuevamente
+      setTimeout(() => {
+        handleStartCause();
+      }, 500);
+      
+    } catch (error) {
+      console.error('Error al actualizar el rol:', error);
+      showToast('Error de conexión. Por favor, intenta nuevamente.', 'error');
+      setIsChangingRole(false);
+    }
   };
 
   return (
@@ -278,6 +373,21 @@ export default function StartCauseButton({
                   }}
                 >
                   Conectar MercadoPago
+                </BrutalButton>
+              )}
+              {showRoleChangeButton && (
+                <BrutalButton
+                  variant="secondary"
+                  onClick={handleRoleChange}
+                  disabled={isChangingRole}
+                  className="flex items-center"
+                >
+                  {isChangingRole ? 'Cambiando...' : (
+                    <>
+                      Cambiar a Beneficiario
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </>
+                  )}
                 </BrutalButton>
               )}
               <BrutalButton

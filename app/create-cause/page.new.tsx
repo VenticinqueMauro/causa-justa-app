@@ -78,8 +78,15 @@ export default function CreateCausePage() {
     }
 
     try {
-      // Siempre verificar con el backend el estado de conexión con MercadoPago
-      console.log('Verificando estado de conexión con MercadoPago en el backend...');
+      // Verificar si hay un estado guardado en localStorage
+      const mpConnectedInStorage = localStorage.getItem('mp_connected');
+      console.log('Estado de conexión MercadoPago en localStorage:', mpConnectedInStorage);
+      
+      if (mpConnectedInStorage === 'true') {
+        console.log('MercadoPago conectado según localStorage, continuando');
+        setIsLoading(false);
+        return;
+      }
 
       // Verificar con el servidor con un timeout para evitar que se quede colgado
       const controller = new AbortController();
@@ -114,20 +121,24 @@ export default function CreateCausePage() {
             console.log('¿Está conectado a MercadoPago?', isConnected);
             
             if (isConnected) {
-              console.log('MercadoPago conectado, continuando');
+              console.log('MercadoPago conectado, guardando en localStorage');
+              localStorage.setItem('mp_connected', 'true');
               setIsLoading(false);
             } else {
               console.log('MercadoPago no conectado, mostrando error');
+              localStorage.removeItem('mp_connected');
               setIsLoading(false);
               setShowMercadoPagoError(true);
             }
           } catch (parseError) {
             console.error('Error al parsear respuesta:', parseError);
+            localStorage.removeItem('mp_connected');
             setIsLoading(false);
             setShowMercadoPagoError(true);
           }
         } else {
           console.error(`Error del servidor (${response.status}):`, response.statusText);
+          localStorage.removeItem('mp_connected');
           setIsLoading(false);
           setShowMercadoPagoError(true);
         }
@@ -148,8 +159,6 @@ export default function CreateCausePage() {
 
   // Ejecutar verificación de requisitos al cargar la página
   useEffect(() => {
-    // Limpiar cualquier estado guardado en localStorage para forzar verificación con el backend
-    localStorage.removeItem('mp_connected');
     checkRequirements();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user, authLoading]);
@@ -247,60 +256,11 @@ export default function CreateCausePage() {
       
       // Actualizar el contexto de autenticación con el usuario actualizado
       if (user) {
-        // Obtener la información actualizada del usuario desde el backend
-        try {
-          const userResponse = await fetch(`${apiUrl}auth/me`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          
-          if (userResponse.ok) {
-            // Verificar que la respuesta no está vacía
-            const responseText = await userResponse.text();
-            console.log('Respuesta de auth/me:', responseText);
-            
-            if (responseText && responseText.trim() !== '') {
-              try {
-                const userData = JSON.parse(responseText);
-                // Actualizar el contexto con los datos actualizados del backend
-                login(token, userData);
-              } catch (jsonError) {
-                console.error('Error al parsear respuesta JSON:', jsonError);
-                // Usar actualización local como fallback
-                const updatedUserData = {
-                  ...user,
-                  role: 'BENEFICIARY'
-                };
-                login(token, updatedUserData);
-              }
-            } else {
-              console.warn('Respuesta vacía de auth/me, usando actualización local');
-              const updatedUserData = {
-                ...user,
-                role: 'BENEFICIARY'
-              };
-              login(token, updatedUserData);
-            }
-          } else {
-            console.warn(`Error en auth/me (${userResponse.status}): ${userResponse.statusText}`);
-            // Si no se puede obtener la información actualizada, usar la actualización local
-            const updatedUserData = {
-              ...user,
-              role: 'BENEFICIARY'
-            };
-            login(token, updatedUserData);
-          }
-        } catch (userError) {
-          console.error('Error al obtener datos actualizados del usuario:', userError);
-          // Fallback a actualización local
-          const updatedUserData = {
-            ...user,
-            role: 'BENEFICIARY'
-          };
-          login(token, updatedUserData);
-        }
+        const updatedUserData = {
+          ...user,
+          role: 'BENEFICIARY'
+        };
+        login(token, updatedUserData);
       }
       
       // Cerrar el modal
