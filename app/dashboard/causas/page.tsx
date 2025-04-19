@@ -5,13 +5,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-interface Cause {
+interface Campaign {
   id: string;
   title: string;
   description: string;
   goalAmount: number;
   currentAmount: number;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
+  status: 'PENDING' | 'VERIFIED' | 'REJECTED' | 'COMPLETED';
   createdAt: string;
   updatedAt: string;
   owner: {
@@ -21,10 +21,10 @@ interface Cause {
   };
 }
 
-export default function CausesManagementPage() {
+export default function CampaignsManagementPage() {
   const { user, isAuthenticated, getToken } = useAuth();
   const router = useRouter();
-  const [causes, setCauses] = useState<Cause[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,7 +40,7 @@ export default function CausesManagementPage() {
   }, [user, router]);
 
   useEffect(() => {
-    const fetchCauses = async () => {
+    const fetchCampaigns = async () => {
       if (!isAuthenticated) return;
       
       try {
@@ -51,7 +51,7 @@ export default function CausesManagementPage() {
         const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
         const baseUrl = apiUrl?.endsWith('/') ? apiUrl : `${apiUrl}/`;
         
-        let url = `${baseUrl}causes?page=${currentPage}&limit=10&search=${searchTerm}`;
+        let url = `${baseUrl}campaigns/admin/all?page=${currentPage}&limit=10&search=${searchTerm}`;
         if (statusFilter) {
           url += `&status=${statusFilter}`;
         }
@@ -64,22 +64,22 @@ export default function CausesManagementPage() {
         });
         
         if (!response.ok) {
-          throw new Error('Error al obtener causas');
+          throw new Error('Error al obtener campañas');
         }
         
         const data = await response.json();
-        setCauses(data.items || []);
+        setCampaigns(data.items || []);
         setTotalPages(data.meta?.totalPages || 1);
         setError(null);
       } catch (err) {
-        console.error('Error fetching causes:', err);
-        setError('No se pudieron cargar las causas. Intente nuevamente.');
+        console.error('Error fetching campaigns:', err);
+        setError('No se pudieron cargar las campañas. Intente nuevamente.');
       } finally {
         setIsLoading(false);
       }
     };
     
-    fetchCauses();
+    fetchCampaigns();
   }, [isAuthenticated, getToken, currentPage, searchTerm, statusFilter]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,7 +96,7 @@ export default function CausesManagementPage() {
     setCurrentPage(page);
   };
 
-  const handleStatusChange = async (causeId: string, newStatus: string) => {
+  const handleStatusChange = async (campaignId: string, newStatus: string) => {
     try {
       const token = await getToken();
       if (!token) throw new Error('No se encontró token de autenticación');
@@ -104,26 +104,34 @@ export default function CausesManagementPage() {
       const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
       const baseUrl = apiUrl?.endsWith('/') ? apiUrl : `${apiUrl}/`;
       
-      const response = await fetch(`${baseUrl}causes/${causeId}/status`, {
+      let endpoint = '';
+      if (newStatus === 'VERIFIED') {
+        endpoint = `${baseUrl}campaigns/${campaignId}/verify`;
+      } else if (newStatus === 'REJECTED') {
+        endpoint = `${baseUrl}campaigns/${campaignId}/reject`;
+      } else {
+        throw new Error('Estado no soportado');
+      }
+      
+      const response = await fetch(endpoint, {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: newStatus }),
       });
       
       if (!response.ok) {
-        throw new Error('Error al actualizar el estado de la causa');
+        throw new Error('Error al actualizar el estado de la campaña');
       }
       
-      // Actualizar la lista de causas
-      setCauses(causes.map(cause => 
-        cause.id === causeId ? { ...cause, status: newStatus as any } : cause
+      // Actualizar la lista de campañas
+      setCampaigns(campaigns.map(campaign => 
+        campaign.id === campaignId ? { ...campaign, status: newStatus as any } : campaign
       ));
     } catch (err) {
-      console.error('Error updating cause status:', err);
-      alert('No se pudo actualizar el estado de la causa. Intente nuevamente.');
+      console.error('Error updating campaign status:', err);
+      alert('No se pudo actualizar el estado de la campaña. Intente nuevamente.');
     }
   };
 
@@ -131,7 +139,7 @@ export default function CausesManagementPage() {
     switch (status) {
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800';
-      case 'APPROVED':
+      case 'VERIFIED':
         return 'bg-green-100 text-green-800';
       case 'REJECTED':
         return 'bg-red-100 text-red-800';
@@ -156,51 +164,41 @@ export default function CausesManagementPage() {
   return (
     <div className="space-y-6">
       <div className="border-b pb-4">
-        <h1 className="text-3xl font-bold">Gestión de Causas</h1>
-        <p className="text-gray-600">Administra y modera las causas de la plataforma</p>
+        <h1 className="text-3xl font-bold">Gestión de Campañas</h1>
+        <p className="text-gray-600">Administra las campañas de recaudación de la plataforma</p>
       </div>
 
       {/* Filtros y búsqueda */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="relative w-full sm:w-64">
+      <div className="mb-4 flex flex-col md:flex-row gap-4">
+        <div className="flex-1">
+          <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">Buscar campaña:</label>
           <input
             type="text"
-            placeholder="Buscar causas..."
-            className="w-full p-2 border border-gray-300 rounded-md pl-8"
+            id="search"
             value={searchTerm}
             onChange={handleSearchChange}
+            placeholder="Buscar por título..."
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
           />
-          <svg
-            className="absolute left-2 top-2.5 h-4 w-4 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
         </div>
-        <div className="w-full sm:w-auto">
+        <div className="md:w-64">
+          <label htmlFor="statusFilter" className="block text-sm font-medium text-gray-700 mb-1">Filtrar por estado:</label>
           <select
-            className="w-full sm:w-auto p-2 border border-gray-300 rounded-md"
+            id="statusFilter"
             value={statusFilter}
             onChange={handleStatusFilterChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
           >
             <option value="">Todos los estados</option>
             <option value="PENDING">Pendientes</option>
-            <option value="APPROVED">Aprobadas</option>
+            <option value="VERIFIED">Verificadas</option>
             <option value="REJECTED">Rechazadas</option>
             <option value="COMPLETED">Completadas</option>
           </select>
         </div>
       </div>
 
-      {/* Tabla de causas */}
+      {/* Tabla de campañas */}
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         {isLoading ? (
           <div className="flex justify-center items-center p-8">
@@ -224,7 +222,7 @@ export default function CausesManagementPage() {
                       Meta
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Recaudado
+                      Campaña
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Estado
@@ -238,74 +236,63 @@ export default function CausesManagementPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {causes.length === 0 ? (
+                  {campaigns.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
-                        No se encontraron causas
+                        No se encontraron campañas
                       </td>
                     </tr>
                   ) : (
-                    causes.map((cause) => (
-                      <tr key={cause.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
-                            {cause.title}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{cause.owner.fullName}</div>
-                          <div className="text-xs text-gray-500">{cause.owner.email}</div>
+                    campaigns.map((campaign) => (
+                      <tr key={campaign.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <Link href={`/campaigns/${campaign.id}`} className="text-primary hover:text-primary-dark">
+                            {campaign.title}
+                          </Link>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatCurrency(cause.goalAmount)}
+                          <div className="font-medium">{campaign.owner.fullName}</div>
+                          <div className="text-xs">{campaign.owner.email}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatCurrency(cause.currentAmount)}
+                          {formatCurrency(campaign.goalAmount)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatCurrency(campaign.currentAmount)}
                           <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
                             <div 
                               className="bg-primary h-2.5 rounded-full" 
-                              style={{ width: `${Math.min(100, (cause.currentAmount / cause.goalAmount) * 100)}%` }}
+                              style={{ width: `${Math.min(100, (campaign.currentAmount / campaign.goalAmount) * 100)}%` }}
                             ></div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(
-                              cause.status
-                            )}`}
-                          >
-                            {cause.status === 'PENDING' && 'Pendiente'}
-                            {cause.status === 'APPROVED' && 'Aprobada'}
-                            {cause.status === 'REJECTED' && 'Rechazada'}
-                            {cause.status === 'COMPLETED' && 'Completada'}
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(campaign.status)}`}>
+                            {campaign.status}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(cause.createdAt).toLocaleDateString()}
+                          {new Date(campaign.createdAt).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <Link 
-                            href={`/dashboard/causas/${cause.id}`}
-                            className="text-primary hover:text-primary-dark mr-3"
-                          >
-                            Ver detalles
-                          </Link>
-                          {cause.status === 'PENDING' && (
-                            <>
-                              <button 
-                                onClick={() => handleStatusChange(cause.id, 'APPROVED')}
-                                className="text-green-600 hover:text-green-900 mr-3"
-                              >
-                                Aprobar
-                              </button>
-                              <button 
-                                onClick={() => handleStatusChange(cause.id, 'REJECTED')}
-                                className="text-red-600 hover:text-red-900"
-                              >
-                                Rechazar
-                              </button>
-                            </>
-                          )}
+                          <div className="flex space-x-2 justify-end">
+                            {campaign.status === 'PENDING' && (
+                              <>
+                                <button
+                                  onClick={() => handleStatusChange(campaign.id, 'VERIFIED')}
+                                  className="text-green-600 hover:text-green-900"
+                                >
+                                  Verificar
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(campaign.id, 'REJECTED')}
+                                  className="text-red-600 hover:text-red-900"
+                                >
+                                  Rechazar
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -343,7 +330,7 @@ export default function CausesManagementPage() {
               <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm text-gray-700">
-                    Mostrando <span className="font-medium">{causes.length}</span> causas
+                    Mostrando <span className="font-medium">{campaigns.length}</span> campañas
                   </p>
                 </div>
                 <div>

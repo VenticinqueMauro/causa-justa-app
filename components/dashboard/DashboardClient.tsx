@@ -112,6 +112,7 @@ export default function DashboardClient({
     return pathname.startsWith(path) && path !== '/dashboard';
   };
 
+
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* Overlay para móviles */}
@@ -146,8 +147,34 @@ export default function DashboardClient({
           </button>
         </Link>
         
-        <div className="p-4 border-b bg-gray-50">
+        <div className="p-4 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center space-x-3">
+            <div className="flex-shrink-0">
+              {user.profilePicture ? (
+                <img 
+                  src={user.profilePicture} 
+                  alt="Foto de perfil" 
+                  className="w-10 h-10 rounded-full object-cover"
+                  onError={(e) => {
+                    // Si hay error al cargar la imagen, mostrar iniciales
+                    e.currentTarget.style.display = 'none';
+                    // El elemento padre debe tener un ID para poder encontrarlo
+                    const parent = e.currentTarget.parentElement;
+                    if (parent) {
+                      parent.innerHTML = `
+                        <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
+                          ${user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                      `;
+                    }
+                  }}
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
+                  {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+                </div>
+              )}
+            </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">{user.fullName}</p>
               <p className="text-xs text-gray-500 truncate">{user.email}</p>
@@ -170,7 +197,7 @@ export default function DashboardClient({
           {/* Menú para BENEFICIARY */}
           {user.role === 'BENEFICIARY' && (
             <>
-              <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Gestión de Causas</p>
+              <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Mis campañas</p>
               <Link 
                 href="/dashboard/mis-causas" 
                 className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/mis-causas') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
@@ -191,6 +218,13 @@ export default function DashboardClient({
               >
                 <DonationsIcon />
                 <span className="ml-3">Donaciones</span>
+              </Link>
+              <Link 
+                href="/dashboard/mis-estadisticas" 
+                className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/mis-estadisticas') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+              >
+                <StatsIcon />
+                <span className="ml-3">Mis Estadísticas</span>
               </Link>
             </>
           )}

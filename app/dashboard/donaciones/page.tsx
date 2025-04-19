@@ -8,11 +8,17 @@ import Link from 'next/link';
 interface Donation {
   id: string;
   amount: number;
-  status: 'PENDING' | 'COMPLETED' | 'FAILED';
+  message?: string;
+  status: 'pending' | 'completed' | 'failed';
+  paymentId?: string;
+  paymentMethod?: string;
+  transactionId?: string;
   createdAt: string;
-  cause: {
+  updatedAt: string;
+  campaign: {
     id: string;
     title: string;
+    slug: string;
   };
   donor: {
     id: string;
@@ -29,7 +35,12 @@ export default function DonationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [causeFilter, setCauseFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
   const [causes, setCauses] = useState<{id: string, title: string}[]>([]);
 
   useEffect(() => {
@@ -86,9 +97,23 @@ export default function DonationsPage() {
         const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
         const baseUrl = apiUrl?.endsWith('/') ? apiUrl : `${apiUrl}/`;
         
-        let url = `${baseUrl}donations/received?page=${currentPage}&limit=10`;
+        let url = `${baseUrl}donations/received?page=${currentPage}&limit=${itemsPerPage}`;
+        
+        // Añadir filtros si están presentes
         if (causeFilter) {
-          url += `&causeId=${causeFilter}`;
+          url += `&campaignId=${causeFilter}`;
+        }
+        
+        if (statusFilter) {
+          url += `&status=${statusFilter}`;
+        }
+        
+        if (startDate) {
+          url += `&startDate=${startDate}`;
+        }
+        
+        if (endDate) {
+          url += `&endDate=${endDate}`;
         }
         
         const response = await fetch(url, {
@@ -105,6 +130,8 @@ export default function DonationsPage() {
         const data = await response.json();
         setDonations(data.items || []);
         setTotalPages(data.meta?.totalPages || 1);
+        setTotalItems(data.meta?.totalItems || 0);
+        setItemsPerPage(data.meta?.itemsPerPage || 10);
         setError(null);
       } catch (err) {
         console.error('Error fetching donations:', err);
@@ -115,11 +142,26 @@ export default function DonationsPage() {
     };
     
     fetchDonations();
-  }, [isAuthenticated, getToken, currentPage, causeFilter, user?.role]);
+  }, [isAuthenticated, getToken, currentPage, causeFilter, statusFilter, startDate, endDate, itemsPerPage, user?.role]);
 
   const handleCauseFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCauseFilter(e.target.value);
     setCurrentPage(1); // Resetear a la primera página al filtrar
+  };
+
+  const handleStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setStatusFilter(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setStartDate(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEndDate(e.target.value);
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
@@ -127,7 +169,7 @@ export default function DonationsPage() {
   };
 
   const getStatusClass = (status: string) => {
-    switch (status) {
+    switch (status.toUpperCase()) {
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800';
       case 'COMPLETED':
@@ -136,6 +178,19 @@ export default function DonationsPage() {
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return 'Pendiente';
+      case 'COMPLETED':
+        return 'Completada';
+      case 'FAILED':
+        return 'Fallida';
+      default:
+        return status;
     }
   };
 
@@ -154,24 +209,60 @@ export default function DonationsPage() {
     <div className="space-y-6">
       <div className="border-b pb-4">
         <h1 className="text-3xl font-bold">Donaciones Recibidas</h1>
-        <p className="text-gray-600">Administra las donaciones recibidas en tus causas</p>
+        <p className="text-gray-600">Gestiona las donaciones recibidas en tus causas</p>
       </div>
 
-      {/* Filtros */}
-      <div className="flex justify-between items-center">
-        <div className="w-64">
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+          <label htmlFor="causeFilter" className="block text-sm font-medium text-gray-700 mb-1">Filtrar por campaña:</label>
           <select
-            className="w-full p-2 border border-gray-300 rounded-md"
+            id="causeFilter"
             value={causeFilter}
             onChange={handleCauseFilterChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
           >
-            <option value="">Todas las causas</option>
-            {causes.map((cause) => (
-              <option key={cause.id} value={cause.id}>
-                {cause.title}
-              </option>
+            <option value="">Todas las campañas</option>
+            {causes.map(cause => (
+              <option key={cause.id} value={cause.id}>{cause.title}</option>
             ))}
           </select>
+        </div>
+        
+        <div>
+          <label htmlFor="statusFilter" className="block text-sm font-medium text-gray-700 mb-1">Estado:</label>
+          <select
+            id="statusFilter"
+            value={statusFilter}
+            onChange={handleStatusFilterChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+          >
+            <option value="">Todos los estados</option>
+            <option value="pending">Pendiente</option>
+            <option value="completed">Completada</option>
+            <option value="failed">Fallida</option>
+          </select>
+        </div>
+        
+        <div>
+          <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">Desde:</label>
+          <input
+            type="date"
+            id="startDate"
+            value={startDate}
+            onChange={handleStartDateChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+          />
+        </div>
+        
+        <div>
+          <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">Hasta:</label>
+          <input
+            type="date"
+            id="endDate"
+            value={endDate}
+            onChange={handleEndDateChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+          />
         </div>
       </div>
 
@@ -190,7 +281,7 @@ export default function DonationsPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Causa
+                      Campaña
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Donante
@@ -202,6 +293,9 @@ export default function DonationsPage() {
                       Estado
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Método
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Fecha
                     </th>
                   </tr>
@@ -209,41 +303,46 @@ export default function DonationsPage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {donations.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                      <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
                         No se encontraron donaciones
                       </td>
                     </tr>
                   ) : (
-                    donations.map((donation) => (
+                    donations.map(donation => (
                       <tr key={donation.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <Link 
-                            href={`/dashboard/mis-causas/${donation.cause.id}`}
-                            className="text-primary hover:text-primary-dark"
-                          >
-                            {donation.cause.title}
-                          </Link>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{donation.donor.fullName}</div>
-                          <div className="text-xs text-gray-500">{donation.donor.email}</div>
-                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {donation.campaign.title}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {donation.donor.fullName}
+                          <div className="text-xs text-gray-400">{donation.donor.email}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {formatCurrency(donation.amount)}
+                          {donation.message && (
+                            <div className="text-xs text-gray-400 mt-1 max-w-xs truncate" title={donation.message}>
+                              "{donation.message}"
+                            </div>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(
-                              donation.status
-                            )}`}
-                          >
-                            {donation.status === 'PENDING' && 'Pendiente'}
-                            {donation.status === 'COMPLETED' && 'Completada'}
-                            {donation.status === 'FAILED' && 'Fallida'}
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(donation.status)}`}>
+                            {getStatusLabel(donation.status)}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {donation.paymentMethod ? donation.paymentMethod.replace('_', ' ') : '-'}
+                          {donation.transactionId && (
+                            <div className="text-xs text-gray-400 mt-1">
+                              ID: {donation.transactionId.substring(0, 8)}...
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {new Date(donation.createdAt).toLocaleDateString()}
+                          <div className="text-xs text-gray-400">
+                            {new Date(donation.createdAt).toLocaleTimeString()}
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -282,7 +381,7 @@ export default function DonationsPage() {
                 <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                   <div>
                     <p className="text-sm text-gray-700">
-                      Mostrando <span className="font-medium">{donations.length}</span> donaciones
+                      Mostrando <span className="font-medium">{donations.length}</span> de <span className="font-medium">{totalItems}</span> donaciones
                     </p>
                   </div>
                   <div>

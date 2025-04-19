@@ -15,6 +15,8 @@ interface User {
   email: string;
   fullName: string;
   role: string;
+  profilePicture?: string;
+  verified?: boolean;
 }
 
 interface AuthContextType {
@@ -24,6 +26,7 @@ interface AuthContextType {
   login: (token: string, userData: User) => void;
   logout: () => Promise<void>;
   getToken: () => Promise<string | null>;
+  updateUserData: (userData: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -36,6 +39,7 @@ const AuthContext = createContext<AuthContextType>({
     console.warn('getToken() called outside AuthProvider');
     return null;
   },
+  updateUserData: () => console.warn('updateUserData() called outside AuthProvider'),
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -187,6 +191,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return localStorage.getItem('auth_token');
   };
 
+  const updateUserData = (userData: Partial<User>) => {
+    if (typeof window === 'undefined' || !user) return;
+    
+    try {
+      // Actualizar el estado del usuario con los nuevos datos
+      const updatedUser = { ...user, ...userData };
+      setUser(updatedUser);
+      
+      // Actualizar los datos en localStorage
+      localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+      
+      console.log('Datos de usuario actualizados:', updatedUser);
+    } catch (err) {
+      console.error('Error al actualizar datos de usuario:', err);
+    }
+  };
+
   const value = useMemo(
     () => ({
       user,
@@ -195,6 +216,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       login,
       logout,
       getToken,
+      updateUserData,
     }),
     [user, isLoading]
   );

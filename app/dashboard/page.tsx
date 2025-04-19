@@ -145,108 +145,247 @@ export default function DashboardPage() {
       try {
         setIsLoading(true);
         
-        // Para ADMIN, intentamos obtener estadísticas reales
+        const token = await getToken();
+        const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
+        const baseUrl = apiUrl?.endsWith('/') ? apiUrl : `${apiUrl}/`;
+        
+        console.log('Fetching stats for role:', user.role);
+        console.log('API URL:', baseUrl);
+        
+        // Para ADMIN, obtener estadísticas de la plataforma
         if (user.role === 'ADMIN') {
           try {
-            const token = await getToken();
-            const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
-            const baseUrl = apiUrl?.endsWith('/') ? apiUrl : `${apiUrl}/`;
+            const url = `${baseUrl}statistics/platform`;
+            console.log('Fetching from URL:', url);
             
-            const response = await fetch(`${baseUrl}admin/stats`, {
+            const response = await fetch(url, {
               headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
               },
             });
+            
+            console.log('Response status:', response.status);
             
             if (response.ok) {
               const data = await response.json();
+              console.log('Received data:', data);
+              
+              // Verificar la estructura de datos
+              const totalUsers = data.totalUsers !== undefined ? data.totalUsers : 
+                                (data.data?.totalUsers !== undefined ? data.data.totalUsers : 0);
+              
+              const totalCampaigns = data.totalCampaigns !== undefined ? data.totalCampaigns : 
+                                    (data.data?.totalCampaigns !== undefined ? data.data.totalCampaigns : 0);
+              
+              const totalDonations = data.totalDonations !== undefined ? data.totalDonations : 
+                                    (data.data?.totalDonations !== undefined ? data.data.totalDonations : 0);
+              
+              const pendingCampaigns = data.pendingCampaigns !== undefined ? data.pendingCampaigns : 
+                                      (data.data?.pendingCampaigns !== undefined ? data.data.pendingCampaigns : 0);
+              
+              console.log('Processed stats:', { totalUsers, totalCampaigns, totalDonations, pendingCampaigns });
+              
               setStats({
-                totalUsers: data.totalUsers || 0,
-                totalCauses: data.totalCauses || 0,
-                totalDonations: data.totalDonations || 0,
-                pendingCauses: data.causesByStatus?.PENDING || 0,
+                totalUsers: totalUsers,
+                totalCauses: totalCampaigns,
+                totalDonations: totalDonations,
+                pendingCauses: pendingCampaigns,
               });
             } else {
-              // Si falla, usamos datos de ejemplo
-              setDemoStats();
-            }
-          } catch (error) {
-            console.error('Error fetching stats:', error);
-            setDemoStats();
-          }
-        } 
-        // Para BENEFICIARY, intentamos obtener sus causas y donaciones
-        else if (user.role === 'BENEFICIARY') {
-          try {
-            const token = await getToken();
-            const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
-            const baseUrl = apiUrl?.endsWith('/') ? apiUrl : `${apiUrl}/`;
-            
-            const causesResponse = await fetch(`${baseUrl}causes/my-causes`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-            });
-            
-            const donationsResponse = await fetch(`${baseUrl}donations/received?limit=1`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-            });
-            
-            if (causesResponse.ok && donationsResponse.ok) {
-              const causesData = await causesResponse.json();
-              const donationsData = await donationsResponse.json();
+              console.error('Error fetching platform statistics, status:', response.status);
+              try {
+                const errorData = await response.text();
+                console.error('Error response:', errorData);
+              } catch (e) {
+                console.error('Could not parse error response');
+              }
               
               setStats({
                 totalUsers: 0,
-                totalCauses: Array.isArray(causesData) ? causesData.length : 0,
-                totalDonations: donationsData.meta?.totalItems || 0,
-                pendingCauses: Array.isArray(causesData) ? causesData.filter(c => c.status === 'PENDING').length : 0,
+                totalCauses: 0,
+                totalDonations: 0,
+                pendingCauses: 0
+              });
+            }
+          } catch (error) {
+            console.error('Error fetching stats:', error);
+            setStats({
+              totalUsers: 0,
+              totalCauses: 0,
+              totalDonations: 0,
+              pendingCauses: 0
+            });
+          }
+        } 
+        // Para BENEFICIARY, obtener estadísticas del beneficiario
+        else if (user.role === 'BENEFICIARY') {
+          try {
+            const statsUrl = `${baseUrl}statistics/beneficiary`;
+            const campaignsUrl = `${baseUrl}campaigns/my`;
+            
+            console.log('Fetching from URLs:', { statsUrl, campaignsUrl });
+            
+            const statsResponse = await fetch(statsUrl, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+            });
+            
+            const campaignsResponse = await fetch(campaignsUrl, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+            });
+            
+            console.log('Response status:', { 
+              stats: statsResponse.status, 
+              campaigns: campaignsResponse.status 
+            });
+            
+            if (statsResponse.ok && campaignsResponse.ok) {
+              const statsData = await statsResponse.json();
+              const campaignsData = await campaignsResponse.json();
+              
+              console.log('Received data:', { statsData, campaignsData });
+              
+              // Verificar si campaignsData es un array o tiene una propiedad items
+              const campaigns = Array.isArray(campaignsData) ? campaignsData : 
+                               (campaignsData.items ? campaignsData.items : []);
+              
+              // Verificar la estructura de datos para totalDonationsReceived
+              const totalDonations = statsData.totalDonationsReceived !== undefined ? statsData.totalDonationsReceived : 
+                                    (statsData.data?.totalDonationsReceived !== undefined ? statsData.data.totalDonationsReceived : 0);
+              
+              const pendingCampaigns = campaigns.filter((c: any) => c.status === 'PENDING').length || 0;
+              
+              console.log('Processed stats:', { 
+                totalCauses: campaigns.length, 
+                totalDonations, 
+                pendingCampaigns 
+              });
+              
+              setStats({
+                totalUsers: 0,
+                totalCauses: campaigns.length || 0,
+                totalDonations: totalDonations,
+                pendingCauses: pendingCampaigns,
               });
             } else {
-              // Si falla, usamos datos de ejemplo
-              setDemoStats();
+              console.error('Error fetching beneficiary statistics');
+              try {
+                if (!statsResponse.ok) {
+                  const errorData = await statsResponse.text();
+                  console.error('Stats error response:', errorData);
+                }
+                if (!campaignsResponse.ok) {
+                  const errorData = await campaignsResponse.text();
+                  console.error('Campaigns error response:', errorData);
+                }
+              } catch (e) {
+                console.error('Could not parse error response');
+              }
+              
+              setStats({
+                totalUsers: 0,
+                totalCauses: 0,
+                totalDonations: 0,
+                pendingCauses: 0
+              });
             }
           } catch (error) {
             console.error('Error fetching beneficiary data:', error);
-            setDemoStats();
+            setStats({
+              totalUsers: 0,
+              totalCauses: 0,
+              totalDonations: 0,
+              pendingCauses: 0
+            });
+          }
+        } 
+        // Para DONOR, obtener estadísticas del donante
+        else if (user.role === 'DONOR') {
+          try {
+            const url = `${baseUrl}donations/made`;
+            console.log('Fetching from URL:', url);
+            
+            const response = await fetch(url, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+            });
+            
+            console.log('Response status:', response.status);
+            
+            if (response.ok) {
+              const data = await response.json();
+              console.log('Received data:', data);
+              
+              // Verificar si data tiene una propiedad items
+              const donations = Array.isArray(data) ? data : 
+                               (data.items ? data.items : []);
+              
+              // Calcular estadísticas del donante
+              const totalDonated = donations.reduce((sum: number, donation: any) => sum + donation.amount, 0);
+              const uniqueCampaignsSet = new Set(
+                donations.map((donation: any) => {
+                  return donation.campaign?.id || donation.campaignId || 'unknown';
+                })
+              );
+              const uniqueCampaigns = uniqueCampaignsSet.size;
+              
+              console.log('Processed stats:', { 
+                totalDonated, 
+                uniqueCampaigns, 
+                totalDonations: donations.length 
+              });
+              
+              setStats({
+                totalUsers: 0,
+                totalCauses: uniqueCampaigns,
+                totalDonations: donations.length,
+                pendingCauses: 0,
+              });
+            } else {
+              console.error('Error fetching donor statistics, status:', response.status);
+              try {
+                const errorData = await response.text();
+                console.error('Error response:', errorData);
+              } catch (e) {
+                console.error('Could not parse error response');
+              }
+              
+              setStats({
+                totalUsers: 0,
+                totalCauses: 0,
+                totalDonations: 0,
+                pendingCauses: 0
+              });
+            }
+          } catch (error) {
+            console.error('Error fetching donor data:', error);
+            setStats({
+              totalUsers: 0,
+              totalCauses: 0,
+              totalDonations: 0,
+              pendingCauses: 0
+            });
           }
         } else {
-          // Para otros roles, usamos datos de ejemplo
-          setDemoStats();
+          // Para otros roles
+          console.log('Unknown role, setting empty stats');
+          setStats({
+            totalUsers: 0,
+            totalCauses: 0,
+            totalDonations: 0,
+            pendingCauses: 0
+          });
         }
       } finally {
         setIsLoading(false);
-      }
-    };
-
-    const setDemoStats = () => {
-      // Datos de ejemplo según el rol
-      if (user?.role === 'ADMIN') {
-        setStats({
-          totalUsers: 125,
-          totalCauses: 48,
-          totalDonations: 312,
-          pendingCauses: 7,
-        });
-      } else if (user?.role === 'BENEFICIARY') {
-        setStats({
-          totalUsers: 0,
-          totalCauses: 3,
-          totalDonations: 28,
-          pendingCauses: 1,
-        });
-      } else {
-        setStats({
-          totalUsers: 0,
-          totalCauses: 0,
-          totalDonations: 0,
-          pendingCauses: 0,
-        });
       }
     };
 

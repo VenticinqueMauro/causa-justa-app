@@ -53,7 +53,7 @@ const FloatingStartCauseButton = () => {
   };
   
   return (
-    <div className="fixed bottom-5 right-3 md:bottom-10 md:right-10 z-[9999]">
+    <div className="fixed bottom-5 right-3 md:bottom-20 md:right-10 z-[9999]">
       <button 
         className={`
           flex items-center bg-[#EDFCA7] border-2 border-[#002C5B] shadow-[4px_4px_0_0_rgba(0,44,91,0.8)]
@@ -253,8 +253,24 @@ const UserDropdownMenu = ({ user, handleLogout }: { user: any, handleLogout: () 
         className="flex items-center gap-1 sm:gap-2 py-1 sm:py-2 px-2 sm:px-3 hover:bg-[#002C5B]/5 rounded-md"
         aria-label="Menú de usuario"
       >
-        <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full border-2 border-[#002C5B] bg-white shrink-0">
-          <User className="h-3 w-3 sm:h-4 sm:w-4 text-[#002C5B]" />
+        <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full border-2 border-[#002C5B] bg-white shrink-0 overflow-hidden">
+          {user?.profilePicture ? (
+            <img 
+              src={user.profilePicture} 
+              alt={user.fullName || 'Usuario'} 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                // Si hay error al cargar la imagen, mostrar icono por defecto
+                e.currentTarget.style.display = 'none';
+                const parent = e.currentTarget.parentElement;
+                if (parent) {
+                  parent.innerHTML = `<svg class="h-3 w-3 sm:h-4 sm:w-4 text-[#002C5B]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+                }
+              }}
+            />
+          ) : (
+            <User className="h-3 w-3 sm:h-4 sm:w-4 text-[#002C5B]" />
+          )}
         </div>
         <span className="hidden sm:block text-xs md:text-sm font-medium truncate max-w-[80px] md:max-w-[120px]">
           {user?.fullName || 'Usuario'}
@@ -266,6 +282,22 @@ const UserDropdownMenu = ({ user, handleLogout }: { user: any, handleLogout: () 
       {isOpen && (
         <div className="absolute right-0 mt-3 w-48 bg-white border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)] z-10">
           <div className="py-1">
+            <Link
+              href="/dashboard"
+              className="flex items-center px-4 py-2 text-sm text-[#002C5B] hover:bg-[#EDFCA7] transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <svg className="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+              Dashboard
+            </Link>
+            <Link
+              href="/dashboard/perfil"
+              className="flex items-center px-4 py-2 text-sm text-[#002C5B] hover:bg-[#EDFCA7] transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <svg className="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              Mi Perfil
+            </Link>
             <Link
               href="/auth/change-password"
               className="flex items-center px-4 py-2 text-sm text-[#002C5B] hover:bg-[#EDFCA7] transition-colors"
