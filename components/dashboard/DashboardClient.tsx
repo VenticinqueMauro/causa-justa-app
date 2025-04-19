@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Heart } from 'lucide-react';
+import { Heart, Plus, DollarSign, BarChart, User } from 'lucide-react';
 
 // Iconos (puedes reemplazarlos con una biblioteca como react-icons si lo prefieres)
 const DashboardIcon = () => (
@@ -74,7 +74,7 @@ export default function DashboardClient({
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/auth/login');
+      router.push('/login');
     }
   }, [isLoading, isAuthenticated, router]);
 
@@ -98,7 +98,7 @@ export default function DashboardClient({
   const handleLogout = async () => {
     try {
       await logout();
-      router.push('/auth/login');
+      router.push('/login');
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
@@ -185,94 +185,95 @@ export default function DashboardClient({
           </div>
         </div>
         
-        <nav className="p-4 space-y-1">
-          <Link 
-            href="/dashboard" 
-            className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
-          >
-            <DashboardIcon />
-            <span className="ml-3">Dashboard</span>
-          </Link>
-          
-          {/* Menú para BENEFICIARY */}
-          {user.role === 'BENEFICIARY' && (
-            <>
-              <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Mis campañas</p>
-              <Link 
-                href="/dashboard/mis-causas" 
-                className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/mis-causas') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
-              >
-                <CausesIcon />
-                <span className="ml-3">Mis Causas</span>
-              </Link>
-              <Link 
-                href="/dashboard/crear-causa" 
-                className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/crear-causa') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
-              >
-                <CreateIcon />
-                <span className="ml-3">Crear Causa</span>
-              </Link>
-              <Link 
-                href="/dashboard/donaciones" 
-                className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/donaciones') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
-              >
-                <DonationsIcon />
-                <span className="ml-3">Donaciones</span>
-              </Link>
-              <Link 
-                href="/dashboard/mis-estadisticas" 
-                className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/mis-estadisticas') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
-              >
-                <StatsIcon />
-                <span className="ml-3">Mis Estadísticas</span>
-              </Link>
-            </>
-          )}
-          
-          {/* Menú para ADMIN */}
-          {user.role === 'ADMIN' && (
-            <>
-              <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Administración</p>
-              <Link 
-                href="/dashboard/usuarios" 
-                className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/usuarios') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
-              >
-                <UsersIcon />
-                <span className="ml-3">Usuarios</span>
-              </Link>
-              <Link 
-                href="/dashboard/causas" 
-                className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/causas') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
-              >
-                <CausesIcon />
-                <span className="ml-3">Causas</span>
-              </Link>
-              <Link 
-                href="/dashboard/estadisticas" 
-                className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/estadisticas') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
-              >
-                <StatsIcon />
-                <span className="ml-3">Estadísticas</span>
-              </Link>
-            </>
-          )}
-          
-          <div className="pt-4 mt-4 border-t border-gray-200">
-            <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tu cuenta</p>
+        <nav className="p-4">
+          {/* Sección principal */}
+          <div className="mb-6">
             <Link 
-              href="/dashboard/perfil" 
-              className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/perfil') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+              href="/dashboard" 
+              className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
             >
-              <ProfileIcon />
-              <span className="ml-3">Mi Perfil</span>
+              <DashboardIcon />
+              <span className="ml-3">Dashboard</span>
             </Link>
-            <button 
-              onClick={handleLogout}
-              className="w-full flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <LogoutIcon />
-              <span className="ml-3">Cerrar Sesión</span>
-            </button>
+          </div>
+          {user.role === 'BENEFICIARY' && (
+            <div className="mb-6">
+              <h3 className="px-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">MIS CAMPAÑAS</h3>
+              <div className="space-y-1">
+                <Link 
+                  href="/dashboard/mis-causas" 
+                  className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/mis-causas') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+                >
+                  <Heart className="w-5 h-5" />
+                  <span className="ml-3">Mis Causas</span>
+                </Link>
+                <Link 
+                  href="/dashboard/crear-causa" 
+                  className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/crear-causa') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+                >
+                  <Plus className="w-5 h-5" />
+                  <span className="ml-3">Crear Causa</span>
+                </Link>
+                <Link 
+                  href="/dashboard/donaciones" 
+                  className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/donaciones') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+                >
+                  <DollarSign className="w-5 h-5" />
+                  <span className="ml-3">Donaciones</span>
+                </Link>
+              </div>
+            </div>
+          )}
+          
+          {/* Sección de administración */}
+          {user.role === 'ADMIN' && (
+            <div className="mb-6">
+              <h3 className="px-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">ADMINISTRACIÓN</h3>
+              <div className="space-y-1">
+                <Link 
+                  href="/dashboard/usuarios" 
+                  className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/usuarios') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+                >
+                  <UsersIcon />
+                  <span className="ml-3">Usuarios</span>
+                </Link>
+                <Link 
+                  href="/dashboard/causas" 
+                  className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/causas') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+                >
+                  <Heart className="w-5 h-5" />
+                  <span className="ml-3">Causas</span>
+                </Link>
+                <Link 
+                  href="/dashboard/estadisticas" 
+                  className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/estadisticas') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+                >
+                  <BarChart className="w-5 h-5" />
+                  <span className="ml-3">Estadísticas</span>
+                </Link>
+              </div>
+            </div>
+          )}
+          
+          {/* Sección de cuenta */}
+          <div className="mt-auto">
+            <h3 className="px-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">TU CUENTA</h3>
+            <div className="space-y-1">
+              <Link 
+                href="/dashboard/perfil" 
+                className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive('/dashboard/perfil') ? 'bg-gray-700 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+              >
+                <User className="w-5 h-5" />
+                <span className="ml-3">Mi Perfil</span>
+              </Link>
+              <button 
+                onClick={handleLogout}
+                className="w-full flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <LogoutIcon />
+                <span className="ml-3">Cerrar Sesión</span>
+              </button>
+            </div>
           </div>
         </nav>
       </aside>

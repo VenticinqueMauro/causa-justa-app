@@ -24,41 +24,96 @@ export default function MyCausesPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Verificar que el usuario sea BENEFICIARY
-    if (user && user.role !== 'BENEFICIARY') {
-      router.push('/dashboard');
+    // Verificar que el usuario esté autenticado y sea BENEFICIARY
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.push('/login');
+      } else if (user && user.role !== 'BENEFICIARY') {
+        console.log('Usuario no es beneficiario:', user.role);
+        router.push('/dashboard');
+      }
     }
-  }, [user, router]);
+  }, [user, router, isAuthenticated, isLoading]);
 
   useEffect(() => {
     const fetchMyCauses = async () => {
-      if (!isAuthenticated) return;
+      if (!isAuthenticated || !user || user.role !== 'BENEFICIARY') {
+        console.log('No se cumplen las condiciones para obtener causas:', {
+          isAuthenticated,
+          userRole: user?.role
+        });
+        return;
+      }
       
       try {
         setIsLoading(true);
         const token = await getToken();
+        console.log('Token obtenido:', token ? 'Token presente (primeros 10 caracteres): ' + token.substring(0, 10) + '...' : 'Token no encontrado');
+        
         if (!token) throw new Error('No se encontró token de autenticación');
         
         const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
         const baseUrl = apiUrl?.endsWith('/') ? apiUrl : `${apiUrl}/`;
         
-        const response = await fetch(`${baseUrl}causes/my-causes`, {
+        // Primero, intentemos obtener el perfil del usuario para verificar que la autenticación funciona
+        console.log('Verificando autenticación con /profile...');
+        const profileResponse = await fetch(`${baseUrl}profile`, {
+          method: 'GET',
           headers: {
-            Authorization: `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
+          credentials: 'include',
         });
         
+        console.log('Respuesta de perfil:', profileResponse.status, profileResponse.statusText);
+        
+        if (!profileResponse.ok) {
+          console.error('Error al verificar perfil, posible problema de autenticación');
+          const profileError = await profileResponse.text();
+          console.error('Detalle del error de perfil:', profileError);
+          
+          // Si hay un error de autenticación, intentemos hacer login nuevamente
+          if (profileResponse.status === 401 || profileResponse.status === 403) {
+            console.log('Intentando reautenticar al usuario...');
+            // Aquí podríamos implementar una lógica para reautenticar al usuario
+            // Por ahora, simplemente informamos al usuario
+            setError('Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.');
+            throw new Error('Sesión expirada');
+          }
+        } else {
+          console.log('Perfil verificado correctamente, procediendo a obtener campañas');
+        }
+        
+        // Ahora intentemos obtener las campañas
+        const url = `${baseUrl}campaigns/my`;
+        console.log('Realizando solicitud a:', url);
+        
+        const response = await fetch(url, {
+          method: 'GET',  
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          credentials: 'include',
+        });
+        
+        console.log('Respuesta recibida:', response.status, response.statusText);
+        
         if (!response.ok) {
-          throw new Error('Error al obtener causas');
+          const errorText = await response.text();
+          console.error('Error en la respuesta:', errorText);
+          throw new Error(`Error al obtener causas: ${response.status} ${response.statusText}`);
         }
         
         const data = await response.json();
+        console.log('Datos recibidos:', data);
         setCauses(data || []);
         setError(null);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching causes:', err);
-        setError('No se pudieron cargar tus causas. Intenta nuevamente.');
+        setError(`No se pudieron cargar tus causas: ${err.message || 'Error desconocido'}`);
       } finally {
         setIsLoading(false);
       }
@@ -117,10 +172,18 @@ export default function MyCausesPage() {
         </div>
         <Link
           href="/dashboard/crear-causa"
-          className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
+          className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors"
         >
           Crear nueva causa
         </Link>
+        {error && (
+          <button 
+            onClick={() => router.push('/auth/login')} 
+            className="ml-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+          >
+            Reiniciar sesión
+          </button>
+        )}
       </div>
 
       {isLoading ? (
@@ -140,7 +203,7 @@ export default function MyCausesPage() {
           </p>
           <Link
             href="/dashboard/crear-causa"
-            className="px-6 py-3 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
+            className="px-6 py-3 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors"
           >
             Crear mi primera causa
           </Link>

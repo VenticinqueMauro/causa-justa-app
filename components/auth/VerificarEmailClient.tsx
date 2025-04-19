@@ -73,7 +73,7 @@ export default function VerificarEmailClient() {
 
     return (
         <BrutalSection variant="alt" className="py-10">
-            <div className="container mx-auto px-4">
+            <div className="bg-gray-100 mx-auto px-4">
                 <div className="max-w-2xl mx-auto">
                     <div className="bg-white border-2 border-[#002C5B] p-8 shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]">
                         <div className="text-center">

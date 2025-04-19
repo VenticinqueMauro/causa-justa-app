@@ -68,7 +68,7 @@ export default function MercadoPagoSuccessPage() {
   // Si está cargando, mostrar un estado de carga mejorado
   if (isLoading || !statusChecked) {
     return (
-      <div className="min-h-screen bg-[#ECECE2] flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
         <div className="max-w-md w-full p-8 border-2 border-[#002C5B] bg-white shadow-[5px_5px_0_0_rgba(0,44,91,0.8)] relative overflow-hidden">
           {/* Decoración de fondo */}
           <div className="absolute -top-10 -right-10 h-40 w-40 bg-[#EDFCA7] opacity-20 rounded-full"></div>
@@ -89,7 +89,7 @@ export default function MercadoPagoSuccessPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#ECECE2] flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
       <div className="max-w-md w-full p-8 border-2 border-[#002C5B] bg-white shadow-[5px_5px_0_0_rgba(0,44,91,0.8)] relative overflow-hidden">
         {/* Decoración de fondo */}
         <div className="absolute -top-10 -right-10 h-40 w-40 bg-[#EDFCA7] opacity-20 rounded-full"></div>

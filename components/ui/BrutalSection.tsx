@@ -13,7 +13,7 @@ const BrutalSection = ({
 }: BrutalSectionProps) => {
   const variantStyles = {
     default: "bg-[#ECECE2]",
-    alt: "bg-white",
+    alt: "bg-gray-100",
     dark: "bg-[#002C5B] text-white",
   };
 

@@ -11,6 +11,8 @@ interface User {
   role: string;
   isVerified: boolean;
   createdAt: string;
+  profilePicture?: string;
+  verified?: boolean;
 }
 
 export default function UsersManagementPage() {

@@ -16,6 +16,6 @@ export function getAuthToken(): string | null {
 export function logoutUser() {
     if (typeof window !== 'undefined') {
         localStorage.removeItem('token');
-        window.location.href = '/auth/login'; 
+        window.location.href = '/login'; 
     }
 }

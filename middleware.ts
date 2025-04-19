@@ -60,7 +60,7 @@ export function middleware(request: NextRequest) {
 
     // Redireccionar a login si no hay token y la ruta está protegida
     if (isProtectedPath && !token) {
-        return NextResponse.redirect(new URL('/auth/login', request.url));
+        return NextResponse.redirect(new URL('/login', request.url));
     }
 
     // Verificar permisos de rol si hay datos de usuario

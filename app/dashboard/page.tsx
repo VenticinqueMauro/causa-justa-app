@@ -13,7 +13,7 @@ const ProfileIcon = () => (
 
 const CausesIcon = () => (
   <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2h2a2 2 0 012 2v2M7 7h10"></path>
   </svg>
 );
 
@@ -38,6 +38,18 @@ const UsersIcon = () => (
 const StatsIcon = () => (
   <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+  </svg>
+);
+
+const PendingIcon = () => (
+  <svg className="h-6 w-6 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const MoneyIcon = () => (
+  <svg className="h-6 w-6 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
 
@@ -128,13 +140,22 @@ const ActionCard: React.FC<ActionCardProps> = ({ title, description, icon, linkT
   );
 };
 
+interface Stats {
+  totalUsers: number;
+  totalCauses: number;
+  totalDonations: number;
+  pendingCauses: number;
+  totalAmount?: number;
+}
+
 export default function DashboardPage() {
   const { user, getToken } = useAuth();
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalCauses: 0,
     totalDonations: 0,
     pendingCauses: 0,
+    totalAmount: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -171,26 +192,27 @@ export default function DashboardPage() {
               const data = await response.json();
               console.log('Received data:', data);
               
-              // Verificar la estructura de datos
-              const totalUsers = data.totalUsers !== undefined ? data.totalUsers : 
-                                (data.data?.totalUsers !== undefined ? data.data.totalUsers : 0);
+              // Extraer datos de la nueva estructura
+              const totalUsers = data.users?.totalUsers || 0;
+              const totalCampaigns = data.campaigns?.totalCampaigns || 0;
+              const totalDonations = data.donations?.totalDonations || 0;
+              const pendingCampaigns = data.campaigns?.pendingCampaigns || 0;
+              const totalAmount = data.donations?.totalAmount || 0;
               
-              const totalCampaigns = data.totalCampaigns !== undefined ? data.totalCampaigns : 
-                                    (data.data?.totalCampaigns !== undefined ? data.data.totalCampaigns : 0);
-              
-              const totalDonations = data.totalDonations !== undefined ? data.totalDonations : 
-                                    (data.data?.totalDonations !== undefined ? data.data.totalDonations : 0);
-              
-              const pendingCampaigns = data.pendingCampaigns !== undefined ? data.pendingCampaigns : 
-                                      (data.data?.pendingCampaigns !== undefined ? data.data.pendingCampaigns : 0);
-              
-              console.log('Processed stats:', { totalUsers, totalCampaigns, totalDonations, pendingCampaigns });
+              console.log('Processed stats:', { 
+                totalUsers, 
+                totalCampaigns, 
+                totalDonations, 
+                pendingCampaigns,
+                totalAmount
+              });
               
               setStats({
                 totalUsers: totalUsers,
                 totalCauses: totalCampaigns,
                 totalDonations: totalDonations,
                 pendingCauses: pendingCampaigns,
+                totalAmount: totalAmount,
               });
             } else {
               console.error('Error fetching platform statistics, status:', response.status);
@@ -205,7 +227,8 @@ export default function DashboardPage() {
                 totalUsers: 0,
                 totalCauses: 0,
                 totalDonations: 0,
-                pendingCauses: 0
+                pendingCauses: 0,
+                totalAmount: 0,
               });
             }
           } catch (error) {
@@ -214,64 +237,58 @@ export default function DashboardPage() {
               totalUsers: 0,
               totalCauses: 0,
               totalDonations: 0,
-              pendingCauses: 0
+              pendingCauses: 0,
+              totalAmount: 0,
             });
           }
         } 
         // Para BENEFICIARY, obtener estadísticas del beneficiario
         else if (user.role === 'BENEFICIARY') {
           try {
+            // Usamos solo el endpoint de estadísticas que sabemos que funciona
             const statsUrl = `${baseUrl}statistics/beneficiary`;
-            const campaignsUrl = `${baseUrl}campaigns/my`;
             
-            console.log('Fetching from URLs:', { statsUrl, campaignsUrl });
+            console.log('Fetching from URL:', statsUrl);
             
             const statsResponse = await fetch(statsUrl, {
               headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
               },
+              credentials: 'include',
             });
             
-            const campaignsResponse = await fetch(campaignsUrl, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-            });
+            console.log('Response status:', statsResponse.status);
             
-            console.log('Response status:', { 
-              stats: statsResponse.status, 
-              campaigns: campaignsResponse.status 
-            });
-            
-            if (statsResponse.ok && campaignsResponse.ok) {
+            if (statsResponse.ok) {
               const statsData = await statsResponse.json();
-              const campaignsData = await campaignsResponse.json();
               
-              console.log('Received data:', { statsData, campaignsData });
+              console.log('Received stats data:', statsData);
               
-              // Verificar si campaignsData es un array o tiene una propiedad items
-              const campaigns = Array.isArray(campaignsData) ? campaignsData : 
-                               (campaignsData.items ? campaignsData.items : []);
+              // Extraer información de campañas desde las estadísticas
+              // Muchos endpoints de estadísticas incluyen información resumida sobre las campañas
+              const totalCampaigns = statsData.totalCampaigns || statsData.campaignsCount || 0;
+              const pendingCampaigns = statsData.pendingCampaigns || 0;
               
               // Verificar la estructura de datos para totalDonationsReceived
-              const totalDonations = statsData.totalDonationsReceived !== undefined ? statsData.totalDonationsReceived : 
-                                    (statsData.data?.totalDonationsReceived !== undefined ? statsData.data.totalDonationsReceived : 0);
+              const totalDonations = statsData.totalDonationsReceived || 0;
               
-              const pendingCampaigns = campaigns.filter((c: any) => c.status === 'PENDING').length || 0;
+              // Extraer el monto total de donaciones si está disponible
+              const totalAmount = statsData.totalAmountReceived || 0;
               
               console.log('Processed stats:', { 
-                totalCauses: campaigns.length, 
+                totalCampaigns, 
                 totalDonations, 
-                pendingCampaigns 
+                pendingCampaigns,
+                totalAmount
               });
               
               setStats({
                 totalUsers: 0,
-                totalCauses: campaigns.length || 0,
+                totalCauses: totalCampaigns,
                 totalDonations: totalDonations,
                 pendingCauses: pendingCampaigns,
+                totalAmount: totalAmount,
               });
             } else {
               console.error('Error fetching beneficiary statistics');
@@ -279,10 +296,6 @@ export default function DashboardPage() {
                 if (!statsResponse.ok) {
                   const errorData = await statsResponse.text();
                   console.error('Stats error response:', errorData);
-                }
-                if (!campaignsResponse.ok) {
-                  const errorData = await campaignsResponse.text();
-                  console.error('Campaigns error response:', errorData);
                 }
               } catch (e) {
                 console.error('Could not parse error response');
@@ -292,7 +305,8 @@ export default function DashboardPage() {
                 totalUsers: 0,
                 totalCauses: 0,
                 totalDonations: 0,
-                pendingCauses: 0
+                pendingCauses: 0,
+                totalAmount: 0,
               });
             }
           } catch (error) {
@@ -301,7 +315,8 @@ export default function DashboardPage() {
               totalUsers: 0,
               totalCauses: 0,
               totalDonations: 0,
-              pendingCauses: 0
+              pendingCauses: 0,
+              totalAmount: 0,
             });
           }
         } 
@@ -348,6 +363,7 @@ export default function DashboardPage() {
                 totalCauses: uniqueCampaigns,
                 totalDonations: donations.length,
                 pendingCauses: 0,
+                totalAmount: totalDonated,
               });
             } else {
               console.error('Error fetching donor statistics, status:', response.status);
@@ -362,7 +378,8 @@ export default function DashboardPage() {
                 totalUsers: 0,
                 totalCauses: 0,
                 totalDonations: 0,
-                pendingCauses: 0
+                pendingCauses: 0,
+                totalAmount: 0,
               });
             }
           } catch (error) {
@@ -371,7 +388,8 @@ export default function DashboardPage() {
               totalUsers: 0,
               totalCauses: 0,
               totalDonations: 0,
-              pendingCauses: 0
+              pendingCauses: 0,
+              totalAmount: 0,
             });
           }
         } else {
@@ -381,7 +399,8 @@ export default function DashboardPage() {
             totalUsers: 0,
             totalCauses: 0,
             totalDonations: 0,
-            pendingCauses: 0
+            pendingCauses: 0,
+            totalAmount: 0,
           });
         }
       } finally {
@@ -432,36 +451,19 @@ export default function DashboardPage() {
                 title="Donaciones" 
                 value={isLoading ? '...' : stats.totalDonations} 
                 icon={<DonationsIcon />} 
+                color="bg-yellow-50" 
+              />
+              <QuickStat 
+                title="Monto Total" 
+                value={isLoading ? '...' : formatCurrency(stats.totalAmount || 0)} 
+                icon={<MoneyIcon />} 
                 color="bg-purple-50" 
               />
               <QuickStat 
                 title="Causas Pendientes" 
                 value={isLoading ? '...' : stats.pendingCauses} 
-                icon={<CreateIcon />} 
-                color="bg-yellow-50" 
-              />
-            </>
-          )}
-
-          {user?.role === 'BENEFICIARY' && (
-            <>
-              <QuickStat 
-                title="Mis Causas" 
-                value={isLoading ? '...' : stats.totalCauses} 
-                icon={<CausesIcon />} 
-                color="bg-green-50" 
-              />
-              <QuickStat 
-                title="Donaciones Recibidas" 
-                value={isLoading ? '...' : stats.totalDonations} 
-                icon={<DonationsIcon />} 
-                color="bg-purple-50" 
-              />
-              <QuickStat 
-                title="Causas Pendientes" 
-                value={isLoading ? '...' : stats.pendingCauses} 
-                icon={<CreateIcon />} 
-                color="bg-yellow-50" 
+                icon={<PendingIcon />} 
+                color="bg-red-50" 
               />
               <QuickStat 
                 title="Recaudación Estimada" 

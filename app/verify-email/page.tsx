@@ -6,7 +6,7 @@ import { Mail } from 'lucide-react';
 
 export default function VerifyEmailPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[#ECECE2] container mx-auto px-4">
+    <div className="flex min-h-screen flex-col bg-gray-100 container mx-auto px-4">
       <main className="flex-1 py-10">
         <BrutalSection variant="alt" className="py-10">
           <div className="container mx-auto px-4">

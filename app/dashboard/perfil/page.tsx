@@ -41,7 +41,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/auth/login');
+      router.push('/login');
     } else {
       // Cargar el perfil del usuario cuando el componente se monta
       fetchUserProfile();
