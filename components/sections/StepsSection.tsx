@@ -10,7 +10,7 @@ interface Step {
 
 const StepsSection = () => {
   return (
-    <BrutalSection variant="default">
+    <BrutalSection variant="alt">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
           <BrutalHeading className="text-3xl md:text-4xl">Cómo funciona</BrutalHeading>
