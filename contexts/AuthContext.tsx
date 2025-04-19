@@ -15,6 +15,8 @@ interface User {
   email: string;
   fullName: string;
   role: string;
+  profilePicture?: string;
+  verified?: boolean;
 }
 
 interface AuthContextType {
@@ -24,6 +26,7 @@ interface AuthContextType {
   login: (token: string, userData: User) => void;
   logout: () => Promise<void>;
   getToken: () => Promise<string | null>;
+  updateUserData: (userData: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -36,6 +39,7 @@ const AuthContext = createContext<AuthContextType>({
     console.warn('getToken() called outside AuthProvider');
     return null;
   },
+  updateUserData: () => console.warn('updateUserData() called outside AuthProvider'),
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -184,7 +188,96 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const getToken = async (): Promise<string | null> => {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('auth_token');
+    
+    const token = localStorage.getItem('auth_token');
+    
+    // Verificar si el token existe y tiene un formato válido
+    if (token) {
+      try {
+        // Verificar si el token tiene el formato correcto (xxx.yyy.zzz)
+        const parts = token.split('.');
+        if (parts.length !== 3) {
+          console.warn('Token con formato inválido, intentando refrescar...');
+          return await refreshToken();
+        }
+        
+        // Verificar si el token está expirado
+        try {
+          const payload = JSON.parse(atob(parts[1]));
+          const expiry = payload.exp * 1000; // Convertir a milisegundos
+          
+          if (Date.now() >= expiry) {
+            console.warn('Token expirado, intentando refrescar...');
+            return await refreshToken();
+          }
+        } catch (e) {
+          console.warn('Error al decodificar el token:', e);
+        }
+        
+        return token;
+      } catch (e) {
+        console.error('Error al procesar el token:', e);
+        return token; // Devolver el token original en caso de error
+      }
+    }
+    
+    return null;
+  };
+
+  const refreshToken = async (): Promise<string | null> => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
+      if (!apiUrl) return null;
+      
+      const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
+      const currentToken = localStorage.getItem('auth_token');
+      
+      if (!currentToken) return null;
+      
+      console.log('Intentando refrescar el token...');
+      
+      const response = await fetch(`${baseUrl}auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${currentToken}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.access_token) {
+          localStorage.setItem('auth_token', data.access_token);
+          console.log('Token refrescado correctamente');
+          return data.access_token;
+        }
+      } else {
+        console.warn('No se pudo refrescar el token, código:', response.status);
+      }
+      
+      return currentToken; // Devolver el token original si no se pudo refrescar
+    } catch (e) {
+      console.error('Error al refrescar el token:', e);
+      return localStorage.getItem('auth_token'); // Devolver el token original en caso de error
+    }
+  };
+
+  const updateUserData = (userData: Partial<User>) => {
+    if (typeof window === 'undefined' || !user) return;
+    
+    try {
+      // Actualizar el estado del usuario con los nuevos datos
+      const updatedUser = { ...user, ...userData };
+      setUser(updatedUser);
+      
+      // Actualizar los datos en localStorage
+      localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+      
+      console.log('Datos de usuario actualizados:', updatedUser);
+    } catch (err) {
+      console.error('Error al actualizar datos de usuario:', err);
+    }
   };
 
   const value = useMemo(
@@ -195,6 +288,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       login,
       logout,
       getToken,
+      updateUserData,
     }),
     [user, isLoading]
   );

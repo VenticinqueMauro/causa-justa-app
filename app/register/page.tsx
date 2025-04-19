@@ -6,7 +6,7 @@ import BrutalSection from '@/components/ui/BrutalSection';
 
 export default function RegisterPage() {
   return (
-    <div className="flex min-h-screen flex-col container mx-auto px-4">
+    <div className="flex min-h-screen flex-col bg-gray-100 mx-auto px-4">
       <main className="flex-1 py-10">
         <BrutalSection variant="alt" className="py-10">
           <div className="container mx-auto px-4">

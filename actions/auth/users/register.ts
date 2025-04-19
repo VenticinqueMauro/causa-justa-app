@@ -21,7 +21,7 @@ export async function registerUser(formData: RegisterData) {
         const data = await response.json();
         console.log('Usuario registrado correctamente:', data);
 
-        redirect('/auth/login');
+        redirect('/login');
     } catch (error) {
         console.error('Error al conectar con la API:', error);
         return { error: 'Error de conexión con el servidor.' };
