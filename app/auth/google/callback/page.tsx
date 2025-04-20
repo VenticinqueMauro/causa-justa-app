@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/Toast';
 
-export default function GoogleCallbackPage() {
+function GoogleCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
@@ -106,5 +106,25 @@ export default function GoogleCallbackPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Componente principal que envuelve el contenido en Suspense
+export default function GoogleCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white border-2 border-[#002C5B] p-6 shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]">
+            <h1 className="text-2xl font-bold text-[#002C5B] mb-4 text-center">Cargando...</h1>
+            <div className="flex justify-center mb-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#002C5B]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <GoogleCallbackContent />
+    </Suspense>
   );
 }
