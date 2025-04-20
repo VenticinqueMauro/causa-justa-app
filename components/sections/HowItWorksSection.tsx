@@ -28,7 +28,7 @@ const HowItWorksSection = () => {
   ];
 
   return (
-    <BrutalSection>
+    <BrutalSection >
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
           <BrutalHeading className="text-3xl md:text-4xl">Cómo funciona</BrutalHeading>
