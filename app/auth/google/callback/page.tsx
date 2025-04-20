@@ -9,13 +9,20 @@ function GoogleCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
-  const { showToast } = useToast();
+  // Eliminamos la dependencia de useToast para evitar posibles bucles
   const [isProcessing, setIsProcessing] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [processed, setProcessed] = useState(false); // Flag para evitar procesamiento múltiple
 
   useEffect(() => {
+    // Evitar procesamiento múltiple
+    if (processed) return;
+
     async function processCallback() {
       try {
+        // Marcar como procesado para evitar múltiples ejecuciones
+        setProcessed(true);
+        
         // Extraer token y needsRoleSelection de los parámetros de URL
         const token = searchParams.get('token');
         const needsRoleSelection = searchParams.get('needsRoleSelection') === 'true';
@@ -26,31 +33,53 @@ function GoogleCallbackContent() {
           return;
         }
 
+        console.log('Procesando token de autenticación');
+
         // Obtener información del usuario desde el token
         try {
           // Decodificar el payload del JWT (segunda parte del token)
           const payload = JSON.parse(atob(token.split('.')[1]));
           
+          // Depuración detallada del payload
+          console.log('===== DEPURACIÓN INFORMACIÓN DE USUARIO =====');
+          console.log('Payload completo:', payload);
+          console.log('Propiedades del payload:');
+          for (const key in payload) {
+            console.log(`${key}: ${JSON.stringify(payload[key])}`);
+          }
+          console.log('Tipo de payload.name:', typeof payload.name);
+          console.log('Valor de payload.name:', payload.name);
+          console.log('Tipo de payload.email:', typeof payload.email);
+          console.log('Valor de payload.email:', payload.email);
+          console.log('===========================================');
+          
           // Crear objeto de usuario a partir del payload del token
           const userData = {
             id: payload.sub,
             email: payload.email,
-            fullName: payload.name || '',
+            // Usar el email como nombre por defecto si no hay nombre
+            fullName: payload.name || payload.email.split('@')[0] || '',
             role: payload.role || 'DONOR',
             verified: payload.verified || false,
             profilePicture: payload.profilePicture || null
           };
 
+          console.log('Datos de usuario extraídos del token:', userData);
+          
           // Actualizar el contexto de autenticación
           login(token, userData);
           
           // Guardar información temporal si se necesita selección de rol
           if (needsRoleSelection) {
+            console.log('Redirigiendo a selección de rol');
             sessionStorage.setItem('googleUserData', JSON.stringify(userData));
-            router.push('/auth/google/role-selection');
+            
+            // Usar window.location.href para evitar problemas con el router de Next.js
+            window.location.href = '/auth/google/role-selection';
           } else {
-            // Redirigir a la página principal o dashboard
-            router.push('/');
+            console.log('Redirigiendo a página principal');
+            // Usar window.location.href para evitar problemas con el router de Next.js
+            window.location.href = '/';
           }
         } catch (decodeError) {
           console.error('Error al decodificar el token:', decodeError);
@@ -65,7 +94,7 @@ function GoogleCallbackContent() {
     }
 
     processCallback();
-  }, [searchParams, login, router, showToast]);
+  }, [searchParams, login, router, processed]); // Eliminamos showToast y agregamos processed
 
   if (error) {
     return (

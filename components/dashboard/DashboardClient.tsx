@@ -14,39 +14,9 @@ const DashboardIcon = () => (
   </svg>
 );
 
-const CausesIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-  </svg>
-);
-
-const CreateIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-  </svg>
-);
-
-const DonationsIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-  </svg>
-);
-
 const UsersIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-  </svg>
-);
-
-const StatsIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-  </svg>
-);
-
-const ProfileIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
   </svg>
 );
 
@@ -73,10 +43,17 @@ export default function DashboardClient({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/login');
+    if (!isLoading) {
+      // Redirigir a login si no está autenticado
+      if (!isAuthenticated) {
+        router.push('/login');
+      }
+      // Redirigir a la página principal si es DONOR
+      else if (user?.role === 'DONOR') {
+        router.push('/');
+      }
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, user, router]);
 
   // Cerrar sidebar en dispositivos móviles al cambiar de ruta
   useEffect(() => {
@@ -93,6 +70,22 @@ export default function DashboardClient({
 
   if (!isAuthenticated || !user) {
     return null; // No renderizar nada mientras redirige
+  }
+  
+  // Mostrar mensaje de redirección para usuarios DONOR
+  if (user.role === 'DONOR') {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 flex-col p-6">
+        <div className="bg-white rounded-lg shadow-md p-8 max-w-md text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Acceso no disponible</h2>
+          <p className="text-gray-600 mb-6">
+            El panel de administración no está disponible para usuarios donantes. 
+            Estás siendo redirigido a la página principal donde podrás ver y apoyar causas.
+          </p>
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary mx-auto"></div>
+        </div>
+      </div>
+    );
   }
 
   const handleLogout = async () => {

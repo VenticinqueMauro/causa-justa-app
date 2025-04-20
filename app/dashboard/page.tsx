@@ -319,61 +319,75 @@ export default function DashboardPage() {
               totalAmount: 0,
             });
           }
-        } 
-        // Para DONOR, obtener estadísticas del donante
+        }
+        // Para DONOR, obtener estadísticas del donante o usar valores por defecto si el endpoint no está disponible
         else if (user.role === 'DONOR') {
           try {
-            const url = `${baseUrl}donations/made`;
-            console.log('Fetching from URL:', url);
+            // Obtener las donaciones realizadas
+            const donationsUrl = `${baseUrl}donations/made`;
             
-            const response = await fetch(url, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-            });
+            console.log('Fetching from URL:', donationsUrl);
             
-            console.log('Response status:', response.status);
-            
-            if (response.ok) {
-              const data = await response.json();
-              console.log('Received data:', data);
-              
-              // Verificar si data tiene una propiedad items
-              const donations = Array.isArray(data) ? data : 
-                               (data.items ? data.items : []);
-              
-              // Calcular estadísticas del donante
-              const totalDonated = donations.reduce((sum: number, donation: any) => sum + donation.amount, 0);
-              const uniqueCampaignsSet = new Set(
-                donations.map((donation: any) => {
-                  return donation.campaign?.id || donation.campaignId || 'unknown';
-                })
-              );
-              const uniqueCampaigns = uniqueCampaignsSet.size;
-              
-              console.log('Processed stats:', { 
-                totalDonated, 
-                uniqueCampaigns, 
-                totalDonations: donations.length 
+            try {
+              const donationsResponse = await fetch(donationsUrl, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
               });
               
-              setStats({
-                totalUsers: 0,
-                totalCauses: uniqueCampaigns,
-                totalDonations: donations.length,
-                pendingCauses: 0,
-                totalAmount: totalDonated,
-              });
-            } else {
-              console.error('Error fetching donor statistics, status:', response.status);
-              try {
-                const errorData = await response.text();
-                console.error('Error response:', errorData);
-              } catch (e) {
-                console.error('Could not parse error response');
+              if (donationsResponse.ok) {
+                const donationsData = await donationsResponse.json();
+                
+                console.log('Received donations data:', donationsData);
+                
+                // Extraer información de donaciones
+                const totalDonations = donationsData.length || 0;
+                
+                // Calcular el monto total donado
+                const totalAmount = donationsData.reduce((sum: number, donation: any) => sum + (donation.amount || 0), 0);
+                
+                // Calcular causas únicas apoyadas
+                const uniqueCauses = new Set(donationsData.map((donation: any) => donation.campaignId));
+                const causesSupported = uniqueCauses.size;
+                
+                // Calcular causas activas (esto podría requerir otro endpoint)
+                const activeCauses = causesSupported; // Por ahora asumimos que todas están activas
+                
+                console.log('Processed donor stats:', { 
+                  totalDonations, 
+                  totalAmount,
+                  causesSupported,
+                  activeCauses
+                });
+                
+                setStats({
+                  totalUsers: 0,
+                  totalCauses: causesSupported,
+                  totalDonations: totalDonations,
+                  pendingCauses: activeCauses,
+                  totalAmount: totalAmount,
+                });
+              } else {
+                // Si el endpoint no está disponible (404), usar valores por defecto sin mostrar error
+                if (donationsResponse.status === 404) {
+                  console.log('Donations endpoint not available yet, using default values');
+                } else {
+                  console.error('Error fetching donor statistics, status:', donationsResponse.status);
+                }
+                
+                // Establecer valores por defecto
+                setStats({
+                  totalUsers: 0,
+                  totalCauses: 0,
+                  totalDonations: 0,
+                  pendingCauses: 0,
+                  totalAmount: 0,
+                });
               }
-              
+            } catch (fetchError) {
+              // Manejar errores de red o CORS sin mostrar error en la consola
+              console.log('Donations endpoint not available yet, using default values');
               setStats({
                 totalUsers: 0,
                 totalCauses: 0,
@@ -383,7 +397,9 @@ export default function DashboardPage() {
               });
             }
           } catch (error) {
-            console.error('Error fetching donor data:', error);
+            console.log('Using default values for donor statistics');
+            
+            // Establecer valores por defecto
             setStats({
               totalUsers: 0,
               totalCauses: 0,
