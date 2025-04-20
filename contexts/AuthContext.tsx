@@ -111,6 +111,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 setUser(userData);
                 // Actualizar datos en localStorage
                 localStorage.setItem('auth_user', JSON.stringify(userData));
+                // Actualizar cookies para el middleware
+                document.cookie = `token=${token}; path=/; max-age=2592000`; // 30 días
+                document.cookie = `auth_user=${JSON.stringify(userData)}; path=/; max-age=2592000`;
               } catch (parseError) {
                 console.error('Error parsing user data:', parseError);
                 // Usar datos almacenados si hay error de parsing
@@ -152,8 +155,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = (token: string, userData: User) => {
     if (typeof window === 'undefined') return;
     try {
+      // Guardar en localStorage
       localStorage.setItem('auth_token', token);
       localStorage.setItem('auth_user', JSON.stringify(userData));
+      
+      // Establecer cookies para el middleware
+      document.cookie = `token=${token}; path=/; max-age=2592000`; // 30 días
+      document.cookie = `auth_user=${JSON.stringify(userData)}; path=/; max-age=2592000`;
+      
       setUser(userData);
       router.refresh();
     } catch (err) {
@@ -178,8 +187,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (err) {
       console.warn('Logout request failed:', err);
     } finally {
+      // Eliminar de localStorage
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
+      
+      // Eliminar cookies
+      document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+      document.cookie = 'auth_user=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+      
       setUser(null);
       setIsLoading(false);
       router.push('/login');
