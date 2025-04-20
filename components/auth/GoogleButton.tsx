@@ -6,8 +6,15 @@ export default function GoogleButton({ text = "Continuar con Google" }) {
     const router = useRouter();
 
     const handleGoogleAuth = () => {
-        // Redirigir al backend para iniciar OAuth
-        window.location.href = `${process.env.NEXT_PUBLIC_NEST_API_URL}auth/google`;
+        // Obtener la URL base del frontend para el callback
+        const baseUrl = window.location.origin;
+        const callbackUrl = `${baseUrl}/auth/google/callback`;
+        
+        // Codificar la URL de callback para pasarla como parámetro
+        const encodedCallback = encodeURIComponent(callbackUrl);
+        
+        // Redirigir al backend para iniciar OAuth incluyendo la URL de callback
+        window.location.href = `${process.env.NEXT_PUBLIC_NEST_API_URL}auth/google?callbackUrl=${encodedCallback}`;
     };
 
     return (
