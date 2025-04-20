@@ -108,6 +108,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (text) {
               try {
                 const userData: User = JSON.parse(text);
+                
+                // Asegurarse de que profilePicture sea una URL completa si existe
+                if (userData.profilePicture && !userData.profilePicture.startsWith('http')) {
+                  const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL || '';
+                  const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
+                  userData.profilePicture = `${baseUrl}${userData.profilePicture.startsWith('/') ? userData.profilePicture.substring(1) : userData.profilePicture}`;
+                }
+                
                 setUser(userData);
                 // Actualizar datos en localStorage
                 localStorage.setItem('auth_user', JSON.stringify(userData));
@@ -154,20 +162,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = (token: string, userData: User) => {
     if (typeof window === 'undefined') return;
-    try {
-      // Guardar en localStorage
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('auth_user', JSON.stringify(userData));
-      
-      // Establecer cookies para el middleware
-      document.cookie = `token=${token}; path=/; max-age=2592000`; // 30 días
-      document.cookie = `auth_user=${JSON.stringify(userData)}; path=/; max-age=2592000`;
-      
-      setUser(userData);
-      router.refresh();
-    } catch (err) {
-      console.error('Login error:', err);
+    
+    // Asegurarse de que profilePicture sea una URL completa si existe
+    if (userData.profilePicture && !userData.profilePicture.startsWith('http')) {
+      const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL || '';
+      const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
+      userData.profilePicture = `${baseUrl}${userData.profilePicture.startsWith('/') ? userData.profilePicture.substring(1) : userData.profilePicture}`;
     }
+    
+    localStorage.setItem('auth_token', token);
+    localStorage.setItem('auth_user', JSON.stringify(userData));
+    
+    // Establecer cookies para el middleware
+    document.cookie = `token=${token}; path=/; max-age=2592000`; // 30 días
+    document.cookie = `auth_user=${JSON.stringify(userData)}; path=/; max-age=2592000`;
+    
+    setUser(userData);
+    setIsLoading(false);
   };
 
   const logout = async () => {

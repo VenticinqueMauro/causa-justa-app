@@ -357,7 +357,7 @@ export default function ProfilePage() {
           <div className="flex">
             <div className="flex-shrink-0">
               <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="ml-3">
@@ -376,57 +376,59 @@ export default function ProfilePage() {
               <div className="space-y-4">
                 {/* Foto de perfil */}
                 <div className="flex flex-col items-center mb-6">
-                  <div className="relative">
-                    <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 mb-2">
+                  <div className="relative w-32 h-32 mx-auto mb-4">
+                    <div className="w-full h-full rounded-full border-2 border-[#002C5B] overflow-hidden bg-white">
                       {profilePicture ? (
-                        <>
-                          {/* Mostrar la imagen con un fallback en caso de error */}
-                          {console.log('Renderizando imagen con URL:', profilePicture)}
-                          <img 
-                            src={profilePicture} 
-                            alt="Foto de perfil" 
-                            className="w-full h-full object-cover"
-                            onLoad={() => console.log('Imagen cargada exitosamente')}
-                            onError={(e) => {
-                              console.error('Error al cargar la imagen de perfil:', e);
-                              console.error('URL que falló:', profilePicture);
-                              
-                              // Intentar agregar el prefijo de API si la URL es relativa
-                              if (profilePicture && !profilePicture.startsWith('http')) {
-                                const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL || '';
-                                const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
-                                const fullUrl = `${baseUrl}${profilePicture.startsWith('/') ? profilePicture.substring(1) : profilePicture}`;
-                                console.log('Intentando con URL completa:', fullUrl);
-                                
-                                // Crear una nueva imagen con la URL completa
-                                const img = new Image();
-                                img.onload = () => {
-                                  console.log('URL completa cargada correctamente');
-                                  setProfilePicture(fullUrl);
-                                };
-                                img.onerror = () => {
-                                  console.error('También falló con URL completa');
-                                  // Si también falla, mostrar el avatar por defecto
-                                  setProfilePicture(null);
-                                };
-                                img.src = fullUrl;
-                              } else {
-                                // Si ya es una URL completa o no se puede arreglar, mostrar avatar por defecto
-                                setProfilePicture(null);
-                              }
-                            }}
-                          />
-                        </>
+                        <img
+                          src={profilePicture}
+                          alt="Foto de perfil"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            // Si hay error al cargar la imagen, mostrar icono por defecto
+                            e.currentTarget.style.display = 'none';
+                            const parent = e.currentTarget.parentElement;
+                            if (parent) {
+                              const icon = document.createElement('div');
+                              icon.className = 'w-full h-full flex items-center justify-center bg-gray-100';
+                              icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#002C5B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+                              parent.appendChild(icon);
+                            }
+                          }}
+                        />
+                      ) : form.profilePicture ? (
+                        <img
+                          src={form.profilePicture}
+                          alt="Foto de perfil"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            // Si hay error al cargar la imagen, mostrar icono por defecto
+                            e.currentTarget.style.display = 'none';
+                            const parent = e.currentTarget.parentElement;
+                            if (parent) {
+                              const icon = document.createElement('div');
+                              icon.className = 'w-full h-full flex items-center justify-center bg-gray-100';
+                              icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#002C5B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+                              parent.appendChild(icon);
+                            }
+                          }}
+                        />
                       ) : (
-                        <>
-                          {/* Si no hay profilePicture, mostrar avatar por defecto */}
-                          {console.log('Renderizando avatar por defecto porque profilePicture es:', profilePicture)}
-                          <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
-                            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                          </div>
-                        </>
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="48"
+                            height="48"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#002C5B"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                          </svg>
+                        </div>
                       )}
                     </div>
                     <label htmlFor="profile-picture" className="absolute bottom-0 right-0 bg-gray-700 text-white rounded-full p-1 cursor-pointer hover:bg-gray-600 transition-colors">
