@@ -1,5 +1,6 @@
 import React from "react";
-import { Campaign, CampaignCategory, CampaignStatus } from "@/types/campaign";
+import { Campaign } from "@/types/campaign";
+import { CampaignCategory, CampaignStatus } from "@/types/enums";
 
 export const campaigns: Campaign[] = [
   {
