@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AlertCircle, PlusCircle, X, ArrowRight } from 'lucide-react';
 import BrutalButton from '@/components/ui/BrutalButton';
 import { useToast } from '@/components/ui/Toast';
+import { UserRole } from '@/types/enums';
 
 type StartCauseButtonProps = {
   variant?: 'primary' | 'secondary' | 'outline' | 'white' | 'dark';
@@ -144,7 +145,7 @@ export default function StartCauseButton({
     console.log('Datos del usuario:', { isAuthenticated, user });
     
     // Paso 1: Verificar si está logeado
-    if (!isAuthenticated || !user) {
+    if (!isAuthenticated || !user || user?.role !== UserRole.BENEFICIARY) {
       console.log('Usuario no autenticado, redirigiendo a login');
       router.push('/login?redirect=create-cause');
       return;
@@ -152,10 +153,10 @@ export default function StartCauseButton({
     
     // Paso 2: Verificar si es BENEFICIARY
     console.log('Rol del usuario:', user.role);
-    if (user.role !== 'BENEFICIARY') {
+    if (user.role !== UserRole.BENEFICIARY) {
       console.log(`Usuario con rol incorrecto: ${user.role}, mostrando error`);
-      if (user.role === 'DONOR') {
-        setErrorMessage(`Solo los beneficiarios pueden iniciar una causa. Tu rol actual es: ${user.role}. ¿Deseas cambiar tu rol a BENEFICIARY?`);
+      if (user.role === UserRole.DONOR) {
+        setErrorMessage(`Solo los beneficiarios pueden iniciar una causa. Tu rol actual es: ${user.role}. ¿Deseas cambiar tu rol a ${UserRole.BENEFICIARY}?`);
         setShowRoleChangeButton(true);
       } else {
         setErrorMessage(`Solo los beneficiarios pueden iniciar una causa. Tu rol actual es: ${user.role}`);
@@ -246,7 +247,7 @@ export default function StartCauseButton({
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ role: 'BENEFICIARY' })
+        body: JSON.stringify({ role: UserRole.BENEFICIARY })
       });
 
       const data = await response.json();
@@ -288,7 +289,7 @@ export default function StartCauseButton({
                 // Usar actualización local como fallback
                 const updatedUserData = {
                   ...user,
-                  role: 'BENEFICIARY'
+                  role: UserRole.BENEFICIARY
                 };
                 // Obtener el refresh token o usar el token de acceso como refresh token si no se proporciona
                 const refreshToken = localStorage.getItem('refresh_token') || token;
@@ -298,7 +299,7 @@ export default function StartCauseButton({
               console.warn('Respuesta vacía de auth/me, usando actualización local');
               const updatedUserData = {
                 ...user,
-                role: 'BENEFICIARY'
+                role: UserRole.BENEFICIARY
               };
               // Obtener el refresh token o usar el token de acceso como refresh token si no se proporciona
               const refreshToken = localStorage.getItem('refresh_token') || token;
@@ -309,7 +310,7 @@ export default function StartCauseButton({
             // Si no se puede obtener la información actualizada, usar la actualización local
             const updatedUserData = {
               ...user,
-              role: 'BENEFICIARY'
+              role: UserRole.BENEFICIARY
             };
             // Obtener el refresh token o usar el token de acceso como refresh token si no se proporciona
             const refreshToken = localStorage.getItem('refresh_token') || token;
@@ -320,7 +321,7 @@ export default function StartCauseButton({
           // Fallback a actualización local
           const updatedUserData = {
             ...user,
-            role: 'BENEFICIARY'
+            role: UserRole.BENEFICIARY
           };
           // Obtener el refresh token o usar el token de acceso como refresh token si no se proporciona
           const refreshToken = localStorage.getItem('refresh_token') || token;

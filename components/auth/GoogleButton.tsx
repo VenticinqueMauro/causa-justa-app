@@ -21,7 +21,7 @@ export default function GoogleButton({ text = "Continuar con Google" }) {
         <button
             type="button"
             onClick={handleGoogleAuth}
-            className="w-full flex items-center justify-center gap-1 md:gap-2 py-2 px-4 border-2 border-[#002C5B] bg-white text-[#002C5B] font-medium shadow-[3px_3px_0_0_rgba(0,44,91,0.8)] hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none transition-all cursor-pointer"
+            className="w-full flex items-center justify-center gap-1 md:gap-2 py-2 px-4 border-2 border-[#002C5B] bg-white text-[#002C5B] font-medium shadow-[3px_3px_0_0_rgba(0,44,91,0.8)] hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none transition-all cursor-pointer truncate"
         >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
