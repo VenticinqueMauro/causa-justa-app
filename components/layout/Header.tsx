@@ -12,9 +12,20 @@ import { useEffect, useRef, useState } from 'react';
 const FloatingStartCauseButton = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const [isAuth, setIsAuth] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  
+  // Usamos un try-catch para manejar el caso donde el contexto no esté disponible
+  useEffect(() => {
+    try {
+      const { isAuthenticated } = useAuth();
+      setIsAuth(isAuthenticated);
+    } catch (error) {
+      console.warn('AuthContext no disponible:', error);
+      setIsAuth(false);
+    }
+  }, []);
 
   if(pathname !== '/'){
     return null;
@@ -50,7 +61,7 @@ const FloatingStartCauseButton = () => {
     }
     
     // Redirigir a la página de creación de causa o login
-    if (!isAuthenticated) {
+    if (!isAuth) {
       router.push('/login?redirect=create-cause');
     } else {
       router.push('/create-cause');
