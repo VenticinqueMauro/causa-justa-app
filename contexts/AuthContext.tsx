@@ -23,7 +23,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (token: string, userData: User) => void;
+  login: (token: string, refreshToken: string, userData: User) => void;
   logout: () => Promise<void>;
   getToken: () => Promise<string | null>;
   updateUserData: (userData: Partial<User>) => void;
@@ -33,7 +33,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
   isLoading: true,
-  login: () => console.warn('login() called outside AuthProvider'),
+  login: (token: string, refreshToken: string, userData: User) => console.warn('login() called outside AuthProvider'),
   logout: async () => console.warn('logout() called outside AuthProvider'),
   getToken: async () => {
     console.warn('getToken() called outside AuthProvider');
@@ -160,25 +160,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   }, [router]);
 
-  const login = (token: string, userData: User) => {
+  const login = (token: string, refreshToken: string, userData: User) => {
     if (typeof window === 'undefined') return;
     
-    // Asegurarse de que profilePicture sea una URL completa si existe
-    if (userData.profilePicture && !userData.profilePicture.startsWith('http')) {
-      const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL || '';
-      const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
-      userData.profilePicture = `${baseUrl}${userData.profilePicture.startsWith('/') ? userData.profilePicture.substring(1) : userData.profilePicture}`;
+    try {
+      // Guardar tokens en localStorage
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('refresh_token', refreshToken);
+      
+      // Guardar el usuario en localStorage
+      localStorage.setItem('auth_user', JSON.stringify(userData));
+      
+      // Establecer cookies para que el middleware pueda verificar la autenticación
+      document.cookie = `token=${token}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `refresh_token=${refreshToken}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `auth_user=${JSON.stringify(userData)}; path=/; max-age=86400; SameSite=Lax`;
+      
+      // Actualizar el estado
+      setUser(userData);
+      setIsLoading(false);
+      
+      console.log('Usuario autenticado:', userData.fullName);
+    } catch (err) {
+      console.error('Error during login:', err);
     }
-    
-    localStorage.setItem('auth_token', token);
-    localStorage.setItem('auth_user', JSON.stringify(userData));
-    
-    // Establecer cookies para el middleware
-    document.cookie = `token=${token}; path=/; max-age=2592000`; // 30 días
-    document.cookie = `auth_user=${JSON.stringify(userData)}; path=/; max-age=2592000`;
-    
-    setUser(userData);
-    setIsLoading(false);
   };
 
   const logout = async () => {
@@ -200,10 +205,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       // Eliminar de localStorage
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
       localStorage.removeItem('auth_user');
       
       // Eliminar cookies
       document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+      document.cookie = 'refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
       document.cookie = 'auth_user=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
       
       setUser(null);
@@ -256,33 +263,56 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!apiUrl) return null;
       
       const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
-      const currentToken = localStorage.getItem('auth_token');
+      const currentRefreshToken = localStorage.getItem('refresh_token');
       
-      if (!currentToken) return null;
+      if (!currentRefreshToken) {
+        console.warn('No hay refresh token disponible');
+        return null;
+      }
       
       console.log('Intentando refrescar el token...');
       
       const response = await fetch(`${baseUrl}auth/refresh`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${currentToken}`,
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          refresh_token: currentRefreshToken
+        }),
         credentials: 'include',
       });
       
       if (response.ok) {
         const data = await response.json();
         if (data.access_token) {
+          // Guardar el nuevo token de acceso
           localStorage.setItem('auth_token', data.access_token);
+          
+          // Si también se devuelve un nuevo refresh token, guardarlo
+          if (data.refresh_token) {
+            localStorage.setItem('refresh_token', data.refresh_token);
+            document.cookie = `refresh_token=${data.refresh_token}; path=/; max-age=86400; SameSite=Lax`;
+          }
+          
+          // Actualizar la cookie del token de acceso
+          document.cookie = `token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
+          
           console.log('Token refrescado correctamente');
           return data.access_token;
         }
       } else {
         console.warn('No se pudo refrescar el token, código:', response.status);
+        
+        // Si el refresh token es inválido o ha expirado, limpiar todo
+        if (response.status === 401 || response.status === 403) {
+          console.warn('Refresh token inválido o expirado, cerrando sesión...');
+          await logout();
+          return null;
+        }
       }
       
-      return currentToken; // Devolver el token original si no se pudo refrescar
+      return localStorage.getItem('auth_token'); // Devolver el token original si no se pudo refrescar
     } catch (e) {
       console.error('Error al refrescar el token:', e);
       return localStorage.getItem('auth_token'); // Devolver el token original en caso de error

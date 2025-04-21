@@ -39,8 +39,11 @@ function GoogleRedirectContent() {
                         // Guardar información temporal del usuario para la selección de rol
                         sessionStorage.setItem('googleUserData', JSON.stringify(data.user));
                         
-                        // Actualizar el contexto de autenticación
-                        login(data.access_token, data.user);
+                        // Obtener el refresh token del backend o usar el access token como refresh token si no se proporciona
+                        const refreshToken = data.refresh_token || data.access_token;
+                        
+                        // Actualizar el contexto de autenticación con el token y refresh token
+                        login(data.access_token, refreshToken, data.user);
                     }
 
                     // Verificar si el usuario necesita seleccionar un rol

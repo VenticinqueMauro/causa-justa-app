@@ -117,8 +117,11 @@ export default function MyCausesPage() {
         // Esta sincronización es clave para resolver el error 403 Forbidden
         document.cookie = `token=${freshToken}; path=/; max-age=86400; SameSite=Lax`;
         
-        // También sincronizar la cookie 'auth_token' que podría estar usando el backend
-        document.cookie = `auth_token=${freshToken}; path=/; max-age=86400; SameSite=Lax`;
+        // Asegurarse de que el refresh token también esté sincronizado en cookies
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (refreshToken) {
+          document.cookie = `refresh_token=${refreshToken}; path=/; max-age=86400; SameSite=Lax`;
+        }
         
         // Esperar un momento para que la cookie se establezca correctamente
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -161,13 +164,25 @@ export default function MyCausesPage() {
               const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
               const baseUrl = apiUrl?.endsWith('/') ? apiUrl : `${apiUrl}/`;
               
+              // Obtener el refresh token
+              const refreshToken = localStorage.getItem('refresh_token');
+              
+              if (!refreshToken) {
+                console.error('No hay refresh token disponible');
+                throw new Error('No hay refresh token disponible');
+              }
+              
+              console.log('Intentando refrescar el token con refresh_token...');
+              
               // Intentar refrescar el token
               const refreshResponse = await fetch(`${baseUrl}auth/refresh`, {
                 method: 'POST',
                 headers: {
-                  'Authorization': `Bearer ${freshToken}`,
                   'Content-Type': 'application/json',
                 },
+                body: JSON.stringify({
+                  refresh_token: refreshToken
+                }),
                 credentials: 'include',
               });
               
@@ -177,9 +192,14 @@ export default function MyCausesPage() {
                   // Guardar el nuevo token en localStorage
                   localStorage.setItem('auth_token', refreshData.access_token);
                   
+                  // Si también se devuelve un nuevo refresh token, guardarlo
+                  if (refreshData.refresh_token) {
+                    localStorage.setItem('refresh_token', refreshData.refresh_token);
+                    document.cookie = `refresh_token=${refreshData.refresh_token}; path=/; max-age=86400; SameSite=Lax`;
+                  }
+                  
                   // Sincronizar con cookies
                   document.cookie = `token=${refreshData.access_token}; path=/; max-age=86400; SameSite=Lax`;
-                  document.cookie = `auth_token=${refreshData.access_token}; path=/; max-age=86400; SameSite=Lax`;
                   
                   console.log('Token refrescado correctamente, reintentando solicitud...');
                   showToast('Reautenticando, por favor espera...', 'info');

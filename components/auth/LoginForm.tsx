@@ -60,8 +60,11 @@ export default function LoginForm() {
           localStorage.setItem('token', formState.data.access_token);
           console.log('Token guardado en localStorage');
           
-          // Actualizar el contexto de autenticación
-          login(formState.data.access_token, formState.data.user);
+          // Obtener el refresh token del backend o usar el access token como refresh token si no se proporciona
+          const refreshToken = formState.data.refresh_token || formState.data.access_token;
+          
+          // Actualizar el contexto de autenticación con el token y refresh token
+          login(formState.data.access_token, refreshToken, formState.data.user);
           
           // Redirigir al usuario a la página principal después de un inicio de sesión exitoso
           setTimeout(() => {

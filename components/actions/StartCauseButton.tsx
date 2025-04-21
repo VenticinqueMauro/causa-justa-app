@@ -280,7 +280,9 @@ export default function StartCauseButton({
               try {
                 const userData = JSON.parse(responseText);
                 // Actualizar el contexto con los datos actualizados del backend
-                login(token, userData);
+                // Obtener el refresh token o usar el token de acceso como refresh token si no se proporciona
+                const refreshToken = localStorage.getItem('refresh_token') || token;
+                login(token, refreshToken, userData);
               } catch (jsonError) {
                 console.error('Error al parsear respuesta JSON:', jsonError);
                 // Usar actualización local como fallback
@@ -288,7 +290,9 @@ export default function StartCauseButton({
                   ...user,
                   role: 'BENEFICIARY'
                 };
-                login(token, updatedUserData);
+                // Obtener el refresh token o usar el token de acceso como refresh token si no se proporciona
+                const refreshToken = localStorage.getItem('refresh_token') || token;
+                login(token, refreshToken, updatedUserData);
               }
             } else {
               console.warn('Respuesta vacía de auth/me, usando actualización local');
@@ -296,7 +300,9 @@ export default function StartCauseButton({
                 ...user,
                 role: 'BENEFICIARY'
               };
-              login(token, updatedUserData);
+              // Obtener el refresh token o usar el token de acceso como refresh token si no se proporciona
+              const refreshToken = localStorage.getItem('refresh_token') || token;
+              login(token, refreshToken, updatedUserData);
             }
           } else {
             console.warn(`Error en auth/me (${userResponse.status}): ${userResponse.statusText}`);
@@ -305,7 +311,9 @@ export default function StartCauseButton({
               ...user,
               role: 'BENEFICIARY'
             };
-            login(token, updatedUserData);
+            // Obtener el refresh token o usar el token de acceso como refresh token si no se proporciona
+            const refreshToken = localStorage.getItem('refresh_token') || token;
+            login(token, refreshToken, updatedUserData);
           }
         } catch (userError) {
           console.error('Error al obtener datos actualizados del usuario:', userError);
@@ -314,7 +322,9 @@ export default function StartCauseButton({
             ...user,
             role: 'BENEFICIARY'
           };
-          login(token, updatedUserData);
+          // Obtener el refresh token o usar el token de acceso como refresh token si no se proporciona
+          const refreshToken = localStorage.getItem('refresh_token') || token;
+          login(token, refreshToken, updatedUserData);
         }
       }
       

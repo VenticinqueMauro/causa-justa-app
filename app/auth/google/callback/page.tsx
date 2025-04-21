@@ -66,8 +66,11 @@ function GoogleCallbackContent() {
 
           console.log('Datos de usuario extraídos del token:', userData);
           
-          // Actualizar el contexto de autenticación
-          login(token, userData);
+          // Extraer refresh token si está presente en los parámetros
+          const refreshToken = searchParams.get('refresh_token') || token; // Usar el token como refresh token si no se proporciona uno específico
+          
+          // Actualizar el contexto de autenticación con el token y refresh token
+          login(token, refreshToken, userData);
           
           // Guardar información temporal si se necesita selección de rol
           if (needsRoleSelection) {

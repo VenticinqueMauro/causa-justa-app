@@ -68,7 +68,11 @@ export default function RoleSelectionPage() {
           ...userData,
           role: role
         };
-        login(token, updatedUserData);
+        // Obtener el refresh token o usar el token de acceso como refresh token si no se proporciona
+        const refreshToken = localStorage.getItem('refresh_token') || token;
+        
+        // Actualizar el contexto de autenticación con el token y refresh token
+        login(token, refreshToken, updatedUserData);
       }
       
       // Limpiar datos temporales
