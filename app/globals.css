@@ -1,6 +1,25 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Tipografía para títulos y botones */
+h1, h2, h3, h4, h5, h6,
+button, .btn, .call-to-action {
+  font-family: 'Nunito', var(--font-nunito), sans-serif;
+  font-weight: 700;
+}
+
+/* Tipografía para texto general */
+body, p, li, a, input, textarea, label, small {
+  font-family: 'Work Sans', var(--font-work-sans), sans-serif;
+  font-weight: 400;
+}
+
+/* Mejorar la suavidad en pantallas */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 button{
     @apply cursor-pointer;
 }

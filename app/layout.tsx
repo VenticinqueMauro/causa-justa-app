@@ -1,13 +1,21 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
+import { Nunito, Work_Sans } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
 import { AuthProvider } from "@/contexts/AuthContext";
 
-// Cargamos Montserrat como fuente principal
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
+// Cargamos Nunito para títulos y botones
+const nunito = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
+  weight: ["600", "700"],
+});
+
+// Cargamos Work Sans para texto general
+const workSans = Work_Sans({
+  variable: "--font-work-sans",
+  subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
@@ -23,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${montserrat.variable} font-sans antialiased`}
+        className={`${nunito.variable} ${workSans.variable} font-sans antialiased`}
       >
         <AuthProvider>
           <ToastProvider>

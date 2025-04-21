@@ -1,17 +1,4 @@
-export enum CampaignCategory {
-  HEALTH = 'HEALTH',
-  EDUCATION = 'EDUCATION',
-  FOOD = 'FOOD',
-  PEOPLE = 'PEOPLE',
-  OTHERS = 'OTHERS'
-}
-
-export enum CampaignStatus {
-  PENDING = 'PENDING',
-  VERIFIED = 'VERIFIED',
-  REJECTED = 'REJECTED',
-  COMPLETED = 'COMPLETED'
-}
+import { CampaignCategory, CampaignStatus } from './enums';
 
 export interface Campaign {
   id?: string;
