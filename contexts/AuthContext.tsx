@@ -9,12 +9,14 @@ import React, {
   ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
+import { UserRole } from '@/types';
 
-interface User {
+// Definición de usuario basada en AuthResponseDto
+export interface User {
   id: string;
   email: string;
   fullName: string;
-  role: string;
+  role: UserRole; // Usando el enum UserRole en lugar de string
   profilePicture?: string;
   verified?: boolean;
 }
@@ -272,13 +274,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       console.log('Intentando refrescar el token...');
       
+      console.log('Enviando refresh token:', currentRefreshToken);
+      
+      // Intentar con el formato refreshToken primero (nuevo formato)
       const response = await fetch(`${baseUrl}auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          refresh_token: currentRefreshToken
+          refreshToken: currentRefreshToken
         }),
         credentials: 'include',
       });

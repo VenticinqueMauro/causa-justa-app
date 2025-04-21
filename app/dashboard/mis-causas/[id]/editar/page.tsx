@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { CampaignCategory } from '@/types';
+import { getCategoryOptions } from '@/utils/campaign-categories';
 import { useToast } from '@/components/ui/Toast';
 import Link from 'next/link';
 
@@ -502,11 +504,11 @@ export default function EditCampaignPage({ params }: { params: Promise<{ id: str
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                   >
                     <option value="">Seleccionar categoría</option>
-                    <option value="HEALTH">Salud</option>
-                    <option value="EDUCATION">Educación</option>
-                    <option value="FOOD">Alimentación</option>
-                    <option value="PEOPLE">Personas</option>
-                    <option value="OTHERS">Otras</option>
+                    {getCategoryOptions().map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>

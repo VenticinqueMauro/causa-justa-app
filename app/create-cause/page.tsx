@@ -9,6 +9,7 @@ import { ArrowLeft, Loader2, ArrowRight, AlertCircle, X } from 'lucide-react';
 import Link from 'next/link';
 import { Toast, useToast } from '@/components/ui/Toast';
 import CampaignForm from '@/components/campaigns/CampaignForm';
+import { UserRole } from '@/types';
 
 export default function CreateCausePage() {
   const { user, isAuthenticated, isLoading: authLoading, getToken, login } = useAuth();
@@ -20,7 +21,61 @@ export default function CreateCausePage() {
   const [showMercadoPagoError, setShowMercadoPagoError] = useState(false);
   const [showRoleChangeModal, setShowRoleChangeModal] = useState(false);
   const [isChangingRole, setIsChangingRole] = useState(false);
+  const [mercadoPagoConnected, setMercadoPagoConnected] = useState(false);
   const { showToast: showGlobalToast } = useToast();
+
+  // Función para verificar el estado de conexión con MercadoPago
+  const checkMercadoPagoStatus = async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      const token = await getToken();
+      if (!token) {
+        console.error('No se encontró token de autenticación');
+        setIsLoading(false);
+        setShowMercadoPagoError(true);
+        return;
+      }
+      
+      const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL || '';
+      const baseUrl = apiUrl?.endsWith('/') ? apiUrl : `${apiUrl}/`;
+      
+      console.log('Verificando estado de MercadoPago con el servidor:', `${baseUrl}mercadopago/status`);
+      console.log('Usando token:', token.substring(0, 10) + '...');
+      
+      const response = await fetch(`${baseUrl}mercadopago/status`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
+      
+      if (!response.ok) {
+        console.error(`Error del servidor (${response.status}):`, response.statusText);
+        setIsLoading(false);
+        setShowMercadoPagoError(true);
+        return;
+      }
+      
+      const data = await response.json();
+      console.log('Respuesta completa de MercadoPago:', JSON.stringify(data, null, 2));
+      
+      // Verificar si está conectado (comprobando todos los posibles formatos de respuesta)
+      const isConnected = data.connected || data.isConnected || false;
+      console.log('¿Está conectado a MercadoPago?', isConnected);
+      
+      // Actualizar el estado sin usar localStorage
+      setMercadoPagoConnected(isConnected);
+      setShowMercadoPagoError(!isConnected);
+      
+    } catch (err) {
+      console.error('Error al verificar estado de MercadoPago:', err);
+      setMercadoPagoConnected(false);
+      setShowMercadoPagoError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Función para verificar requisitos para crear una campaña
   const checkRequirements = async () => {
@@ -40,116 +95,40 @@ export default function CreateCausePage() {
       return;
     }
 
-    // Verificar si el usuario es BENEFICIARY
-    console.log('Rol del usuario:', user.role);
-    if (user.role !== 'BENEFICIARY') {
-      console.log('Usuario no es BENEFICIARY, verificando si es DONOR');
-      
-      if (user.role === 'DONOR') {
-        console.log('Usuario es DONOR, mostrando modal para cambio de rol');
-        setShowRoleChangeModal(true);
-        setIsLoading(false);
-        return;
-      } else {
-        // Para otros roles, mostrar error y redirigir
-        console.log('Usuario tiene un rol que no es DONOR ni BENEFICIARY, mostrando error');
-        setToastMessage('Solo los beneficiarios pueden crear campañas');
+    // Verificar que el usuario tenga el rol de BENEFICIARY
+    if (user.role !== UserRole.BENEFICIARY) {
+      console.log('Usuario no es BENEFICIARY, mostrando modal de cambio de rol');
+      setShowRoleChangeModal(true);
+      setIsLoading(false);
+      return;
+    } else {
+      // Verificar conexión con MercadoPago
+      console.log('Obteniendo token para verificar MercadoPago');
+      const token = await getToken();
+      if (!token) {
+        console.log('No se pudo obtener token, redirigiendo a login');
+        setToastMessage('Error de autenticación. Por favor, inicia sesión nuevamente.');
         setToastType('error');
         setShowToast(true);
         setTimeout(() => {
-          router.push('/');
+          router.push('/login');
         }, 2000);
         return;
       }
-    }
 
-    // Verificar conexión con MercadoPago
-    console.log('Obteniendo token para verificar MercadoPago');
-    const token = await getToken();
-    if (!token) {
-      console.log('No se pudo obtener token, redirigiendo a login');
-      setToastMessage('Error de autenticación. Por favor, inicia sesión nuevamente.');
-      setToastType('error');
-      setShowToast(true);
-      setTimeout(() => {
-        router.push('/login');
-      }, 2000);
-      return;
-    }
-
-    try {
-      // Siempre verificar con el backend el estado de conexión con MercadoPago
-      console.log('Verificando estado de conexión con MercadoPago en el backend...');
-
-      // Verificar con el servidor con un timeout para evitar que se quede colgado
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos de timeout
-      
       try {
-        // Asegurarse de que la URL termine con /
-        const baseUrl = process.env.NEXT_PUBLIC_NEST_API_URL || '';
-        const apiUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
-        const fullUrl = `${apiUrl}mercadopago/status`;
-        
-        console.log('Verificando estado de MercadoPago con el servidor:', fullUrl);
-        
-        const response = await fetch(fullUrl, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          signal: controller.signal
-        });
-
-        clearTimeout(timeoutId);
-        console.log('Respuesta del servidor:', { status: response.status, ok: response.ok });
-        
-        if (response.ok) {
-          try {
-            const data = await response.json();
-            console.log('Datos de MercadoPago:', data);
-            
-            // Verificar si está conectado
-            const isConnected = data.connected || data.isConnected || false;
-            console.log('¿Está conectado a MercadoPago?', isConnected);
-            
-            if (isConnected) {
-              console.log('MercadoPago conectado, continuando');
-              setIsLoading(false);
-            } else {
-              console.log('MercadoPago no conectado, mostrando error');
-              setIsLoading(false);
-              setShowMercadoPagoError(true);
-            }
-          } catch (parseError) {
-            console.error('Error al parsear respuesta:', parseError);
-            setIsLoading(false);
-            setShowMercadoPagoError(true);
-          }
-        } else {
-          console.error(`Error del servidor (${response.status}):`, response.statusText);
-          setIsLoading(false);
-          setShowMercadoPagoError(true);
-        }
-      } catch (fetchError) {
-        clearTimeout(timeoutId);
-        console.error('Error al verificar MercadoPago:', fetchError);
-        
-        // Si hay un error de red, permitimos continuar pero mostramos la opción de conectar
+        // Verificar MercadoPago
+        await checkMercadoPagoStatus();
+      } catch (error) {
+        console.error('Error general en verificación de requisitos:', error);
         setIsLoading(false);
         setShowMercadoPagoError(true);
       }
-    } catch (error) {
-      console.error('Error general en verificación de requisitos:', error);
-      setIsLoading(false);
-      setShowMercadoPagoError(true);
     }
   };
 
   // Ejecutar verificación de requisitos al cargar la página
   useEffect(() => {
-    // Limpiar cualquier estado guardado en localStorage para forzar verificación con el backend
-    localStorage.removeItem('mp_connected');
     checkRequirements();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user, authLoading]);
@@ -231,7 +210,7 @@ export default function CreateCausePage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ role: 'BENEFICIARY' })
+        body: JSON.stringify({ role: UserRole.BENEFICIARY })
       });
 
       const data = await response.json();
@@ -247,60 +226,13 @@ export default function CreateCausePage() {
       
       // Actualizar el contexto de autenticación con el usuario actualizado
       if (user) {
-        // Obtener la información actualizada del usuario desde el backend
-        try {
-          const userResponse = await fetch(`${apiUrl}auth/me`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          
-          if (userResponse.ok) {
-            // Verificar que la respuesta no está vacía
-            const responseText = await userResponse.text();
-            console.log('Respuesta de auth/me:', responseText);
-            
-            if (responseText && responseText.trim() !== '') {
-              try {
-                const userData = JSON.parse(responseText);
-                // Actualizar el contexto con los datos actualizados del backend
-                login(token, userData);
-              } catch (jsonError) {
-                console.error('Error al parsear respuesta JSON:', jsonError);
-                // Usar actualización local como fallback
-                const updatedUserData = {
-                  ...user,
-                  role: 'BENEFICIARY'
-                };
-                login(token, updatedUserData);
-              }
-            } else {
-              console.warn('Respuesta vacía de auth/me, usando actualización local');
-              const updatedUserData = {
-                ...user,
-                role: 'BENEFICIARY'
-              };
-              login(token, updatedUserData);
-            }
-          } else {
-            console.warn(`Error en auth/me (${userResponse.status}): ${userResponse.statusText}`);
-            // Si no se puede obtener la información actualizada, usar la actualización local
-            const updatedUserData = {
-              ...user,
-              role: 'BENEFICIARY'
-            };
-            login(token, updatedUserData);
-          }
-        } catch (userError) {
-          console.error('Error al obtener datos actualizados del usuario:', userError);
-          // Fallback a actualización local
-          const updatedUserData = {
-            ...user,
-            role: 'BENEFICIARY'
-          };
-          login(token, updatedUserData);
-        }
+        const updatedUserData = {
+          ...user,
+          role: UserRole.BENEFICIARY
+        };
+        // Obtener el refreshToken del localStorage o usar uno vacío si no existe
+        const refreshToken = localStorage.getItem('refresh_token') || '';
+        login(token, refreshToken, updatedUserData);
       }
       
       // Cerrar el modal
@@ -328,7 +260,8 @@ export default function CreateCausePage() {
   }
   
   // Mostrar mensaje de error de MercadoPago
-  if (showMercadoPagoError) {
+  console.log('Renderizando componente, mercadoPagoConnected:', mercadoPagoConnected, 'isLoading:', isLoading);
+  if (!mercadoPagoConnected && !isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Link href="/" className="inline-flex items-center text-[#002C5B] hover:underline mb-6">
@@ -370,6 +303,7 @@ export default function CreateCausePage() {
     );
   }
 
+  console.log('Renderizando formulario de creación de campaña');
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <Link href="/" className="inline-flex items-center text-[#002C5B] hover:underline mb-6">

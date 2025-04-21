@@ -4,13 +4,15 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { CampaignCategory } from '@/types';
+import { getCategoryOptions } from '@/utils/campaign-categories';
 
 interface CreateCauseForm {
   title: string;
   description: string;
   goalAmount: string;
   endDate: string;
-  category: string;
+  category: CampaignCategory | string;
   image: File | null;
 }
 
@@ -45,17 +47,13 @@ export default function CreateCausePage() {
       try {
         setIsCheckingMercadoPago(true);
         
-        // Primero intentar obtener el estado desde localStorage para una respuesta rápida
-        const cachedStatus = localStorage.getItem('mercadopago_connected');
-        if (cachedStatus) {
-          setMercadoPagoConnected(cachedStatus === 'true');
-        }
-        
         const token = await getToken();
         if (!token) throw new Error('No se encontró token de autenticación');
         
         const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
         const baseUrl = apiUrl?.endsWith('/') ? apiUrl : `${apiUrl}/`;
+        
+        console.log('Verificando estado de MercadoPago con el servidor:', `${baseUrl}mercadopago/status`);
         
         const response = await fetch(`${baseUrl}mercadopago/status`, {
           headers: {
@@ -69,18 +67,17 @@ export default function CreateCausePage() {
         }
         
         const data = await response.json();
-        const isConnected = data.isConnected || false;
+        console.log('Respuesta de MercadoPago:', data);
         
-        // Actualizar el estado y guardar en localStorage para futuras referencias
+        // Verificar si está conectado (comprobando todos los posibles formatos de respuesta)
+        const isConnected = data.connected || data.isConnected || false;
+        console.log('¿Está conectado a MercadoPago?', isConnected);
+        
+        // Actualizar el estado sin usar localStorage
         setMercadoPagoConnected(isConnected);
-        localStorage.setItem('mercadopago_connected', isConnected.toString());
       } catch (err) {
         console.error('Error checking MercadoPago status:', err);
-        // Si hay un error, usamos el valor de localStorage si existe
-        const cachedStatus = localStorage.getItem('mercadopago_connected');
-        if (cachedStatus) {
-          setMercadoPagoConnected(cachedStatus === 'true');
-        }
+        setMercadoPagoConnected(false);
       } finally {
         setIsCheckingMercadoPago(false);
       }
@@ -403,13 +400,11 @@ export default function CreateCausePage() {
               required
             >
               <option value="" disabled>Selecciona una categoría</option>
-              <option value="HEALTH">Salud</option>
-              <option value="EDUCATION">Educación</option>
-              <option value="ENVIRONMENT">Medio ambiente</option>
-              <option value="ANIMALS">Animales</option>
-              <option value="COMMUNITY">Comunidad</option>
-              <option value="EMERGENCY">Emergencia</option>
-              <option value="OTHER">Otro</option>
+              {getCategoryOptions().map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
           
@@ -453,7 +448,7 @@ export default function CreateCausePage() {
           </Link>
           <button
             type="submit"
-            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
+            className="px-4 py-2 bg-primary text-white rounded-md bg-gray-700 hover:bg-gray-900 transition-colors"
             disabled={isLoading}
           >
             {isLoading ? (

@@ -124,10 +124,23 @@ export default function DonationsPage() {
         
         const data = await response.json();
         console.log('Datos de causas recibidos:', data);
-        setCauses(data.map((cause: any) => ({
-          id: cause.id,
-          title: cause.title
-        })));
+        
+        // Verificar que data sea un array antes de usar map
+        if (Array.isArray(data)) {
+          setCauses(data.map((cause: any) => ({
+            id: cause.id,
+            title: cause.title
+          })));
+        } else if (data.items && Array.isArray(data.items)) {
+          // Si la respuesta tiene un formato { items: [...] }
+          setCauses(data.items.map((cause: any) => ({
+            id: cause.id,
+            title: cause.title
+          })));
+        } else {
+          console.warn('La respuesta de causas no es un array:', data);
+          setCauses([]);
+        }
       } catch (err: any) {
         console.error('Error fetching causes:', err);
         // No mostramos el error en la UI para no confundir al usuario
@@ -180,7 +193,17 @@ export default function DonationsPage() {
         }
         
         const data = await response.json();
-        setDonations(data.items || []);
+        console.log('Respuesta de donaciones:', data);
+        
+        // Asegurarse de que data.items sea un array
+        if (Array.isArray(data.items)) {
+          setDonations(data.items);
+        } else {
+          console.warn('data.items no es un array:', data.items);
+          setDonations([]);
+        }
+        
+        // Extraer los metadatos de paginación con valores predeterminados seguros
         setTotalPages(data.meta?.totalPages || 1);
         setTotalItems(data.meta?.totalItems || 0);
         setItemsPerPage(data.meta?.itemsPerPage || 10);

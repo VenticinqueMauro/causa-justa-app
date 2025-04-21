@@ -4,7 +4,8 @@ import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import BrutalButton from '@/components/ui/BrutalButton';
-import { CampaignCategory, CampaignFormData } from '@/types/campaign';
+import { CampaignCategory, CampaignFormData } from '@/types';
+import { getCategoryOptions } from '@/utils/campaign-categories';
 import { Toast } from '@/components/ui/Toast';
 import { Loader2, Upload, X, Check } from 'lucide-react';
 
@@ -27,7 +28,7 @@ export default function CampaignForm() {
     slug: '',
     description: '',
     shortDescription: '',
-    category: CampaignCategory.HEALTH,
+    category: CampaignCategory.HEALTH, // Categoría por defecto
     goalAmount: undefined,
     images: [],
     location: {
@@ -734,11 +735,11 @@ export default function CampaignForm() {
               onChange={handleChange}
               className="w-full p-2 border-2 border-[#002C5B]"
             >
-              <option value={CampaignCategory.HEALTH}>Salud</option>
-              <option value={CampaignCategory.EDUCATION}>Educación</option>
-              <option value={CampaignCategory.FOOD}>Alimentación</option>
-              <option value={CampaignCategory.PEOPLE}>Personas</option>
-              <option value={CampaignCategory.OTHERS}>Otras</option>
+              {getCategoryOptions().map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
           
