@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function DonationFailureRedirect() {
+// Componente que utiliza useSearchParams envuelto en Suspense
+function RedirectContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -20,11 +21,27 @@ export default function DonationFailureRedirect() {
   }, [router, searchParams]);
 
   return (
+    <div className="text-center">
+      <h1 className="text-2xl font-bold mb-4">Redireccionando...</h1>
+      <p>Por favor espera mientras te redirigimos a la página de información.</p>
+    </div>
+  );
+}
+
+// Componente principal que envuelve el contenido en Suspense
+export default function DonationFailureRedirect() {
+  return (
     <div className="flex min-h-screen items-center justify-center bg-[#ECECE2]">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold mb-4">Redireccionando...</h1>
-        <p>Por favor espera mientras te redirigimos a la página de información.</p>
-      </div>
+      <Suspense fallback={
+        <div className="text-center">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded mb-4 mx-auto w-3/4"></div>
+            <div className="h-4 bg-gray-100 rounded mb-4 mx-auto w-1/2"></div>
+          </div>
+        </div>
+      }>
+        <RedirectContent />
+      </Suspense>
     </div>
   );
 }
