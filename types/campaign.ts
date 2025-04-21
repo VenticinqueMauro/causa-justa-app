@@ -8,6 +8,7 @@ export interface Campaign {
   shortDescription: string;
   category: CampaignCategory;
   goalAmount?: number;
+  currentAmount?: number;
   images: string[];
   location: {
     city: string;
@@ -27,6 +28,16 @@ export interface Campaign {
   status?: CampaignStatus;
   createdAt?: string;
   updatedAt?: string;
+  userId?: string;
+  user?: {
+    id: string;
+    fullName: string;
+    email: string;
+  };
+  publishedAt?: string | null;
+  verificationNotes?: string | null;
+  rejectionReason?: string | null;
+  isFeatured?: boolean;
 }
 
 export interface CampaignFormData {

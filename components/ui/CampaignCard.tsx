@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Campaign } from "@/types/campaign";
 import BrutalButton from "./BrutalButton";
 
@@ -8,14 +9,17 @@ interface CampaignCardProps {
 }
 
 const CampaignCard = ({ campaign }: CampaignCardProps) => {
-  // Valores de muestra para la visualización (en una app real, estos vendrían del backend)
-  const raised = Math.floor(campaign.goalAmount ? campaign.goalAmount * 0.6 : 0); // 60% de la meta como ejemplo
+  // Usar el monto actual si está disponible, de lo contrario calcular un valor de ejemplo
+  const raised = campaign.currentAmount !== undefined ? campaign.currentAmount : 
+                (campaign.goalAmount ? Math.floor(campaign.goalAmount * 0.6) : 0); // 60% de la meta como fallback
   
   return (
     <div className="group relative overflow-hidden border-2 border-[#002C5B] bg-white transition-all transform shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)]">
       <div className="aspect-video overflow-hidden border-b-2 border-[#002C5B]">
         <Image
-          src={campaign.images[0] || "/placeholder.svg"}
+          src={campaign.images && campaign.images.length > 0 ? 
+               (campaign.images[0].startsWith('http') ? campaign.images[0] : `/placeholder.svg`) : 
+               "/placeholder.svg"}
           alt={campaign.title}
           width={400}
           height={225}
@@ -37,9 +41,11 @@ const CampaignCard = ({ campaign }: CampaignCardProps) => {
             ></div>
           </div>
         </div>
-        <BrutalButton variant="secondary" className="mt-6 w-full">
-          Donar ahora
-        </BrutalButton>
+        <Link href={`/campaigns/${campaign.slug || campaign.id || ''}`} passHref>
+          <BrutalButton variant="secondary" className="mt-6 w-full">
+            Donar ahora
+          </BrutalButton>
+        </Link>
       </div>
     </div>
   );

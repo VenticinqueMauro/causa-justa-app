@@ -485,7 +485,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                   )}
                   
                   <Link
-                    href={`/causa/${campaign.slug || campaign.id}`}
+                    href={`/campaigns/${campaign.slug || campaign.id}`}
                     className="block w-full px-4 py-2 bg-gray-700 text-white text-center rounded-md hover:bg-gray-600 transition-colors"
                     target="_blank"
                   >

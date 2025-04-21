@@ -5,7 +5,7 @@ import StartCauseButton from '@/components/actions/StartCauseButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { ChevronDown, Heart, KeyRound, LogOut, Menu, PlusCircle, User, X } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 // Botón flotante para iniciar causa
@@ -14,6 +14,11 @@ const FloatingStartCauseButton = () => {
   const [isMobile, setIsMobile] = useState(false);
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+
+  if(pathname !== '/'){
+    return null;
+  }
   
   useEffect(() => {
     // Detectar si estamos en un dispositivo móvil

@@ -197,10 +197,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       if (apiUrl) {
-        await fetch(`${baseUrl}auth/logout`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        });
+        // Obtener el token actual del localStorage
+        const token = localStorage.getItem('auth_token');
+        
+        if (token) {
+          await fetch(`${baseUrl}auth/logout`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ token }), // Enviar el token en el cuerpo de la solicitud
+            credentials: 'include'
+          });
+        } else {
+          console.warn('No se encontró token para cerrar sesión');
+        }
       }
     } catch (err) {
       console.warn('Logout request failed:', err);

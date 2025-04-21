@@ -11,10 +11,44 @@ import HeroSection from "@/components/sections/HeroSection";
 import StepsSection from "@/components/sections/StepsSection";
 import TestimonialsSection from "@/components/sections/TestimonialsSection";
 
-// Data
-import { campaigns } from "@/data/sampleData";
+// Types
+import { Campaign } from "@/types/campaign";
 
-export default function Home() {
+// Fallback data en caso de error
+import { campaigns as sampleCampaigns } from "@/data/sampleData";
+
+async function getCampaigns(): Promise<Campaign[]> {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
+    if (!apiUrl) {
+      console.error('API URL no configurada');
+      return sampleCampaigns;
+    }
+    
+    const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
+    const response = await fetch(`${baseUrl}campaigns?status=VERIFIED&limit=3`, {
+      cache: 'no-store', // No cachear para siempre obtener los datos más recientes
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      console.error('Error al obtener campañas:', response.status);
+      return sampleCampaigns;
+    }
+
+    const data = await response.json();
+    return data.items || [];
+  } catch (error) {
+    console.error('Error al obtener campañas:', error);
+    return sampleCampaigns;
+  }
+}
+
+export default async function Home() {
+  // Obtener campañas reales desde la API
+  const campaigns = await getCampaigns();
   return (
     <div className="flex min-h-screen flex-col bg-[#ECECE2]">
       <Header />
