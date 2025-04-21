@@ -92,9 +92,9 @@ function formatCurrency(amount?: number): string {
   }).format(amount);
 }
 
-export default async function CampaignDetailPage({ params }: { params: { slug: string } }) {
+export default async function CampaignDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   // Asegurarnos de que params está resuelto antes de acceder a sus propiedades
-  const resolvedParams = await Promise.resolve(params);
+  const resolvedParams = await params;
   const slug = resolvedParams.slug;
   
   console.log('Buscando campaña con slug/id:', slug);
