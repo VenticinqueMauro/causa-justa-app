@@ -248,7 +248,7 @@ export default function DashboardPage() {
             // Usamos solo el endpoint de estadísticas que sabemos que funciona
             const statsUrl = `${baseUrl}statistics/beneficiary`;
             
-            console.log('Fetching from URL:', statsUrl);
+            console.log('BENEFICIARY - Fetching from URL:', statsUrl);
             
             const statsResponse = await fetch(statsUrl, {
               headers: {
@@ -258,38 +258,48 @@ export default function DashboardPage() {
               credentials: 'include',
             });
             
-            console.log('Response status:', statsResponse.status);
+            console.log('BENEFICIARY - Response status:', statsResponse.status);
             
             if (statsResponse.ok) {
               const statsData = await statsResponse.json();
               
-              console.log('Received stats data:', statsData);
+              console.log('BENEFICIARY - Received stats data (raw):', JSON.stringify(statsData, null, 2));
               
-              // Extraer información de campañas desde las estadísticas
-              // Muchos endpoints de estadísticas incluyen información resumida sobre las campañas
-              const totalCampaigns = statsData.totalCampaigns || statsData.campaignsCount || 0;
-              const pendingCampaigns = statsData.pendingCampaigns || 0;
+              // Estructura esperada según la respuesta de la API:
+              // { campaigns: {...}, donations: {...} }
               
-              // Verificar la estructura de datos para totalDonationsReceived
-              const totalDonations = statsData.totalDonationsReceived || 0;
+              // Extraer información de campañas
+              const campaigns = statsData.campaigns || {};
+              const totalCampaigns = campaigns.totalCampaigns || 0;
+              const pendingCampaigns = campaigns.pendingCampaigns || 0;
+              const verifiedCampaigns = campaigns.verifiedCampaigns || 0;
+              const rejectedCampaigns = campaigns.rejectedCampaigns || 0;
               
-              // Extraer el monto total de donaciones si está disponible
-              const totalAmount = statsData.totalAmountReceived || 0;
+              // Extraer información de donaciones
+              const donations = statsData.donations || {};
+              const totalDonations = donations.totalDonations || 0;
+              const totalAmount = donations.totalAmount || 0;
               
-              console.log('Processed stats:', { 
+              console.log('BENEFICIARY - Processed stats:', { 
                 totalCampaigns, 
-                totalDonations, 
+                verifiedCampaigns,
                 pendingCampaigns,
+                rejectedCampaigns,
+                totalDonations, 
                 totalAmount
               });
               
+              // Actualizar el estado con los datos procesados
               setStats({
-                totalUsers: 0,
+                totalUsers: 0, // No relevante para beneficiario
                 totalCauses: totalCampaigns,
                 totalDonations: totalDonations,
                 pendingCauses: pendingCampaigns,
                 totalAmount: totalAmount,
               });
+              
+              // Forzar la actualización del estado de carga después de procesar los datos
+              setIsLoading(false);
             } else {
               console.error('Error fetching beneficiary statistics');
               try {
@@ -446,16 +456,17 @@ export default function DashboardPage() {
       </div>
 
       {/* Estadísticas rápidas */}
-      <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Resumen</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Estadísticas rápidas</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Estadísticas específicas para ADMIN */}
           {user?.role === 'ADMIN' && (
             <>
               <QuickStat 
                 title="Usuarios Totales" 
                 value={isLoading ? '...' : stats.totalUsers} 
                 icon={<UsersIcon />} 
-                color="bg-blue-50" 
+                color="bg-indigo-50" 
               />
               <QuickStat 
                 title="Causas Totales" 
@@ -464,16 +475,28 @@ export default function DashboardPage() {
                 color="bg-green-50" 
               />
               <QuickStat 
+                title="Causas Pendientes" 
+                value={isLoading ? '...' : stats.pendingCauses} 
+                icon={<PendingIcon />} 
+                color="bg-red-50" 
+              />
+              <QuickStat 
                 title="Donaciones" 
                 value={isLoading ? '...' : stats.totalDonations} 
                 icon={<DonationsIcon />} 
-                color="bg-yellow-50" 
-              />
-              <QuickStat 
-                title="Monto Total" 
-                value={isLoading ? '...' : formatCurrency(stats.totalAmount || 0)} 
-                icon={<MoneyIcon />} 
                 color="bg-purple-50" 
+              />
+            </>
+          )}
+
+          {/* Estadísticas específicas para BENEFICIARY */}
+          {user?.role === 'BENEFICIARY' && (
+            <>
+              <QuickStat 
+                title="Mis Causas" 
+                value={isLoading ? '...' : stats.totalCauses} 
+                icon={<CausesIcon />} 
+                color="bg-green-50" 
               />
               <QuickStat 
                 title="Causas Pendientes" 
@@ -482,14 +505,21 @@ export default function DashboardPage() {
                 color="bg-red-50" 
               />
               <QuickStat 
-                title="Recaudación Estimada" 
-                value={isLoading ? '...' : formatCurrency(stats.totalDonations * 1000)} 
-                icon={<StatsIcon />} 
+                title="Donaciones Recibidas" 
+                value={isLoading ? '...' : stats.totalDonations} 
+                icon={<DonationsIcon />} 
+                color="bg-purple-50" 
+              />
+              <QuickStat 
+                title="Monto Recaudado" 
+                value={isLoading ? '...' : formatCurrency(stats.totalAmount || 0)} 
+                icon={<MoneyIcon />} 
                 color="bg-indigo-50" 
               />
             </>
           )}
 
+          {/* Estadísticas específicas para DONOR */}
           {user?.role === 'DONOR' && (
             <>
               <QuickStat 
@@ -507,7 +537,7 @@ export default function DashboardPage() {
               <QuickStat 
                 title="Donación Total" 
                 value={isLoading ? '...' : formatCurrency(0)} 
-                icon={<StatsIcon />} 
+                icon={<MoneyIcon />} 
                 color="bg-indigo-50" 
               />
               <QuickStat 

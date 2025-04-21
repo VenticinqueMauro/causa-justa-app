@@ -4,26 +4,54 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useToast } from '@/components/ui/Toast';
 
 interface Campaign {
   id: string;
   title: string;
   description: string;
+  shortDescription?: string;
   goalAmount: number;
   currentAmount: number;
   status: 'PENDING' | 'VERIFIED' | 'REJECTED' | 'COMPLETED';
   createdAt: string;
   updatedAt: string;
-  owner: {
+  userId: string;
+  user: {
     id: string;
     fullName: string;
     email: string;
   };
+  // Otros campos que puedan venir de la API
+  slug?: string;
+  category?: string;
+  images?: string[];
+  location?: {
+    city: string;
+    country: string;
+    province: string;
+  };
+  recipient?: {
+    age: number;
+    name: string;
+    condition: string;
+  };
+  creator?: {
+    contact: string;
+    relation: string;
+  };
+  publishedAt?: string | null;
+  verificationNotes?: string | null;
+  rejectionReason?: string | null;
+  updates?: any | null;
+  tags?: string[];
+  isFeatured?: boolean;
 }
 
 export default function CampaignsManagementPage() {
   const { user, isAuthenticated, getToken } = useAuth();
   const router = useRouter();
+  const { showToast } = useToast();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -131,7 +159,7 @@ export default function CampaignsManagementPage() {
       ));
     } catch (err) {
       console.error('Error updating campaign status:', err);
-      alert('No se pudo actualizar el estado de la campaña. Intente nuevamente.');
+      showToast('No se pudo actualizar el estado de la campaña. Intente nuevamente.', 'error');
     }
   };
 
@@ -246,13 +274,13 @@ export default function CampaignsManagementPage() {
                     campaigns.map((campaign) => (
                       <tr key={campaign.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          <Link href={`/campaigns/${campaign.id}`} className="text-primary hover:text-primary-dark">
+                          <Link href={`/dashboard/causas/${campaign.id}`} className="text-primary hover:text-primary-dark">
                             {campaign.title}
                           </Link>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <div className="font-medium">{campaign.owner.fullName}</div>
-                          <div className="text-xs">{campaign.owner.email}</div>
+                          <div className="font-medium">{campaign.user?.fullName}</div>
+                          <div className="text-xs">{campaign.user?.email}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {formatCurrency(campaign.goalAmount)}
@@ -276,17 +304,23 @@ export default function CampaignsManagementPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex space-x-2 justify-end">
+                            <Link 
+                              href={`/dashboard/causas/${campaign.id}`}
+                              className="text-blue-600 hover:text-blue-900"
+                            >
+                              Ver detalles
+                            </Link>
                             {campaign.status === 'PENDING' && (
                               <>
                                 <button
                                   onClick={() => handleStatusChange(campaign.id, 'VERIFIED')}
-                                  className="text-green-600 hover:text-green-900"
+                                  className="text-green-600 hover:text-green-900 ml-3"
                                 >
                                   Verificar
                                 </button>
                                 <button
                                   onClick={() => handleStatusChange(campaign.id, 'REJECTED')}
-                                  className="text-red-600 hover:text-red-900"
+                                  className="text-red-600 hover:text-red-900 ml-3"
                                 >
                                   Rechazar
                                 </button>
@@ -331,6 +365,9 @@ export default function CampaignsManagementPage() {
                 <div>
                   <p className="text-sm text-gray-700">
                     Mostrando <span className="font-medium">{campaigns.length}</span> campañas
+                    {totalPages > 0 && (
+                      <span className="ml-1">- Página <span className="font-bold">{currentPage}</span> de {totalPages}</span>
+                    )}
                   </p>
                 </div>
                 <div>
@@ -353,7 +390,7 @@ export default function CampaignsManagementPage() {
                         onClick={() => handlePageChange(page)}
                         className={`relative inline-flex items-center px-4 py-2 border ${
                           page === currentPage
-                            ? 'z-10 bg-primary border-primary text-white'
+                            ? 'z-10 bg-gray-600 border-gray-600 text-white font-bold'
                             : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                         } text-sm font-medium`}
                       >
