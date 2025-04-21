@@ -15,10 +15,10 @@ const HeroSection = () => {
           diferencia en nuestra comunidad.
         </p>
         <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-          <BrutalButton variant="outline" className="text-base">
+          <BrutalButton variant="secondary" className="text-base">
             Iniciar una causa
           </BrutalButton>
-          <BrutalButton variant="secondary" className="text-base">
+          <BrutalButton variant="outline" className="text-base">
             Explorar causas
           </BrutalButton>
         </div>

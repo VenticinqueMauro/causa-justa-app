@@ -44,6 +44,18 @@ export default function LoginForm() {
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
+  // Verificar si hay un parámetro de redirección en la URL
+  useEffect(() => {
+    // Obtener el parámetro redirect de la URL
+    const searchParams = new URLSearchParams(window.location.search);
+    const redirectParam = searchParams.get('redirect');
+    
+    if (redirectParam) {
+      console.log('Parámetro de redirección detectado:', redirectParam);
+      localStorage.setItem('redirectAfterLogin', redirectParam);
+    }
+  }, []);
+
   // Efecto para detectar cambios en formState y preparar el toast
   useEffect(() => {
     // Solo configurar el toast si hay un mensaje
@@ -56,19 +68,38 @@ export default function LoginForm() {
         if (formState.data) {
           console.log('Login exitoso, token recibido:', formState.data.access_token);
           
-          // SOLUCIÓN DIRECTA: Guardar el token en localStorage
+          // Guardar el token en localStorage con la clave correcta (auth_token)
+          localStorage.setItem('auth_token', formState.data.access_token);
+          // También guardar con la clave 'token' para compatibilidad
           localStorage.setItem('token', formState.data.access_token);
           console.log('Token guardado en localStorage');
           
+          // Establecer cookies para el middleware
+          document.cookie = `token=${formState.data.access_token}; path=/; max-age=86400; SameSite=Lax`;
+          
           // Obtener el refresh token del backend o usar el access token como refresh token si no se proporciona
           const refreshToken = formState.data.refresh_token || formState.data.access_token;
+          localStorage.setItem('refresh_token', refreshToken);
+          document.cookie = `refresh_token=${refreshToken}; path=/; max-age=86400; SameSite=Lax`;
+          
+          // Guardar datos de usuario en cookie
+          document.cookie = `auth_user=${JSON.stringify(formState.data.user)}; path=/; max-age=86400; SameSite=Lax`;
           
           // Actualizar el contexto de autenticación con el token y refresh token
           login(formState.data.access_token, refreshToken, formState.data.user);
           
-          // Redirigir al usuario a la página principal después de un inicio de sesión exitoso
+          // Verificar si hay una redirección guardada
+          const redirectPath = localStorage.getItem('redirectAfterLogin');
+          
+          // Redirigir al usuario después de un inicio de sesión exitoso
           setTimeout(() => {
-            router.push('/');
+            if (redirectPath) {
+              console.log('Redirigiendo a:', redirectPath);
+              localStorage.removeItem('redirectAfterLogin'); // Limpiar después de usar
+              router.push(redirectPath);
+            } else {
+              router.push('/');
+            }
           }, 500); // Pequeño retraso para asegurar que el contexto se actualice antes de la redirección
         }
       } else {

@@ -56,16 +56,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (typeof window === 'undefined') return;
       setIsLoading(true);
 
-      // Cargar datos de localStorage primero para una experiencia más rápida
-      const token = localStorage.getItem('auth_token');
-      const storedUser = localStorage.getItem('auth_user');
+      // Intentar obtener datos de autenticación de las cookies primero
+      let token = null;
+      let storedUser = null;
+      
+      // Buscar token en cookies
+      const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('token='));
+      if (tokenCookie) {
+        token = tokenCookie.split('=')[1];
+      }
+      
+      // Buscar datos de usuario en cookies
+      const userCookie = document.cookie.split('; ').find(row => row.startsWith('auth_user='));
+      if (userCookie) {
+        try {
+          const userString = decodeURIComponent(userCookie.split('=')[1]);
+          storedUser = userString;
+        } catch (e) {
+          console.warn('Error decoding user cookie:', e);
+        }
+      }
+      
+      // Si no encontramos en cookies, intentar con localStorage como respaldo
+      if (!token) {
+        token = localStorage.getItem('auth_token');
+      }
+      
+      if (!storedUser) {
+        storedUser = localStorage.getItem('auth_user');
+      }
       
       // Si tenemos un usuario almacenado, establecerlo temporalmente mientras verificamos
       // Esto evita redirecciones innecesarias si hay problemas de conexión
       if (token && storedUser) {
         try {
           const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser); // Establecer usuario desde localStorage inmediatamente
+          setUser(parsedUser); // Establecer usuario inmediatamente
         } catch (e) {
           console.warn('Error parsing stored user data:', e);
         }
@@ -119,11 +145,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 }
                 
                 setUser(userData);
-                // Actualizar datos en localStorage
-                localStorage.setItem('auth_user', JSON.stringify(userData));
-                // Actualizar cookies para el middleware
+                // Actualizar cookies primero (prioridad)
                 document.cookie = `token=${token}; path=/; max-age=2592000`; // 30 días
                 document.cookie = `auth_user=${JSON.stringify(userData)}; path=/; max-age=2592000`;
+                // Actualizar datos en localStorage como respaldo
+                localStorage.setItem('auth_user', JSON.stringify(userData));
               } catch (parseError) {
                 console.error('Error parsing user data:', parseError);
                 // Usar datos almacenados si hay error de parsing
@@ -166,17 +192,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (typeof window === 'undefined') return;
     
     try {
-      // Guardar tokens en localStorage
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('refresh_token', refreshToken);
-      
-      // Guardar el usuario en localStorage
-      localStorage.setItem('auth_user', JSON.stringify(userData));
-      
+      // Priorizar cookies para la autenticación
       // Establecer cookies para que el middleware pueda verificar la autenticación
       document.cookie = `token=${token}; path=/; max-age=86400; SameSite=Lax`;
       document.cookie = `refresh_token=${refreshToken}; path=/; max-age=86400; SameSite=Lax`;
       document.cookie = `auth_user=${JSON.stringify(userData)}; path=/; max-age=86400; SameSite=Lax`;
+      
+      // También guardar en localStorage como respaldo
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('refresh_token', refreshToken);
+      localStorage.setItem('auth_user', JSON.stringify(userData));
       
       // Actualizar el estado
       setUser(userData);
@@ -190,85 +215,112 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     if (typeof window === 'undefined') return;
-    setIsLoading(true);
-
-    const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
-    const baseUrl = apiUrl && apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
 
     try {
+      // Intentar hacer logout en el servidor
+      const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
       if (apiUrl) {
-        // Obtener el token actual del localStorage
-        const token = localStorage.getItem('auth_token');
-        
-        if (token) {
-          await fetch(`${baseUrl}auth/logout`, {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ token }), // Enviar el token en el cuerpo de la solicitud
-            credentials: 'include'
-          });
+        const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
+        // Obtener token de cookie primero, luego de localStorage como respaldo
+        let token = null;
+        const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('token='));
+        if (tokenCookie) {
+          token = tokenCookie.split('=')[1];
         } else {
-          console.warn('No se encontró token para cerrar sesión');
+          token = localStorage.getItem('auth_token');
+        }
+
+        if (token) {
+          try {
+            // Establecer un timeout para la solicitud
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+            await fetch(`${baseUrl}auth/logout`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+              body: JSON.stringify({ token }), // Enviar el token en el cuerpo de la solicitud
+              signal: controller.signal,
+            }).catch(err => {
+              console.warn('Network error during logout:', err);
+            });
+
+            clearTimeout(timeoutId);
+          } catch (err) {
+            console.warn('Error during server logout:', err);
+            // Continuar con el logout local incluso si falla el servidor
+          }
         }
       }
-    } catch (err) {
-      console.warn('Logout request failed:', err);
-    } finally {
-      // Eliminar de localStorage
+
+      // Limpiar cookies primero (prioridad)
+      document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'auth_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      
+      // Limpiar localStorage como respaldo
       localStorage.removeItem('auth_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('auth_user');
-      
-      // Eliminar cookies
-      document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
-      document.cookie = 'refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
-      document.cookie = 'auth_user=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
-      
+
+      // Actualizar estado
       setUser(null);
-      setIsLoading(false);
-      router.push('/login');
+      console.log('Sesión cerrada correctamente');
+    } catch (err) {
+      console.error('Error during logout:', err);
     }
   };
 
   const getToken = async (): Promise<string | null> => {
     if (typeof window === 'undefined') return null;
     
-    const token = localStorage.getItem('auth_token');
-    
-    // Verificar si el token existe y tiene un formato válido
-    if (token) {
+    try {
+      // Intentar obtener el token de las cookies primero
+      let token = null;
+      const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('token='));
+      if (tokenCookie) {
+        token = tokenCookie.split('=')[1];
+      }
+      
+      // Si no hay token en cookies, intentar obtenerlo de localStorage como respaldo
+      if (!token) {
+        token = localStorage.getItem('auth_token');
+      }
+      
+      if (!token) {
+        console.warn('No hay token en cookies ni localStorage');
+        return null;
+      }
+      
+      // Verificar si el token es válido
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        console.warn('Token malformado, intentando refrescar...');
+        return await refreshToken();
+      }
+      
+      // Verificar si el token está expirado
       try {
-        // Verificar si el token tiene el formato correcto (xxx.yyy.zzz)
-        const parts = token.split('.');
-        if (parts.length !== 3) {
-          console.warn('Token con formato inválido, intentando refrescar...');
+        const payload = JSON.parse(atob(parts[1]));
+        const expiry = payload.exp * 1000; // Convertir a milisegundos
+        
+        if (Date.now() >= expiry) {
+          console.warn('Token expirado, intentando refrescar...');
           return await refreshToken();
         }
-        
-        // Verificar si el token está expirado
-        try {
-          const payload = JSON.parse(atob(parts[1]));
-          const expiry = payload.exp * 1000; // Convertir a milisegundos
-          
-          if (Date.now() >= expiry) {
-            console.warn('Token expirado, intentando refrescar...');
-            return await refreshToken();
-          }
-        } catch (e) {
-          console.warn('Error al decodificar el token:', e);
-        }
-        
-        return token;
       } catch (e) {
-        console.error('Error al procesar el token:', e);
-        return token; // Devolver el token original en caso de error
+        console.warn('Error al decodificar el token:', e);
       }
+      
+      return token;
+    } catch (e) {
+      console.error('Error al procesar el token:', e);
+      const tokenFromStorage = localStorage.getItem('auth_token');
+      return tokenFromStorage; // Devolver el token de localStorage en caso de error
     }
-    
-    return null;
   };
 
   const refreshToken = async (): Promise<string | null> => {
@@ -277,10 +329,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!apiUrl) return null;
       
       const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
-      const currentRefreshToken = localStorage.getItem('refresh_token');
+      
+      // Intentar obtener el refresh token de las cookies primero
+      let currentRefreshToken = null;
+      const refreshTokenCookie = document.cookie.split('; ').find(row => row.startsWith('refresh_token='));
+      if (refreshTokenCookie) {
+        currentRefreshToken = refreshTokenCookie.split('=')[1];
+      }
+      
+      // Si no hay refresh token en cookies, intentar obtenerlo de localStorage
+      if (!currentRefreshToken) {
+        currentRefreshToken = localStorage.getItem('refresh_token');
+      }
       
       if (!currentRefreshToken) {
-        console.warn('No hay refresh token disponible');
+        console.warn('No hay refresh token disponible en cookies ni localStorage');
         return null;
       }
       
@@ -303,17 +366,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (response.ok) {
         const data = await response.json();
         if (data.access_token) {
-          // Guardar el nuevo token de acceso
-          localStorage.setItem('auth_token', data.access_token);
+          // Actualizar primero las cookies (prioridad)
+          document.cookie = `token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
           
           // Si también se devuelve un nuevo refresh token, guardarlo
           if (data.refresh_token) {
-            localStorage.setItem('refresh_token', data.refresh_token);
             document.cookie = `refresh_token=${data.refresh_token}; path=/; max-age=86400; SameSite=Lax`;
+            localStorage.setItem('refresh_token', data.refresh_token);
           }
           
-          // Actualizar la cookie del token de acceso
-          document.cookie = `token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
+          // Guardar también en localStorage como respaldo
+          localStorage.setItem('auth_token', data.access_token);
           
           console.log('Token refrescado correctamente');
           return data.access_token;

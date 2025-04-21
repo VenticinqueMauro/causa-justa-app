@@ -142,24 +142,105 @@ export default function StartCauseButton({
   // Manejar clic en "Iniciar una causa"
   const handleStartCause = async () => {
     console.log('=== INICIO PROCESO INICIAR CAUSA ===');
-    console.log('Datos del usuario:', { isAuthenticated, user });
     
-    // Paso 1: Verificar si está logeado
-    if (!isAuthenticated || !user || user?.role !== UserRole.BENEFICIARY) {
+    // Verificar autenticación basada en cookies primero
+    const allCookies = document.cookie;
+    console.log('Todas las cookies:', allCookies);
+    
+    const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('token='));
+    const userCookie = document.cookie.split('; ').find(row => row.startsWith('auth_user='));
+    const refreshTokenCookie = document.cookie.split('; ').find(row => row.startsWith('refresh_token='));
+    
+    console.log('Cookies detalladas:', {
+      tokenCookie: tokenCookie ? tokenCookie : 'No presente',
+      userCookie: userCookie ? 'Presente' : 'No presente',
+      refreshTokenCookie: refreshTokenCookie ? 'Presente' : 'No presente',
+      isAuthenticated,
+      userRole: user?.role,
+      userId: user?.id
+    });
+    
+    // Verificar localStorage
+    const localStorageToken = localStorage.getItem('auth_token');
+    const localStorageUser = localStorage.getItem('auth_user');
+    const localStorageRefreshToken = localStorage.getItem('refresh_token');
+    
+    console.log('LocalStorage:', {
+      token: localStorageToken ? 'Presente' : 'No presente',
+      user: localStorageUser ? 'Presente' : 'No presente',
+      refreshToken: localStorageRefreshToken ? 'Presente' : 'No presente'
+    });
+    
+    // Intentar refrescar el token primero para asegurar que tenemos la sesión actualizada
+    const currentToken = await getToken();
+    console.log('Token obtenido de getToken():', currentToken ? 'Sí' : 'No');
+    
+    // Paso 1: Verificar si está logeado (usando cookies o estado del contexto)
+    // Intentar obtener datos de usuario directamente si están disponibles en localStorage o cookies
+    let userFromStorage = null;
+    try {
+      if (localStorageUser) {
+        userFromStorage = JSON.parse(localStorageUser);
+      } else if (userCookie) {
+        const userString = decodeURIComponent(userCookie.split('=')[1]);
+        userFromStorage = JSON.parse(userString);
+      }
+    } catch (e) {
+      console.error('Error al parsear datos de usuario:', e);
+    }
+    
+    // Verificación más robusta de autenticación
+    const isUserAuthenticated = isAuthenticated || !!currentToken || !!tokenCookie || !!localStorageToken;
+    const hasUserData = !!user || !!userFromStorage;
+    
+    console.log('Estado de autenticación final:', {
+      isUserAuthenticated,
+      hasUserData,
+      userFromContext: !!user,
+      userFromStorage: !!userFromStorage
+    });
+    
+    if (!isUserAuthenticated || !hasUserData) {
       console.log('Usuario no autenticado, redirigiendo a login');
+      // Guardar la URL actual para redireccionar de vuelta después del login
+      localStorage.setItem('redirectAfterLogin', '/create-cause');
       router.push('/login?redirect=create-cause');
       return;
     }
     
+    // Si tenemos datos de usuario en storage pero no en el contexto, actualizar el contexto
+    if (!user && userFromStorage) {
+      console.log('Actualizando contexto con datos de usuario del storage');
+      const refreshToken = localStorageRefreshToken || (refreshTokenCookie ? refreshTokenCookie.split('=')[1] : null);
+      const token = localStorageToken || (tokenCookie ? tokenCookie.split('=')[1] : null);
+      if (token) {
+        login(token, refreshToken || token, userFromStorage);
+        // Esperar un momento para que se actualice el contexto
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+    
     // Paso 2: Verificar si es BENEFICIARY
-    console.log('Rol del usuario:', user.role);
-    if (user.role !== UserRole.BENEFICIARY) {
-      console.log(`Usuario con rol incorrecto: ${user.role}, mostrando error`);
-      if (user.role === UserRole.DONOR) {
-        setErrorMessage(`Solo los beneficiarios pueden iniciar una causa. Tu rol actual es: ${user.role}. ¿Deseas cambiar tu rol a ${UserRole.BENEFICIARY}?`);
+    // Usar datos de usuario del contexto o del storage
+    const currentUser = user || userFromStorage;
+    
+    if (!currentUser) {
+      console.log('No se encontraron datos de usuario válidos');
+      setErrorMessage('Error de autenticación. Por favor, inicia sesión nuevamente.');
+      setShowMpConnectButton(false);
+      setShowRoleChangeButton(false);
+      setShowErrorModal(true);
+      return;
+    }
+    
+    console.log('Rol del usuario:', currentUser.role);
+    if (currentUser.role !== UserRole.BENEFICIARY) {
+      console.log(`Usuario con rol incorrecto: ${currentUser.role}, mostrando error`);
+      if (currentUser.role === UserRole.DONOR) {
+        setErrorMessage(`Solo los beneficiarios pueden iniciar una causa. Tu rol actual es: ${currentUser.role}. ¿Deseas cambiar tu rol a ${UserRole.BENEFICIARY}?`);
         setShowRoleChangeButton(true);
       } else {
-        setErrorMessage(`Solo los beneficiarios pueden iniciar una causa. Tu rol actual es: ${user.role}`);
+        setErrorMessage(`Solo los beneficiarios pueden iniciar una causa. Tu rol actual es: ${currentUser.role}`);
         setShowRoleChangeButton(false);
       }
       setShowMpConnectButton(false);
@@ -168,9 +249,8 @@ export default function StartCauseButton({
     }
     
     // Paso 3: Verificar conexión con MercadoPago
-    console.log('Obteniendo token para verificar MercadoPago');
-    const token = await getToken();
-    if (!token) {
+    console.log('Verificando token para MercadoPago');
+    if (!currentToken) {
       console.log('No se pudo obtener el token, mostrando error');
       setErrorMessage('Error de autenticación. Por favor, inicia sesión nuevamente.');
       setShowMpConnectButton(false);
@@ -178,9 +258,9 @@ export default function StartCauseButton({
       return;
     }
     
-    console.log('Verificando conexión de MercadoPago para usuario:', user.email);
+    console.log('Verificando conexión de MercadoPago para usuario:', currentUser.email);
     console.log('Llamando a checkMercadoPagoConnection');
-    const isConnected = await checkMercadoPagoConnection(token);
+    const isConnected = await checkMercadoPagoConnection(currentToken);
     console.log('Resultado de verificación de MercadoPago:', isConnected);
     
     if (!isConnected) {
@@ -195,6 +275,29 @@ export default function StartCauseButton({
     console.log('Usuario verificado y conectado a MercadoPago, redirigiendo a /create-cause');
     
     try {      
+      // Asegurarnos de que las cookies estén actualizadas antes de redirigir
+      if (currentToken) {
+        // Establecer cookies con prioridad
+        document.cookie = `token=${currentToken}; path=/; max-age=86400; SameSite=Lax`;
+        
+        // Obtener refresh token de cookies primero, luego de localStorage
+        let refreshToken = null;
+        const refreshTokenCookie = document.cookie.split('; ').find(row => row.startsWith('refresh_token='));
+        if (refreshTokenCookie) {
+          refreshToken = refreshTokenCookie.split('=')[1];
+        } else {
+          refreshToken = localStorage.getItem('refresh_token');
+        }
+        
+        if (refreshToken) {
+          document.cookie = `refresh_token=${refreshToken}; path=/; max-age=86400; SameSite=Lax`;
+        }
+        
+        if (currentUser) {
+          document.cookie = `auth_user=${JSON.stringify(currentUser)}; path=/; max-age=86400; SameSite=Lax`;
+        }
+      }
+      
       // Redirigir a la página de creación de causa
       router.push('/create-cause');
     } catch (error) {

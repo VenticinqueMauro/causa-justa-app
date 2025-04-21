@@ -80,7 +80,18 @@ export default function CreateCausePage() {
   // Función para verificar requisitos para crear una campaña
   const checkRequirements = async () => {
     console.log('Iniciando verificación de requisitos para crear campaña');
-    console.log('Estado de autenticación:', { isAuthenticated, user, authLoading });
+    
+    // Verificar cookies primero
+    const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('token='));
+    const userCookie = document.cookie.split('; ').find(row => row.startsWith('auth_user='));
+    
+    console.log('Verificación de autenticación:', { 
+      cookieToken: tokenCookie ? 'Presente' : 'Ausente',
+      cookieUser: userCookie ? 'Presente' : 'Ausente',
+      isAuthenticated, 
+      user, 
+      authLoading 
+    });
     
     // Si aún está cargando la autenticación, esperar
     if (authLoading) {
@@ -88,15 +99,19 @@ export default function CreateCausePage() {
       return;
     }
     
-    // Si ya terminó de cargar y no está autenticado, entonces redirigir
-    if (!isAuthenticated || !user) {
-      console.log('Usuario no autenticado (después de cargar), redirigiendo a login');
+    // Verificar autenticación combinando cookies y estado del contexto
+    if ((!tokenCookie && !isAuthenticated) || !user) {
+      console.log('Usuario no autenticado (después de verificar cookies y contexto), redirigiendo a login');
       router.push('/login?redirect=create-cause');
       return;
     }
 
+    // Usar el usuario del contexto o del storage
+    const userFromStorage = localStorage.getItem('auth_user');
+    const currentUser = user || (userFromStorage ? JSON.parse(userFromStorage) : null);
+  
     // Verificar que el usuario tenga el rol de BENEFICIARY
-    if (user.role !== UserRole.BENEFICIARY) {
+    if (!currentUser || currentUser.role !== UserRole.BENEFICIARY) {
       console.log('Usuario no es BENEFICIARY, mostrando modal de cambio de rol');
       setShowRoleChangeModal(true);
       setIsLoading(false);
@@ -107,6 +122,12 @@ export default function CreateCausePage() {
       const token = await getToken();
       if (!token) {
         console.log('No se pudo obtener token, redirigiendo a login');
+        
+        // Asegurarse de que las cookies estén limpias antes de redirigir
+        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'auth_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        
         setToastMessage('Error de autenticación. Por favor, inicia sesión nuevamente.');
         setToastType('error');
         setShowToast(true);

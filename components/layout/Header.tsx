@@ -54,16 +54,45 @@ const FloatingStartCauseButton = () => {
     if (!isMobile) setIsExpanded(false);
   };
 
-  const handleClick = () => {
+  const handleClick = async () => {
     // Siempre expandir/contraer en móvil
     if (isMobile) {
       setIsExpanded(!isExpanded);
     }
     
+    // Verificación más robusta de autenticación
+    console.log('Verificando autenticación para redirección...');
+    
+    // Verificar cookies primero
+    const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('token='));
+    const userCookie = document.cookie.split('; ').find(row => row.startsWith('auth_user='));
+    
+    // Verificar localStorage
+    const localStorageToken = localStorage.getItem('auth_token') || localStorage.getItem('token');
+    const localStorageUser = localStorage.getItem('auth_user');
+    
+    // Verificación combinada
+    const isUserAuthenticated = isAuth || !!tokenCookie || !!localStorageToken;
+    
+    console.log('Estado de autenticación:', {
+      isAuth,
+      tokenCookie: !!tokenCookie,
+      localStorageToken: !!localStorageToken,
+      isUserAuthenticated
+    });
+    
     // Redirigir a la página de creación de causa o login
-    if (!isAuth) {
+    if (!isUserAuthenticated) {
+      console.log('Usuario no autenticado, redirigiendo a login');
+      // Guardar la URL actual para redireccionar de vuelta después del login
+      localStorage.setItem('redirectAfterLogin', '/create-cause');
       router.push('/login?redirect=create-cause');
     } else {
+      console.log('Usuario autenticado, redirigiendo a create-cause');
+      // Asegurarse de que las cookies estén actualizadas
+      if (localStorageToken) {
+        document.cookie = `token=${localStorageToken}; path=/; max-age=86400; SameSite=Lax`;
+      }
       router.push('/create-cause');
     }
   };
