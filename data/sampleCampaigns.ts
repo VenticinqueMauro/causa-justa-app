@@ -1,4 +1,5 @@
-import { Campaign, CampaignCategory, CampaignStatus } from "@/types/campaign";
+import { Campaign } from "@/types/campaign";
+import { CampaignCategory, CampaignStatus } from "@/types/enums";
 
 // Este archivo es solo para referencia y no se usa actualmente
 // Para datos de muestra, usar sampleData.ts
