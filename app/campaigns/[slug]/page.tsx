@@ -6,6 +6,7 @@ import Footer from '@/components/layout/Footer';
 import BrutalSection from '@/components/ui/BrutalSection';
 import BrutalHeading from '@/components/ui/BrutalHeading';
 import DonationForm from '@/components/campaigns/DonationForm';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import { Campaign } from '@/types/campaign';
 import { CampaignCategory } from '@/types/enums';
 import { getCategoryLabel } from '@/utils/campaign-categories';
@@ -118,6 +119,14 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
       <main className="flex-1">
         <BrutalSection className="py-8 md:py-12">
           <div className="container mx-auto px-4">
+            <Breadcrumb
+              items={[
+                { label: 'Inicio', href: '/' },
+                { label: 'Campañas', href: '/campaigns' },
+                { label: campaign.title, href: `/campaigns/${slug}`, isCurrent: true }
+              ]}
+              className="mb-6"
+            />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Columna izquierda - Imágenes y detalles */}
               <div className="lg:col-span-2 space-y-6">

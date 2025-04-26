@@ -41,7 +41,7 @@ export default function DonationForm({ campaignId, campaignTitle }: DonationForm
   const watchAmount = watch('amount');
 
   // Predefined donation amounts
-  const donationAmounts = [1000, 2000, 5000, 10000];
+  const donationAmounts = [10000, 20000, 50000, 100000];
 
   // Handle predefined amount selection
   const handleAmountSelect = (amount: number) => {
