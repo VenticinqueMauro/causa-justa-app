@@ -18,7 +18,7 @@ const FeaturedCampaignsSection = ({ campaigns }: FeaturedCampaignsSectionProps) 
             Estas son algunas de las causas verificadas que necesitan tu apoyo ahora mismo
           </p>
         </div>
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {campaigns.map((campaign, index) => (
             <CampaignCard key={index} campaign={campaign} />
           ))}

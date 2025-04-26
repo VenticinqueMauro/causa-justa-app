@@ -27,7 +27,7 @@ async function getCampaigns(): Promise<Campaign[]> {
     
     const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
     const response = await fetch(`${baseUrl}campaigns?status=VERIFIED&limit=3`, {
-      cache: 'no-store', // No cachear para siempre obtener los datos más recientes
+      next: { revalidate: 3600 }, // Revalidar cada hora en lugar de 'no-store'
       headers: {
         'Content-Type': 'application/json',
       },
@@ -45,6 +45,10 @@ async function getCampaigns(): Promise<Campaign[]> {
     return sampleCampaigns;
   }
 }
+
+// Configuración para permitir la generación estática con revalidación
+export const dynamic = 'force-static';
+export const revalidate = 3600; // Revalidar cada hora
 
 export default async function Home() {
   // Obtener campañas reales desde la API

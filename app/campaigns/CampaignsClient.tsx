@@ -116,7 +116,7 @@ const CampaignsClient = ({
       }
       
       const response = await fetch(`${baseUrl}campaigns?${params.toString()}`, {
-        cache: 'no-store',
+        // No usar cache: 'no-store' en el cliente para permitir que el navegador cachee
         headers: {
           'Content-Type': 'application/json',
         },
@@ -138,8 +138,23 @@ const CampaignsClient = ({
   };
   
   // Efecto para cargar campañas cuando cambian los filtros
+  // Solo se ejecuta cuando los filtros cambian, no en la carga inicial
   useEffect(() => {
-    fetchCampaigns();
+    // Verificar si los parámetros actuales son diferentes de los iniciales
+    const initialParams = new URLSearchParams(window.location.search);
+    const initialCategoryParam = initialParams.get('category');
+    const initialSearchParam = initialParams.get('search') || '';
+    const initialPageParam = parseInt(initialParams.get('page') || '1', 10);
+    
+    const paramsChanged = 
+      selectedCategory !== initialCategoryParam ||
+      searchTerm !== initialSearchParam ||
+      currentPage !== initialPageParam;
+    
+    // Solo hacer fetch si los parámetros han cambiado desde la carga inicial
+    if (paramsChanged) {
+      fetchCampaigns();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory, searchTerm, currentPage]);
   

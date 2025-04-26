@@ -8,11 +8,87 @@ import Breadcrumb from '@/components/ui/Breadcrumb';
 import CampaignsClient from './CampaignsClient';
 import { Campaign } from '@/types/campaign';
 import { CampaignStatus, CampaignCategory } from '@/types/enums';
+import { getCategoryLabel } from '@/utils/campaign-categories';
 
-export const metadata: Metadata = {
-  title: 'Campañas | Causa Justa',
-  description: 'Explora todas las campañas activas en Causa Justa y ayuda a quienes más lo necesitan.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  // Obtener las campañas destacadas para enriquecer la descripción
+  const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
+  let featuredCampaignsCount = 0;
+  let categories: string[] = [];
+  
+  if (apiUrl) {
+    try {
+      const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
+      const response = await fetch(`${baseUrl}campaigns?status=VERIFIED&isFeatured=true&limit=5`, {
+        next: { revalidate: 3600 },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        featuredCampaignsCount = data.items?.length || 0;
+        
+        // Extraer categorías únicas para keywords
+        const uniqueCategories = new Set<string>();
+        data.items?.forEach((campaign: Campaign) => {
+          if (campaign.category) {
+            uniqueCategories.add(getCategoryLabel(campaign.category as CampaignCategory).toLowerCase());
+          }
+        });
+        categories = Array.from(uniqueCategories);
+      }
+    } catch (error) {
+      console.error('Error al obtener campañas destacadas para metadatos:', error);
+    }
+  }
+  
+  // URL base para rutas absolutas
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://causajusta.org';
+  
+  // Descripción enriquecida con datos dinámicos
+  const description = featuredCampaignsCount > 0
+    ? `Explora ${featuredCampaignsCount}+ campañas activas en Causa Justa. Ayuda a quienes más lo necesitan con causas de ${categories.join(', ')}.`
+    : 'Explora todas las campañas activas en Causa Justa y ayuda a quienes más lo necesitan.';
+  
+  return {
+    title: 'Campañas | Causa Justa',
+    description,
+    keywords: [
+      'causa justa', 
+      'donaciones', 
+      'campañas solidarias',
+      'ayuda social',
+      'argentina',
+      ...categories
+    ].join(', '),
+    openGraph: {
+      title: 'Campañas | Causa Justa',
+      description,
+      images: [
+        {
+          url: '/images/og-campaigns.jpg',
+          width: 1200,
+          height: 630,
+          alt: 'Campañas activas en Causa Justa',
+        },
+      ],
+      locale: 'es_AR',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Campañas | Causa Justa',
+      description,
+      images: ['/images/og-campaigns.jpg'],
+    },
+    metadataBase: new URL(baseUrl),
+    alternates: {
+      canonical: '/campaigns',
+      languages: {
+        'es-AR': '/campaigns',
+      },
+    },
+  };
+}
 
 interface CampaignsResponse {
   items: Campaign[];
@@ -54,7 +130,7 @@ async function getCampaigns(searchParams: Record<string, string | string[] | und
     
     const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
     const response = await fetch(`${baseUrl}campaigns?${params.toString()}`, {
-      cache: 'no-store',
+      next: { revalidate: 3600 }, // Revalidar cada hora
       headers: {
         'Content-Type': 'application/json',
       },
@@ -89,7 +165,7 @@ async function getAvailableCategories(): Promise<CampaignCategory[]> {
     // Idealmente, el backend tendría un endpoint para obtener categorías con campañas
     // Como alternativa, obtenemos todas las campañas y extraemos las categorías únicas
     const response = await fetch(`${baseUrl}campaigns/categories`, {
-      cache: 'no-store',
+      next: { revalidate: 86400 }, // Revalidar cada día (las categorías cambian con menos frecuencia)
       headers: {
         'Content-Type': 'application/json',
       },
@@ -114,9 +190,16 @@ async function getAvailableCategories(): Promise<CampaignCategory[]> {
 
 
 
-export default async function CampaignsPage({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
+export const dynamic = 'force-static';
+export const revalidate = 3600; // Revalidar cada hora
+
+export default async function CampaignsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  // En Next.js 15, searchParams es ahora asincónico y debe ser await
+  // Ver: https://nextjs.org/docs/app/guides/upgrading/version-15#params--searchparams
+  const resolvedSearchParams = await searchParams;
+  
   // Obtener campañas con los parámetros de búsqueda
-  const { items: campaigns, meta } = await getCampaigns(searchParams);
+  const { items: campaigns, meta } = await getCampaigns(resolvedSearchParams);
   
   // Obtener categorías disponibles
   const availableCategories = await getAvailableCategories();
