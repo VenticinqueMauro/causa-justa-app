@@ -23,9 +23,13 @@ export const runtime = 'edge';
  * Esta imagen se mostrará cuando se comparta la URL de la campaña en redes sociales
  * @param params - Parámetros de la ruta dinámica, incluyendo el slug de la campaña
  */
-export default async function Image({ params }: { params: { slug: string } }) {
+export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
+  // En Next.js 15, los parámetros son ahora asincónicos y deben ser await
+  // Ver: https://nextjs.org/docs/app/guides/upgrading/version-15#params--searchparams
+  const { slug } = await params;
+  
   // Obtener los datos de la campaña
-  const campaign = await getCampaignBySlug(params.slug);
+  const campaign = await getCampaignBySlug(slug);
   
   // Si no se encuentra la campaña, usar una imagen por defecto
   if (!campaign) {

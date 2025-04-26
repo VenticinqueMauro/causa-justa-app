@@ -40,8 +40,12 @@ function formatCurrency(amount?: number): string {
 }
 
 // Generar metadatos dinámicos para la página de detalle de campaña
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const campaign = await getCampaignBySlug(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  // En Next.js 15, los parámetros son ahora asincónicos y deben ser await
+  // Ver: https://nextjs.org/docs/app/guides/upgrading/version-15#params--searchparams
+  const { slug } = await params;
+  
+  const campaign = await getCampaignBySlug(slug);
   
   if (!campaign) {
     return baseGenerateMetadata({
@@ -78,7 +82,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       description,
       images: [
         {
-          url: `/campaigns/${params.slug}/opengraph-image`,
+          url: `/campaigns/${slug}/opengraph-image`,
           width: 1200,
           height: 630,
           alt: campaign.title,
@@ -94,13 +98,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       card: 'summary_large_image',
       title: campaign.title,
       description,
-      images: [`/campaigns/${params.slug}/opengraph-image`],
+      images: [`/campaigns/${slug}/opengraph-image`],
     },
     metadataBase: new URL(baseUrl),
     alternates: {
-      canonical: `/campaigns/${params.slug}`,
+      canonical: `/campaigns/${slug}`,
       languages: {
-        'es-AR': `/campaigns/${params.slug}`,
+        'es-AR': `/campaigns/${slug}`,
       },
     },
   };
@@ -136,8 +140,10 @@ export async function generateStaticParams() {
 export const dynamic = 'force-static';
 export const revalidate = 3600; // Revalidar cada hora
 
-export default async function CampaignDetailPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export default async function CampaignDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  // En Next.js 15, los parámetros son ahora asincónicos y deben ser await
+  // Ver: https://nextjs.org/docs/app/guides/upgrading/version-15#params--searchparams
+  const { slug } = await params;
   
   console.log('Buscando campaña con slug/id:', slug);
   const campaign = await getCampaignBySlug(slug);

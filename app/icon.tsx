@@ -12,12 +12,6 @@ export const contentType = 'image/png';
 export const runtime = 'edge';
 
 // Función para generar el favicon dinámicamente
-/**
- * Función para generar el icono de la aplicación
- * 
- * Siguiendo la documentación oficial de Next.js:
- * https://nextjs.org/docs/app/api-reference/file-conventions/metadata/app-icons
- */
 export default function Icon() {
   return new ImageResponse(
     (
