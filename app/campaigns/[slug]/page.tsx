@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import BrutalSection from '@/components/ui/BrutalSection';
@@ -10,65 +11,10 @@ import Breadcrumb from '@/components/ui/Breadcrumb';
 import { Campaign } from '@/types/campaign';
 import { CampaignCategory } from '@/types/enums';
 import { getCategoryLabel } from '@/utils/campaign-categories';
+import { generateMetadata as baseGenerateMetadata } from '@/utils/metadata';
+import { getCampaignBySlug } from './utils';
 
-// Función para obtener los datos de la campaña por su slug o ID
-async function getCampaignBySlug(slugOrId: string): Promise<Campaign | null> {
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
-    if (!apiUrl) {
-      console.error('API URL no configurada');
-      return null;
-    }
-    
-    const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
-    
-    // Intentar primero obtener por ID directo (para casos donde el slug es en realidad un ID)
-    let response = await fetch(`${baseUrl}campaigns/${slugOrId}`, {
-      cache: 'no-store',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    
-    // Si no funciona, intentar con el endpoint de slug si está disponible
-    if (!response.ok && response.status === 404) {
-      console.log('Campaña no encontrada por ID, intentando por slug...');
-      response = await fetch(`${baseUrl}campaigns?search=${encodeURIComponent(slugOrId)}&status=VERIFIED`, {
-        cache: 'no-store',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        // Si encontramos resultados, devolver el primero que coincida con el slug
-        if (data.items && data.items.length > 0) {
-          const matchingCampaign = data.items.find((c: Campaign) => 
-            c.slug === slugOrId || c.id === slugOrId
-          );
-          if (matchingCampaign) {
-            return matchingCampaign;
-          }
-          // Si no hay coincidencia exacta, devolver el primer resultado
-          return data.items[0];
-        }
-      }
-      return null;
-    }
-
-    if (!response.ok) {
-      console.error('Error al obtener campaña:', response.status);
-      return null;
-    }
-
-    const campaign = await response.json();
-    return campaign;
-  } catch (error) {
-    console.error('Error al obtener campaña:', error);
-    return null;
-  }
-}
+// La función getCampaignBySlug ahora se importa desde ./utils
 
 // Función para formatear la fecha
 function formatDate(dateString?: string): string {
@@ -93,10 +39,105 @@ function formatCurrency(amount?: number): string {
   }).format(amount);
 }
 
-export default async function CampaignDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  // Asegurarnos de que params está resuelto antes de acceder a sus propiedades
-  const resolvedParams = await params;
-  const slug = resolvedParams.slug;
+// Generar metadatos dinámicos para la página de detalle de campaña
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const campaign = await getCampaignBySlug(params.slug);
+  
+  if (!campaign) {
+    return baseGenerateMetadata({
+      title: 'Campaña no encontrada | Causa Justa',
+      description: 'La campaña que estás buscando no existe o ha sido eliminada.',
+    });
+  }
+  
+  // URL base para rutas absolutas
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://causajusta.org';
+  const categoryLabel = getCategoryLabel(campaign.category as CampaignCategory);
+  
+  // Calcular el progreso de la campaña para enriquecer la descripción
+  const progress = campaign.goalAmount && campaign.currentAmount !== undefined
+    ? Math.min(Math.round((campaign.currentAmount / campaign.goalAmount) * 100), 100)
+    : 0;
+  
+  // Descripción enriquecida con datos dinámicos
+  const description = `${campaign.shortDescription || 'Ayuda a esta causa solidaria'}. ${progress}% recaudado de la meta. Categoría: ${categoryLabel}.`;
+  
+  return {
+    title: `${campaign.title} | Causa Justa`,
+    description,
+    keywords: [
+      'causa justa', 
+      'donaciones', 
+      categoryLabel.toLowerCase(),
+      'ayuda social',
+      'argentina',
+      campaign.tags?.join(', ') || '',
+    ].filter(Boolean).join(', '),
+    openGraph: {
+      title: campaign.title,
+      description,
+      images: [
+        {
+          url: `/campaigns/${params.slug}/opengraph-image`,
+          width: 1200,
+          height: 630,
+          alt: campaign.title,
+        },
+      ],
+      locale: 'es_AR',
+      type: 'article',
+      publishedTime: campaign.publishedAt || campaign.createdAt,
+      modifiedTime: campaign.updatedAt,
+      tags: campaign.tags,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: campaign.title,
+      description,
+      images: [`/campaigns/${params.slug}/opengraph-image`],
+    },
+    metadataBase: new URL(baseUrl),
+    alternates: {
+      canonical: `/campaigns/${params.slug}`,
+      languages: {
+        'es-AR': `/campaigns/${params.slug}`,
+      },
+    },
+  };
+}
+
+// Generar rutas estáticas para las campañas más populares
+export async function generateStaticParams() {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
+    if (!apiUrl) {
+      return [];
+    }
+    
+    const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
+    const response = await fetch(`${baseUrl}campaigns?status=VERIFIED&limit=20&sort=currentAmount:desc`, {
+      next: { revalidate: 86400 }, // Revalidar diariamente
+    });
+    
+    if (!response.ok) {
+      return [];
+    }
+    
+    const data = await response.json();
+    return (data.items || []).map((campaign: Campaign) => ({
+      slug: campaign.slug || campaign.id,
+    }));
+  } catch (error) {
+    console.error('Error generando rutas estáticas:', error);
+    return [];
+  }
+}
+
+export const dynamic = 'force-static';
+export const revalidate = 3600; // Revalidar cada hora
+
+export default async function CampaignDetailPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   
   console.log('Buscando campaña con slug/id:', slug);
   const campaign = await getCampaignBySlug(slug);

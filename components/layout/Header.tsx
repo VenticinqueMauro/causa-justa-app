@@ -167,7 +167,7 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-4 xl:gap-6">
-            <Link href="#" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 whitespace-nowrap">Causas</Link>
+            <Link href="/campaigns" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 whitespace-nowrap">Causas</Link>
             <Link href="#" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 whitespace-nowrap">Cómo funciona</Link>
             <Link href="#" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 whitespace-nowrap">Sobre nosotros</Link>
             <Link href="#" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 whitespace-nowrap">Contacto</Link>

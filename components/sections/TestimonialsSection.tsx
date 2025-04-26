@@ -21,7 +21,7 @@ const TestimonialsSection = () => {
             Historias reales de personas que han experimentado el poder de la solidaridad a través de nuestra plataforma
           </p>
         </div>
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
