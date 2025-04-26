@@ -33,18 +33,14 @@ export const metadata: Metadata = {
     address: true,
     telephone: true,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://causajusta.org'),
-  alternates: {
-    canonical: '/',
-    languages: {
-      'es-AR': '/',
-    },
-  },
+  category: 'fundraising',
   openGraph: {
-    title: 'Por una Causa Justa | Plataforma de recaudación de fondos para todo tipo de causas',
-    description: 'Plataforma de recaudación de fondos para todo tipo de causas: desde viajes y estudios hasta emergencias médicas y proyectos solidarios. Crea tu campaña o apoya las existentes.',
-    url: '/',
+    title: 'Por una Causa Justa - Plataforma de recaudación de fondos',
+    description: 'Plataforma de recaudación de fondos para todo tipo de causas: viajes, estudios, emergencias o proyectos personales.',
+    url: 'https://causajusta.org',
     siteName: 'Por una Causa Justa',
+    locale: 'es_AR',
+    type: 'website',
     images: [
       {
         url: '/opengraph-image',
@@ -53,19 +49,18 @@ export const metadata: Metadata = {
         alt: 'Por una Causa Justa - Plataforma de recaudación de fondos',
       },
     ],
-    locale: 'es_AR',
-    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Por una Causa Justa | Plataforma de recaudación de fondos para todo tipo de causas',
-    description: 'Plataforma de recaudación de fondos para todo tipo de causas: desde viajes y estudios hasta emergencias médicas y proyectos solidarios. Crea tu campaña o apoya las existentes.',
-    images: ['/opengraph-image'],
+    title: 'Por una Causa Justa - Plataforma de recaudación de fondos',
+    description: 'Plataforma de recaudación de fondos para todo tipo de causas: viajes, estudios, emergencias o proyectos personales.',
     creator: '@PorUnaCausaJusta',
+    images: ['/twitter-image'],
   },
   robots: {
     index: true,
     follow: true,
+    nocache: false,
     googleBot: {
       index: true,
       follow: true,
@@ -74,11 +69,17 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  alternates: {
+    canonical: '/',
+    languages: {
+      'es-AR': '/',
+    },
+  },
+  manifest: '/manifest',
   verification: {
-    // Estos valores deberían ser reemplazados con los reales cuando estén disponibles
-    google: 'google-site-verification-code',
+    // Agregar cuando estén disponibles
+    // google: 'google-site-verification-code',
     // yandex: 'yandex-verification-code',
-    // yahoo: 'yahoo-verification-code',
   },
 };
 
@@ -89,6 +90,33 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
+      <head>
+        {/* Datos estructurados JSON-LD para mejorar SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'Por una Causa Justa',
+              url: process.env.NEXT_PUBLIC_APP_URL || 'https://causajusta.org',
+              logo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://causajusta.org'}/icon-512x512.png`,
+              sameAs: [
+                'https://facebook.com/porunacausajusta',
+                'https://twitter.com/PorUnaCausaJusta',
+                'https://instagram.com/porunacausajusta',
+              ],
+              contactPoint: {
+                '@type': 'ContactPoint',
+                telephone: '+54-11-1234-5678',
+                contactType: 'customer service',
+                availableLanguage: 'Spanish',
+              },
+              description: 'Plataforma de recaudación de fondos para todo tipo de causas: viajes, estudios, emergencias o proyectos personales.',
+            })
+          }}
+        />
+      </head>
       <body
         className={`${nunito.variable} ${workSans.variable} font-sans antialiased`}
       >
