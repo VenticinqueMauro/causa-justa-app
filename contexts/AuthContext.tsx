@@ -166,6 +166,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                   userData.profilePicture = `${baseUrl}${userData.profilePicture.startsWith('/') ? userData.profilePicture.substring(1) : userData.profilePicture}`;
                 }
                 
+                // Verificar si el usuario necesita seleccionar un rol (autenticación con Google)
+                const responseData = userData as User & { needsRoleSelection?: boolean };
+                
+                if (responseData.needsRoleSelection) {
+                  console.log('Usuario necesita seleccionar un rol, redirigiendo...');
+                  // Guardar datos temporalmente para la página de selección de rol
+                  sessionStorage.setItem('googleUserData', JSON.stringify(userData));
+                  // Guardar token para que la página de selección de rol pueda usarlo
+                  localStorage.setItem('auth_token', token);
+                  localStorage.setItem('token', token); // Mantener compatibilidad
+                  // Redirigir a la página de selección de rol
+                  router.push('/auth/google/role-selection');
+                  return;
+                }
+                
                 setUser(userData);
                 // Actualizar cookies primero (prioridad)
                 document.cookie = `token=${token}; path=/; max-age=2592000`; // 30 días
@@ -239,6 +254,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (decodedToken && decodedToken.fullName && (!userData.fullName || userData.fullName === userData.email.split('@')[0])) {
         userData.fullName = decodedToken.fullName;
         console.log('Nombre completo extraído del token JWT:', decodedToken.fullName);
+      }
+      
+      // Verificar si el usuario necesita seleccionar un rol (autenticación con Google)
+      const extendedUserData = userData as User & { needsRoleSelection?: boolean };
+      
+      if (extendedUserData.needsRoleSelection) {
+        console.log('Usuario necesita seleccionar un rol, redirigiendo...');
+        // Guardar datos temporalmente para la página de selección de rol
+        sessionStorage.setItem('googleUserData', JSON.stringify(userData));
+        // Guardar token para que la página de selección de rol pueda usarlo
+        localStorage.setItem('auth_token', token);
+        localStorage.setItem('token', token); // Mantener compatibilidad
+        localStorage.setItem('refresh_token', refreshToken);
+        // Redirigir a la página de selección de rol
+        router.push('/auth/google/role-selection');
+        return;
       }
       
       // Priorizar cookies para la autenticación

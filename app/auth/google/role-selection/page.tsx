@@ -31,14 +31,22 @@ export default function RoleSelectionPage() {
     setLoading(true);
     
     try {
-      // Obtener el token de acceso
-      const token = localStorage.getItem('token');
+      // Obtener el token de acceso (buscar en ambas ubicaciones)
+      let token = localStorage.getItem('auth_token');
+      
+      // Si no se encuentra en 'auth_token', intentar con 'token'
+      if (!token) {
+        token = localStorage.getItem('token');
+      }
       
       if (!token) {
+        console.error('No se encontró el token en ninguna ubicación');
         showToast('Error: No se encontró el token de autenticación', 'error');
         router.push('/login');
         return;
       }
+      
+      console.log('Token encontrado, longitud:', token.length);
 
       // Enviar solicitud directamente al endpoint del backend para actualizar el rol del usuario
       const response = await fetch(`${process.env.NEXT_PUBLIC_NEST_API_URL}auth/update-role`, {
