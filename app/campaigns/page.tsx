@@ -24,7 +24,7 @@ interface CampaignsResponse {
   };
 }
 
-async function getCampaigns(searchParams: { [key: string]: string | string[] | undefined }): Promise<CampaignsResponse> {
+async function getCampaigns(searchParams: Record<string, string | string[] | undefined>): Promise<CampaignsResponse> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
     if (!apiUrl) {
@@ -114,7 +114,7 @@ async function getAvailableCategories(): Promise<CampaignCategory[]> {
 
 
 
-export default async function CampaignsPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default async function CampaignsPage({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
   // Obtener campañas con los parámetros de búsqueda
   const { items: campaigns, meta } = await getCampaigns(searchParams);
   
