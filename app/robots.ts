@@ -6,7 +6,7 @@ import { MetadataRoute } from 'next';
  */
 export default function robots(): MetadataRoute.Robots {
   // URL base de la aplicación
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://causajusta.org';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://causa-justa-app.vercel.app';
   
   return {
     rules: {

@@ -7,7 +7,7 @@ import { CampaignCategory } from '@/types/enums';
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // URL base de la aplicación
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://causajusta.org';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://causa-justa-app.vercel.app';
   
   // Rutas estáticas principales
   const staticRoutes = [

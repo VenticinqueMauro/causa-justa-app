@@ -5,6 +5,8 @@ import { MetadataRoute } from 'next';
  * @returns Configuración del manifest para Next.js
  */
 export default function manifest(): MetadataRoute.Manifest {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://causa-justa-app.vercel.app';
+  
   return {
     name: 'Por una Causa Justa',
     short_name: 'Causa Justa',

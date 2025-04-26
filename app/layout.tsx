@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Por una Causa Justa - Plataforma de recaudación de fondos',
     description: 'Plataforma de recaudación de fondos para todo tipo de causas: viajes, estudios, emergencias o proyectos personales.',
-    url: 'https://causajusta.org',
+    url: 'https://causa-justa-app.vercel.app',
     siteName: 'Por una Causa Justa',
     locale: 'es_AR',
     type: 'website',
@@ -99,8 +99,8 @@ export default function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'Organization',
               name: 'Por una Causa Justa',
-              url: process.env.NEXT_PUBLIC_APP_URL || 'https://causajusta.org',
-              logo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://causajusta.org'}/icon-512x512.png`,
+              url: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://causa-justa-app.vercel.app').href,
+              logo: `${new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://causa-justa-app.vercel.app').href}/icon-512x512.png`,
               sameAs: [
                 'https://facebook.com/porunacausajusta',
                 'https://twitter.com/PorUnaCausaJusta',

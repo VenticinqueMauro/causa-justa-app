@@ -17,7 +17,7 @@ export function generateMetadata({
   keywords = ['causa justa', 'donaciones', 'campañas solidarias', 'ayuda social', 'argentina'],
 }: MetadataProps): Metadata {
   // URL base para rutas absolutas
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://causajusta.org';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://causa-justa-app.vercel.app';
   
   return {
     title,
