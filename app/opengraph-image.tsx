@@ -11,6 +11,9 @@ export const contentType = 'image/png';
 // Configuración de revalidación
 export const revalidate = 86400; // Revalidar cada día
 
+// Configuración de runtime para asegurar que funcione correctamente
+export const runtime = 'edge';
+
 // Función para generar la imagen OG estática para la página principal
 export default function Image() {
   return new ImageResponse(
@@ -56,7 +59,7 @@ export default function Image() {
               ❤️
             </div>
           </div>
-          <div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: '24px', marginBottom: '-8px' }}>Por una</div>
             <div>Causa Justa</div>
           </div>
@@ -128,6 +131,14 @@ export default function Image() {
         </div>
       </div>
     ),
-    { ...size }
+    { 
+      ...size,
+      // Optimizaciones necesarias para evitar errores de renderizado
+      emoji: 'twemoji',
+      debug: false,
+      headers: {
+        'Cache-Control': 'public, max-age=86400, s-maxage=86400' // Caché por 1 día
+      }
+    }
   );
 }
