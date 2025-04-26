@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import BrutalButton from '@/components/ui/BrutalButton';
 import BrutalHeading from '@/components/ui/BrutalHeading';
-import { ArrowLeft, Loader2, ArrowRight, AlertCircle, X } from 'lucide-react';
+import { ArrowLeft, Loader2, ArrowRight, AlertCircle, X, Info } from 'lucide-react';
 import Link from 'next/link';
 import { Toast, useToast } from '@/components/ui/Toast';
 import CampaignForm from '@/components/campaigns/CampaignForm';
 import { UserRole } from '@/types';
+import TermsContent from '@/components/terms/TermsContent';
 
 export default function CreateCausePage() {
   const { user, isAuthenticated, isLoading: authLoading, getToken, login } = useAuth();
@@ -22,6 +23,8 @@ export default function CreateCausePage() {
   const [showRoleChangeModal, setShowRoleChangeModal] = useState(false);
   const [isChangingRole, setIsChangingRole] = useState(false);
   const [mercadoPagoConnected, setMercadoPagoConnected] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const { showToast: showGlobalToast } = useToast();
 
   // Función para verificar el estado de conexión con MercadoPago
@@ -76,6 +79,8 @@ export default function CreateCausePage() {
       setIsLoading(false);
     }
   };
+
+
 
   // Función para verificar requisitos para crear una campaña
   const checkRequirements = async () => {
@@ -156,6 +161,15 @@ export default function CreateCausePage() {
 
   // Conectar MercadoPago
   const connectMercadoPago = async () => {
+    // Verificar que se hayan aceptado los términos y condiciones
+    if (!termsAccepted) {
+      setToastMessage('Debes aceptar los términos y condiciones antes de continuar');
+      setToastType('error');
+      setShowToast(true);
+      // Hacer scroll al checkbox de términos y condiciones
+      document.getElementById('terms')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
     try {
       const token = await getToken();
       if (!token) {
@@ -290,18 +304,52 @@ export default function CreateCausePage() {
           Volver al inicio
         </Link>
         
-        <div className="border-2 border-red-500 shadow-[5px_5px_0_0_rgba(239,68,68,0.8)] p-6 bg-white mb-8">
-          <h2 className="text-xl font-bold text-[#002C5B] mb-4">Conexión con MercadoPago requerida</h2>
+        <div className={`border-2 ${termsAccepted ? 'border-green-500 shadow-[5px_5px_0_0_rgba(34,197,94,0.8)]' : 'border-red-500 shadow-[5px_5px_0_0_rgba(239,68,68,0.8)]'} p-6 bg-white mb-8 transition-all duration-300`}>
+          <h2 className="text-xl font-bold text-[#002C5B] mb-4">
+            {termsAccepted ? 'Listo para conectar MercadoPago' : 'Conexión con MercadoPago requerida'}
+          </h2>
           
           <p className="text-[#002C5B] mb-6">
-            Para crear una campaña, es necesario conectar tu cuenta de MercadoPago. Esto permitirá recibir donaciones
-            cuando tu campaña sea aprobada.
+            Para crear una campaña, es necesario conectar tu cuenta de MercadoPago. Esto permitirá <b>recibir donaciones</b> cuando tu campaña sea aprobada.
           </p>
+
+          {/* Términos y condiciones */}
+          <div className={`mb-6 border-2 p-4 ${termsAccepted ? 'border-green-500 bg-green-100' : 'border-[#002C5B] bg-[#EDFCA7]/30'} transition-all duration-300`}>
+            <h3 className="font-bold text-[#002C5B] mb-2">Términos y Condiciones</h3>
+            
+            {/* Contenido de los términos y condiciones con scroll */}
+            <div className="mb-4 max-h-60 overflow-y-auto border border-gray-300 p-3 bg-white">
+              <TermsContent />
+            </div>
+            
+            <div className="flex items-start mt-4">
+              <div className="flex items-center h-5">
+                <input
+                  id="terms"
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="w-5 h-5 border-2 border-[#002C5B] rounded focus:ring-2 focus:ring-[#002C5B]"
+                />
+              </div>
+              <div className="ml-3">
+                <label htmlFor="terms" className="font-medium text-[#002C5B]">
+                  Acepto los términos y condiciones
+                </label>
+                <p className="text-gray-600 text-sm mt-1">
+                  Es necesario aceptar los términos y condiciones antes de conectar tu cuenta de MercadoPago.
+                </p>
+                {(showToast && toastMessage.includes('términos')) && (
+                  <p className="text-red-500 font-semibold mt-1">Debes aceptar los términos y condiciones</p>
+                )}
+              </div>
+            </div>
+          </div>
           
           <div className="flex flex-col sm:flex-row gap-4">
             <BrutalButton 
               onClick={connectMercadoPago}
-              variant="secondary"
+              variant="primary"
               className="flex items-center justify-center"
             >
               Conectar MercadoPago
