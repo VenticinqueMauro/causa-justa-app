@@ -136,7 +136,11 @@ export async function generateStaticParams() {
 export const dynamic = 'force-static';
 export const revalidate = 3600; // Revalidar cada hora
 
-export default async function CampaignDetailPage({ params }: { params: { slug: string } }) {
+type Props = {
+  params: { slug: string }
+}
+
+export default async function CampaignDetailPage({ params }: Props) {
   const { slug } = params;
   
   console.log('Buscando campaña con slug/id:', slug);

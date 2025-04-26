@@ -193,7 +193,11 @@ async function getAvailableCategories(): Promise<CampaignCategory[]> {
 export const dynamic = 'force-static';
 export const revalidate = 3600; // Revalidar cada hora
 
-export default async function CampaignsPage({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
+type Props = {
+  searchParams: Record<string, string | string[] | undefined>
+}
+
+export default async function CampaignsPage({ searchParams }: Props) {
   // Obtener campañas con los parámetros de búsqueda
   const { items: campaigns, meta } = await getCampaigns(searchParams);
   

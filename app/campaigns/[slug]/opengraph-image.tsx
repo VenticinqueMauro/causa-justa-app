@@ -14,8 +14,12 @@ export const contentType = 'image/png';
 // Configuración de revalidación
 export const revalidate = 3600; // Revalidar cada hora
 
+type Props = {
+  params: { slug: string }
+}
+
 // Función para generar la imagen OG dinámicamente
-export default async function Image({ params }: { params: { slug: string } }) {
+export default async function Image({ params }: Props) {
   // Obtener los datos de la campaña
   const campaign = await getCampaignBySlug(params.slug);
   
