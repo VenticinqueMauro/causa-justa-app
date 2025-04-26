@@ -204,7 +204,7 @@ export default function StartCauseButton({
       console.log('Usuario no autenticado, redirigiendo a login');
       // Guardar la URL actual para redireccionar de vuelta después del login
       localStorage.setItem('redirectAfterLogin', '/create-cause');
-      router.push('/login?redirect=create-cause');
+      router.push('/login');
       return;
     }
     

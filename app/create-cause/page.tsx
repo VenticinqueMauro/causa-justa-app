@@ -107,7 +107,7 @@ export default function CreateCausePage() {
     // Verificar autenticación combinando cookies y estado del contexto
     if ((!tokenCookie && !isAuthenticated) || !user) {
       console.log('Usuario no autenticado (después de verificar cookies y contexto), redirigiendo a login');
-      router.push('/login?redirect=create-cause');
+      router.push('/login');
       return;
     }
 

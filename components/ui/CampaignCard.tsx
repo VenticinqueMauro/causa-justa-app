@@ -17,7 +17,7 @@ const CampaignCard = ({ campaign }: CampaignCardProps) => {
 
   return (
     <Link href={campaignUrl} passHref className="block cursor-pointer">
-      <div className="group relative overflow-hidden border-2 border-[#002C5B] bg-white transition-all transform shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)] h-[450px] w-full flex flex-col hover:shadow-[7px_7px_0px_0px_rgba(0,44,91,0.9)] hover:-translate-y-1">
+      <div className="group relative overflow-hidden border-2 border-[#002C5B] bg-white transition-all transform shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)] h-[450px] w-full flex flex-col">
         <div className="aspect-video overflow-hidden border-b-2 border-[#002C5B] h-[225px]">
           <Image
             src={campaign.images && campaign.images.length > 0 ? 

@@ -86,7 +86,7 @@ const FloatingStartCauseButton = () => {
       console.log('Usuario no autenticado, redirigiendo a login');
       // Guardar la URL actual para redireccionar de vuelta después del login
       localStorage.setItem('redirectAfterLogin', '/create-cause');
-      router.push('/login?redirect=create-cause');
+      router.push('/login');
     } else {
       console.log('Usuario autenticado, redirigiendo a create-cause');
       // Asegurarse de que las cookies estén actualizadas
