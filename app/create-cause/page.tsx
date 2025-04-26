@@ -304,7 +304,7 @@ export default function CreateCausePage() {
           Volver al inicio
         </Link>
         
-        <div className={`border-2 ${termsAccepted ? 'border-green-500 shadow-[5px_5px_0_0_rgba(34,197,94,0.8)]' : 'border-red-500 shadow-[5px_5px_0_0_rgba(239,68,68,0.8)]'} p-6 bg-white mb-8 transition-all duration-300`}>
+        <div className={`border-2 ${termsAccepted ? 'border-green-500 shadow-[5px_5px_0_0_rgba(34,197,94,0.8)]' : 'border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]'} p-6 bg-white mb-8 transition-all duration-300`}>
           <h2 className="text-xl font-bold text-[#002C5B] mb-4">
             {termsAccepted ? 'Listo para conectar MercadoPago' : 'Conexión con MercadoPago requerida'}
           </h2>

@@ -86,11 +86,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         storedUser = localStorage.getItem('auth_user');
       }
       
+      // Si tenemos un token, intentar decodificarlo para obtener información adicional
+      if (token) {
+        const decodedToken = decodeJWT(token);
+        if (decodedToken && decodedToken.fullName) {
+          console.log('Nombre completo encontrado en el token JWT:', decodedToken.fullName);
+        }
+      }
+      
       // Si tenemos un usuario almacenado, establecerlo temporalmente mientras verificamos
       // Esto evita redirecciones innecesarias si hay problemas de conexión
       if (token && storedUser) {
         try {
           const parsedUser = JSON.parse(storedUser);
+          
+          // Si tenemos un token, intentar extraer el nombre completo
+          if (token) {
+            const decodedToken = decodeJWT(token);
+            if (decodedToken && decodedToken.fullName && (!parsedUser.fullName || parsedUser.fullName === parsedUser.email.split('@')[0])) {
+              parsedUser.fullName = decodedToken.fullName;
+              console.log('Actualizando nombre completo desde JWT:', decodedToken.fullName);
+              
+              // Actualizar el usuario almacenado con el nombre completo correcto
+              localStorage.setItem('auth_user', JSON.stringify(parsedUser));
+              document.cookie = `auth_user=${JSON.stringify(parsedUser)}; path=/; max-age=86400; SameSite=Lax`;
+            }
+          }
+          
           setUser(parsedUser); // Establecer usuario inmediatamente
         } catch (e) {
           console.warn('Error parsing stored user data:', e);
@@ -188,10 +210,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   }, [router]);
 
+  // Función para decodificar un token JWT
+  const decodeJWT = (token: string): any => {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error('Error decodificando JWT:', error);
+      return null;
+    }
+  };
+
   const login = (token: string, refreshToken: string, userData: User) => {
     if (typeof window === 'undefined') return;
     
     try {
+      // Decodificar el token para obtener información adicional
+      const decodedToken = decodeJWT(token);
+      
+      // Si el token contiene fullName, asegurarse de que userData lo tenga
+      if (decodedToken && decodedToken.fullName && (!userData.fullName || userData.fullName === userData.email.split('@')[0])) {
+        userData.fullName = decodedToken.fullName;
+        console.log('Nombre completo extraído del token JWT:', decodedToken.fullName);
+      }
+      
       // Priorizar cookies para la autenticación
       // Establecer cookies para que el middleware pueda verificar la autenticación
       document.cookie = `token=${token}; path=/; max-age=86400; SameSite=Lax`;
