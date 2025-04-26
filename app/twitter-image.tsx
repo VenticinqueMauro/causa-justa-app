@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-// Configuración de la imagen
+// Configuración de la imagen para Twitter
 export const size = {
   width: 1200,
   height: 630,
@@ -18,8 +18,8 @@ export const revalidate = 86400; // Revalidar cada día
 export const runtime = 'edge';
 
 /**
- * Genera la imagen OpenGraph para la página principal de campañas
- * Esta imagen se mostrará cuando se comparta la URL de la página de campañas en redes sociales
+ * Genera la imagen Twitter Card para la página principal
+ * Optimizada específicamente para el formato de Twitter
  */
 export default function Image() {
   return new ImageResponse(
@@ -27,7 +27,7 @@ export default function Image() {
       <div
         style={{
           fontSize: 32,
-          background: '#ECECE2',
+          background: 'linear-gradient(to bottom right, #ECECE2, #FFFFFF)',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -36,14 +36,39 @@ export default function Image() {
           fontFamily: 'Inter, sans-serif',
         }}
       >
-        {/* Encabezado con logo */}
+        {/* Encabezado */}
         <div style={{ 
-          fontSize: 48, 
-          fontWeight: 'bold', 
-          color: '#002C5B',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
           marginBottom: '30px',
         }}>
-          Causa Justa
+          <div style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: 'white',
+            border: '2px solid #002C5B',
+            boxShadow: '4px 4px 0px 0px rgba(0,44,91,0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <div style={{
+              fontSize: '30px',
+              textAlign: 'center',
+            }}>
+              ❤️
+            </div>
+          </div>
+          <div style={{
+            fontSize: '36px',
+            fontWeight: 'bold',
+            color: '#002C5B',
+          }}>
+            <span style={{ fontSize: '20px', fontWeight: 'normal' }}>Por una</span>
+            <br />
+            Causa Justa
+          </div>
         </div>
         
         {/* Contenido principal */}
@@ -53,6 +78,7 @@ export default function Image() {
           flex: 1, 
           background: 'white',
           border: '3px solid #002C5B',
+          borderRadius: '12px',
           padding: '40px',
           boxShadow: '8px 8px 0px 0px rgba(0,44,91,0.8)',
           justifyContent: 'center',
@@ -60,65 +86,57 @@ export default function Image() {
           textAlign: 'center',
         }}>
           <div style={{ 
-            fontSize: 64, 
+            fontSize: '48px', 
             fontWeight: 'bold', 
             color: '#002C5B',
-            marginBottom: '30px',
+            marginBottom: '24px',
             lineHeight: 1.2,
           }}>
-            Campañas Solidarias
+            Recauda fondos para tu causa
           </div>
           
           <div style={{ 
-            fontSize: 36, 
+            fontSize: '28px', 
             color: '#4A4A4A',
-            marginBottom: '40px',
+            marginBottom: '32px',
             lineHeight: 1.4,
             maxWidth: '80%',
           }}>
-            Explora todas las campañas activas y ayuda a quienes más lo necesitan
+            Viajes ✈️ • Estudios 📚 • Emergencias 🚨 • Proyectos personales 💼
           </div>
           
-          {/* Categorías */}
+          {/* CTA */}
           <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: '16px',
-            marginTop: '20px',
+            backgroundColor: '#002C5B',
+            color: 'white',
+            padding: '16px 32px',
+            borderRadius: '8px',
+            fontSize: '28px',
+            fontWeight: 'bold',
+            boxShadow: '4px 4px 0px 0px rgba(0,0,0,0.2)',
           }}>
-            {['Salud 🏥', 'Educación 📚', 'Viajes ✈️', 'Estudios 📖', 'Emergencias 🚨', 'Proyectos 💼'].map((category) => (
-              <div key={category} style={{
-                backgroundColor: '#002C5B',
-                color: 'white',
-                padding: '8px 16px',
-                borderRadius: '4px',
-                fontSize: 24,
-              }}>
-                {category}
-              </div>
-            ))}
+            Crea tu campaña
           </div>
         </div>
         
         {/* Pie de página */}
         <div style={{ 
           marginTop: '20px',
-          fontSize: 24,
+          fontSize: '20px',
           color: '#002C5B',
           textAlign: 'center',
         }}>
-          causajusta.org/campaigns
+          causajusta.org • Síguenos @PorUnaCausaJusta
         </div>
       </div>
     ),
     { 
       ...size,
       // Optimizaciones para mejorar la calidad y rendimiento
-      emoji: 'twemoji', // Soporte para emojis consistentes
-      debug: false, // Deshabilitar en producción
+      emoji: 'twemoji',
+      debug: false,
       headers: {
-        'Cache-Control': 'public, max-age=86400, s-maxage=86400' // Caché por 1 día
+        'Cache-Control': 'public, max-age=86400, s-maxage=86400'
       }
     }
   );

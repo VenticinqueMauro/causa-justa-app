@@ -8,19 +8,10 @@ export const size = {
 
 export const contentType = 'image/png';
 
-// Texto alternativo para accesibilidad
-export const alt = 'Por una Causa Justa - Plataforma de recaudación de fondos para todo tipo de causas';
-
 // Configuración de revalidación
 export const revalidate = 86400; // Revalidar cada día
 
-// Configuración de runtime para asegurar que funcione correctamente
-export const runtime = 'edge';
-
-/**
- * Genera la imagen OpenGraph para la página principal de campañas
- * Esta imagen se mostrará cuando se comparta la URL de la página de campañas en redes sociales
- */
+// Función para generar la imagen OG estática para la página principal
 export default function Image() {
   return new ImageResponse(
     (
@@ -33,7 +24,7 @@ export default function Image() {
           display: 'flex',
           flexDirection: 'column',
           padding: '40px',
-          fontFamily: 'Inter, sans-serif',
+          fontFamily: 'sans-serif',
         }}
       >
         {/* Encabezado con logo */}
@@ -42,8 +33,33 @@ export default function Image() {
           fontWeight: 'bold', 
           color: '#002C5B',
           marginBottom: '30px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
         }}>
-          Causa Justa
+          <div style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: 'white',
+            border: '2px solid #002C5B',
+            boxShadow: '4px 4px 0px 0px rgba(0,44,91,0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <div style={{
+              width: '30px',
+              height: '30px',
+              color: '#002C5B',
+              textAlign: 'center',
+            }}>
+              ❤️
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: '24px', marginBottom: '-8px' }}>Por una</div>
+            <div>Causa Justa</div>
+          </div>
         </div>
         
         {/* Contenido principal */}
@@ -66,7 +82,7 @@ export default function Image() {
             marginBottom: '30px',
             lineHeight: 1.2,
           }}>
-            Campañas Solidarias
+            Recauda fondos para tu causa
           </div>
           
           <div style={{ 
@@ -76,7 +92,7 @@ export default function Image() {
             lineHeight: 1.4,
             maxWidth: '80%',
           }}>
-            Explora todas las campañas activas y ayuda a quienes más lo necesitan
+            Viajes, estudios, emergencias, proyectos personales o solidarios
           </div>
           
           {/* Categorías */}
@@ -87,7 +103,7 @@ export default function Image() {
             gap: '16px',
             marginTop: '20px',
           }}>
-            {['Salud 🏥', 'Educación 📚', 'Viajes ✈️', 'Estudios 📖', 'Emergencias 🚨', 'Proyectos 💼'].map((category) => (
+            {['Salud', 'Educación', 'Viajes', 'Estudios', 'Emergencias', 'Proyectos'].map((category) => (
               <div key={category} style={{
                 backgroundColor: '#002C5B',
                 color: 'white',
@@ -108,18 +124,10 @@ export default function Image() {
           color: '#002C5B',
           textAlign: 'center',
         }}>
-          causajusta.org/campaigns
+          causajusta.org
         </div>
       </div>
     ),
-    { 
-      ...size,
-      // Optimizaciones para mejorar la calidad y rendimiento
-      emoji: 'twemoji', // Soporte para emojis consistentes
-      debug: false, // Deshabilitar en producción
-      headers: {
-        'Cache-Control': 'public, max-age=86400, s-maxage=86400' // Caché por 1 día
-      }
-    }
+    { ...size }
   );
 }

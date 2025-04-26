@@ -14,12 +14,16 @@ export const contentType = 'image/png';
 // Configuración de revalidación
 export const revalidate = 3600; // Revalidar cada hora
 
-type Props = {
-  params: { slug: string }
-}
+// Configuración de runtime - fundamental para que funcione correctamente
+export const runtime = 'edge';
 
 // Función para generar la imagen OG dinámicamente
-export default async function Image({ params }: Props) {
+/**
+ * Genera dinámicamente la imagen OpenGraph para una campaña específica
+ * Esta imagen se mostrará cuando se comparta la URL de la campaña en redes sociales
+ * @param params - Parámetros de la ruta dinámica, incluyendo el slug de la campaña
+ */
+export default async function Image({ params }: { params: { slug: string } }) {
   // Obtener los datos de la campaña
   const campaign = await getCampaignBySlug(params.slug);
   
@@ -40,16 +44,24 @@ export default async function Image({ params }: Props) {
             color: '#002C5B',
             padding: '40px',
             textAlign: 'center',
-            fontFamily: 'sans-serif',
+            fontFamily: 'Inter, sans-serif',
           }}
         >
           <div style={{ fontSize: 64, fontWeight: 'bold', marginBottom: '20px' }}>
-            Causa Justa
+            Por una Causa Justa
           </div>
           <div>Campaña no encontrada</div>
         </div>
       ),
-      { ...size }
+      { 
+        ...size,
+        // Optimizaciones para mejorar la calidad y rendimiento
+        emoji: 'twemoji', // Soporte para emojis consistentes
+        debug: false, // Deshabilitar en producción
+        headers: {
+          'Cache-Control': 'public, max-age=86400, immutable'
+        }
+      }
     );
   }
 
@@ -89,7 +101,7 @@ export default async function Image({ params }: Props) {
           display: 'flex',
           flexDirection: 'column',
           padding: '40px',
-          fontFamily: 'sans-serif',
+          fontFamily: 'Inter, sans-serif',
         }}
       >
         {/* Encabezado con logo y categoría */}
@@ -141,8 +153,13 @@ export default async function Image({ params }: Props) {
               color: '#002C5B',
               textAlign: 'center',
               padding: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
             }}>
-              {campaign.title}
+              {/* Mostrar texto del título con emojis que representen la categoría */}
+              {getCategoryEmoji(campaign.category as CampaignCategory)} {campaign.title}
             </div>
           </div>
           
@@ -230,6 +247,39 @@ export default async function Image({ params }: Props) {
         </div>
       </div>
     ),
-    { ...size }
+    { 
+      ...size,
+      // Optimizaciones para mejorar la calidad y rendimiento
+      emoji: 'twemoji', // Soporte para emojis consistentes
+      debug: false, // Deshabilitar en producción
+      headers: {
+        'Cache-Control': 'public, max-age=3600, s-maxage=3600' // Caché por 1 hora
+      }
+    }
   );
+}
+
+/**
+ * Función auxiliar para obtener un emoji representativo de cada categoría
+ */
+function getCategoryEmoji(category: CampaignCategory): string {
+  const emojiMap: Record<CampaignCategory, string> = {
+    HEALTH: '🏥',
+    EDUCATION: '📚',
+    FOOD: '🍲',
+    PEOPLE: '👪',
+    HOUSING: '🏠',
+    EMERGENCY: '🚨',
+    CHILDREN: '👶',
+    ELDERLY: '👵',
+    DISABILITY: '♿',
+    ANIMALS: '🐾',
+    ENVIRONMENT: '🌳',
+    SOCIAL_ENTERPRISE: '🤝',
+    ARTS: '🎨',
+    SPORTS: '⚽',
+    OTHERS: '✨',
+  };
+  
+  return emojiMap[category] || '✨';
 }
