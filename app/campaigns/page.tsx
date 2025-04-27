@@ -42,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
   
   // URL base para rutas absolutas
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://causajusta.org';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://causa-justa-app.vercel.app';
   
   // Descripción enriquecida con datos dinámicos
   const description = featuredCampaignsCount > 0
@@ -50,7 +50,7 @@ export async function generateMetadata(): Promise<Metadata> {
     : 'Explora todas las campañas activas en Causa Justa y ayuda a quienes más lo necesitan.';
   
   return {
-    title: 'Campañas | Causa Justa',
+    title: 'Campañas | Por una Causa Justa',
     description,
     keywords: [
       'causa justa', 
@@ -61,14 +61,17 @@ export async function generateMetadata(): Promise<Metadata> {
       ...categories
     ].join(', '),
     openGraph: {
-      title: 'Campañas | Causa Justa',
+      title: 'Campañas | Por una Causa Justa',
       description,
+      url: `${baseUrl}/campaigns`,
+      siteName: 'Por una Causa Justa',
       images: [
         {
-          url: '/images/og-campaigns.jpg',
+          url: '/opengraph-image', // Usar la misma imagen que la página principal para consistencia
           width: 1200,
           height: 630,
           alt: 'Campañas activas en Causa Justa',
+          type: 'image/jpeg', // Especificar el tipo de imagen para mejor compatibilidad
         },
       ],
       locale: 'es_AR',
@@ -76,9 +79,10 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Campañas | Causa Justa',
+      title: 'Campañas | Por una Causa Justa',
       description,
-      images: ['/images/og-campaigns.jpg'],
+      creator: '@PorUnaCausaJusta',
+      images: ['/opengraph-image'], // Usar la misma imagen que OpenGraph para consistencia
     },
     metadataBase: new URL(baseUrl),
     alternates: {

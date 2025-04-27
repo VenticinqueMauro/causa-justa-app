@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
   
   // URL base para rutas absolutas
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://causajusta.org';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://causa-justa-app.vercel.app';
   const categoryLabel = getCategoryLabel(campaign.category as CampaignCategory);
   
   // Calcular el progreso de la campaña para enriquecer la descripción
@@ -67,7 +67,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const description = `${campaign.shortDescription || 'Ayuda a esta causa solidaria'}. ${progress}% recaudado de la meta. Categoría: ${categoryLabel}.`;
   
   return {
-    title: `${campaign.title} | Causa Justa`,
+    title: `${campaign.title} | Por una Causa Justa`,
     description,
     keywords: [
       'causa justa', 
@@ -80,12 +80,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     openGraph: {
       title: campaign.title,
       description,
+      url: `${baseUrl}/campaigns/${slug}`,
+      siteName: 'Por una Causa Justa',
       images: [
         {
-          url: `/campaigns/${slug}/opengraph-image`,
+          // Usar la primera imagen de la campaña si existe, o la imagen generada dinámicamente como respaldo
+          url: campaign.images && campaign.images.length > 0 
+            ? campaign.images[0].startsWith('http') 
+              ? campaign.images[0] 
+              : `${baseUrl}${campaign.images[0]}` 
+            : `/campaigns/${slug}/opengraph-image`,
           width: 1200,
           height: 630,
           alt: campaign.title,
+          type: 'image/jpeg', // Especificar el tipo de imagen para mejor compatibilidad
         },
       ],
       locale: 'es_AR',
@@ -93,12 +101,22 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       publishedTime: campaign.publishedAt || campaign.createdAt,
       modifiedTime: campaign.updatedAt,
       tags: campaign.tags,
+      // Agregar información de autor si está disponible
+      ...(campaign.user?.fullName && {
+        authors: [campaign.user.fullName],
+      }),
     },
     twitter: {
       card: 'summary_large_image',
       title: campaign.title,
       description,
-      images: [`/campaigns/${slug}/opengraph-image`],
+      creator: '@PorUnaCausaJusta',
+      // Usar la misma imagen que OpenGraph para consistencia
+      images: [campaign.images && campaign.images.length > 0 
+        ? campaign.images[0].startsWith('http') 
+          ? campaign.images[0] 
+          : `${baseUrl}${campaign.images[0]}` 
+        : `/campaigns/${slug}/opengraph-image`],
     },
     metadataBase: new URL(baseUrl),
     alternates: {

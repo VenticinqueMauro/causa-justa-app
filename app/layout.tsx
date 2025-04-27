@@ -47,6 +47,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: 'Por una Causa Justa - Plataforma de recaudación de fondos',
+        type: 'image/jpeg', // Especificar el tipo de imagen para mejor compatibilidad
       },
     ],
   },
@@ -55,7 +56,7 @@ export const metadata: Metadata = {
     title: 'Por una Causa Justa - Plataforma de recaudación de fondos',
     description: 'Plataforma de recaudación de fondos para todo tipo de causas: viajes, estudios, emergencias o proyectos personales.',
     creator: '@PorUnaCausaJusta',
-    images: ['/twitter-image'],
+    images: ['/opengraph-image'], // Usar la misma imagen que OpenGraph para consistencia
   },
   robots: {
     index: true,
@@ -80,6 +81,10 @@ export const metadata: Metadata = {
     // Agregar cuando estén disponibles
     // google: 'google-site-verification-code',
     // yandex: 'yandex-verification-code',
+  },
+  // Metadatos adicionales para mejorar la compatibilidad con otras plataformas
+  other: {
+    'fb:app_id': '', // Agregar ID de app de Facebook si está disponible
   },
 };
 
