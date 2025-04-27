@@ -197,11 +197,12 @@ async function getAvailableCategories(): Promise<CampaignCategory[]> {
 export const dynamic = 'force-static';
 export const revalidate = 3600; // Revalidar cada hora
 
-export default async function CampaignsPage({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
-  // En Next.js, searchParams es un objeto que contiene los parámetros de búsqueda de la URL
+export default async function CampaignsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  // En Next.js 15, searchParams es ahora asincrónico y debe ser await
+  const resolvedSearchParams = await searchParams;
   
   // Obtener campañas con los parámetros de búsqueda
-  const { items: campaigns, meta } = await getCampaigns(searchParams);
+  const { items: campaigns, meta } = await getCampaigns(resolvedSearchParams);
   
   // Obtener categorías disponibles
   const availableCategories = await getAvailableCategories();
