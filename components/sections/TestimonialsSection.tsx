@@ -25,7 +25,7 @@ const TestimonialsSection = () => {
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
-              className="border-2 border-white p-6 bg-[#002C5B]/80 shadow-[5px_5px_0_0_rgba(255,255,255,0.3)] transform transition-all duration-200"
+              className="border-2 border-white p-3 md:p-6 bg-[#002C5B]/80 shadow-[5px_5px_0_0_rgba(255,255,255,0.3)] transform transition-all duration-200"
             >
               <div className="flex items-center gap-4 mb-4">
                 <div className="h-12 w-12 overflow-hidden border-2 border-white bg-white/20 shadow-[2px_2px_0_0_rgba(255,255,255,0.3)]">

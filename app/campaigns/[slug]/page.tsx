@@ -217,7 +217,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                   {/* Eliminado el botón flotante sobre la imagen */}
                 </div>
 
-                <div className="bg-white border-2 border-[#002C5B] p-3 md:p-6 shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)]">
+                <div className="bg-white border-2 border-[#002C5B]  p-3 md:p-6 shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)]">
                   <div className="flex flex-wrap items-start md:items-center justify-between mb-4 gap-4">
                     <div className="flex items-center gap-3">
                       <span className="px-2 py-1 bg-[#002C5B] text-white text-xs md:text-sm w-fit font-bold uppercase">
@@ -239,7 +239,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 </div>
 
                 {/* Información del beneficiario */}
-                <div className="bg-white border-2 border-[#002C5B] p-3 md:p-6 shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)]">
+                <div className="bg-white border-2 border-[#002C5B]  p-3 md:p-6 shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)]">
                   <BrutalHeading className="text-xl mb-4">Sobre el beneficiario</BrutalHeading>
                   <div className="space-y-2">
                     <p><strong>Nombre:</strong> {campaign.recipient?.name}</p>
@@ -250,7 +250,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 </div>
 
                 {/* Información del creador */}
-                <div className="bg-white border-2 border-[#002C5B] p-3 md:p-6 shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)]">
+                <div className="bg-white border-2 border-[#002C5B]  p-3 md:p-6 shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)]">
                   <BrutalHeading className="text-xl mb-4">Sobre el creador de la campaña</BrutalHeading>
                   <div className="space-y-2">
                     <p><strong>Relación con el beneficiario:</strong> {campaign.creator?.relation}</p>
@@ -261,7 +261,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
 
               {/* Columna derecha - Progreso y formulario de donación */}
               <div className="lg:col-span-1 space-y-6">
-                <div className="bg-white border-2 border-[#002C5B] p-3 md:p-6 shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)] sticky top-24">
+                <div className="bg-white border-2 border-[#002C5B]  p-3 md:p-6 shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)] sticky top-24">
                   <BrutalHeading className="text-xl mb-4">Progreso de la campaña</BrutalHeading>
 
                   <div className="space-y-4 mb-6">

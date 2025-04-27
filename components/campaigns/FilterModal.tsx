@@ -1,14 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
 import { CampaignCategory } from '@/types/enums';
 import { getCategoryLabel } from '@/utils/campaign-categories';
-import {
-  Heart, GraduationCap, Utensils, Users, Home,
-  AlertTriangle, Baby, UserPlus, AccessibilityIcon,
-  Cat, Leaf, Store, Paintbrush, Activity, MoreHorizontal
-} from 'lucide-react';
+import { AccessibilityIcon, Activity, AlertTriangle, Baby, Cat, GraduationCap, Heart, Home, Leaf, MoreHorizontal, Paintbrush, Store, UserPlus, Users, Utensils, X } from 'lucide-react';
+import React, { useEffect } from 'react';
 
 interface FilterModalProps {
   isOpen: boolean;

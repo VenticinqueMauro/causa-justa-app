@@ -171,7 +171,7 @@ export default function PerfilDonorPage() {
         <h1 className="text-3xl font-extrabold text-[#002C5B] mb-8 border-b-4 border-[#002C5B] pb-2">Mi Perfil</h1>
         <div className="flex flex-col md:flex-row gap-6">
           <div className="w-full md:w-1/3 space-y-6">
-            <div className="bg-white border-2 border-black p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+            <div className="bg-white border-2 border-black p-3 md:p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
               <div className="flex flex-col items-center">
                 <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-black mb-4">
                   {profileImage && !showDefaultAvatar ? (
@@ -201,7 +201,7 @@ export default function PerfilDonorPage() {
           </div>
 
           <div className="w-full md:w-2/3 space-y-6">
-            <div className="bg-white border-2 border-black p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+            <div className="bg-white border-2 border-black p-3 md:p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold">Información personal</h2>
                 <button
@@ -294,7 +294,7 @@ export default function PerfilDonorPage() {
               </form>
             </div>
 
-            <div className="bg-white border-2 border-black p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+            <div className="bg-white border-2 border-black p-3 md:p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
               <h2 className="text-xl font-bold mb-4">Seguridad</h2>
               <p className="text-sm text-gray-500 mb-4">
                 Actualiza tu contraseña para mantener tu cuenta segura.

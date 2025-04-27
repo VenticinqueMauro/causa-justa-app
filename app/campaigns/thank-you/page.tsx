@@ -87,7 +87,7 @@ export default function ThankYouPage() {
                     <p className="text-lg text-gray-600">Tu apoyo hace una gran diferencia.</p>
                   </div>
                   
-                  <div className="border-2 border-[#002C5B] p-6 mb-8">
+                  <div className="border-2 border-[#002C5B] p-3 md:p-6 mb-8">
                     <h3 className="text-xl font-bold mb-4">Detalles de la donación</h3>
                     <div className="space-y-3">
                       <div className="flex justify-between">

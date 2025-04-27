@@ -121,7 +121,7 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="bg-white border-2 border-[#002C5B] p-6 shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]">
+    <div className="bg-white border-2 border-[#002C5B] p-3 md:p-6 shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]">
       <div className="flex justify-end mb-4">
         <a href="/" className="text-sm text-[#002C5B] hover:underline flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">

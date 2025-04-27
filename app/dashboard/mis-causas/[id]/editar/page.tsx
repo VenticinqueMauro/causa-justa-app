@@ -417,7 +417,7 @@ export default function EditCampaignPage({ params }: { params: Promise<{ id: str
           {error}
         </div>
       ) : campaign ? (
-        <form onSubmit={handleSubmit} className="space-y-8 bg-white rounded-lg shadow-md p-6">
+        <form onSubmit={handleSubmit} className="space-y-8 bg-white rounded-lg shadow-md p-3 md:p-6">
           {/* Información básica */}
           <div className="space-y-6">
             <h2 className="text-xl font-semibold border-b pb-2">Información básica</h2>

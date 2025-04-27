@@ -40,7 +40,7 @@ const HowItWorksSection = () => {
           {steps.map((step, index) => (
             <div
               key={index}
-              className="flex flex-col items-center border-2 border-[#002C5B] bg-white p-6 text-center shadow-[5px_5px_0_0_rgba(0,44,91,0.3)]"
+              className="flex flex-col items-center border-2 border-[#002C5B] bg-white p-3 md:p-6 text-center shadow-[5px_5px_0_0_rgba(0,44,91,0.3)]"
             >
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#002C5B] bg-[#EDFCA7]">
                 {step.icon}

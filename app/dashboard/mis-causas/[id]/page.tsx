@@ -388,7 +388,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                 <h3 className="text-xl font-bold mb-4">Donaciones recibidas</h3>
                 
                 {donationsLoading ? (
-                  <div className="flex justify-center items-center p-6">
+                  <div className="flex justify-center items-center p-3 md:p-6">
                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
                   </div>
                 ) : donations.length === 0 ? (

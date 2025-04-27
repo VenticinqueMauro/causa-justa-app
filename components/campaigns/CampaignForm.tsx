@@ -679,7 +679,7 @@ export default function CampaignForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Información básica */}
-      <div className="border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)] p-6 bg-white">
+      <div className="border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]  p-3 md:p-6 bg-white">
         <h2 className="text-xl font-bold text-[#002C5B] mb-4">Información básica</h2>
         
         <div className="space-y-4">
@@ -879,7 +879,7 @@ export default function CampaignForm() {
       </div>
       
       {/* Ubicación */}
-      <div className="border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)] p-6 bg-white">
+      <div className="border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]  p-3 md:p-6 bg-white">
         <h2 className="text-xl font-bold text-[#002C5B] mb-4">Ubicación</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -937,7 +937,7 @@ export default function CampaignForm() {
       </div>
       
       {/* Beneficiario */}
-      <div className="border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)] p-6 bg-white">
+      <div className="border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]  p-3 md:p-6 bg-white">
         <h2 className="text-xl font-bold text-[#002C5B] mb-4">Información del beneficiario</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -995,7 +995,7 @@ export default function CampaignForm() {
       </div>
       
       {/* Creador */}
-      <div className="border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)] p-6 bg-white">
+      <div className="border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]  p-3 md:p-6 bg-white">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-[#002C5B]">Información del creador</h2>
           
@@ -1053,7 +1053,7 @@ export default function CampaignForm() {
       </div>
       
       {/* Imágenes */}
-      <div className="border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)] p-6 bg-white">
+      <div className="border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]  p-3 md:p-6 bg-white">
         <h2 className="text-xl font-bold text-[#002C5B] mb-4">Imágenes</h2>
         
         <div className="space-y-4">

@@ -462,7 +462,7 @@ export default function StartCauseButton({
       {/* Modal de error */}
       {showErrorModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="relative w-full max-w-md bg-white border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)] p-6">
+          <div className="relative w-full max-w-md bg-white border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]  p-3 md:p-6">
             <button 
               onClick={() => setShowErrorModal(false)} 
               className="absolute right-2 top-2 text-[#002C5B] hover:text-[#002C5B]/80"

@@ -39,7 +39,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-      <div className="bg-[#ECECE2] border-2 border-[#002C5B] p-6 max-w-md w-full shadow-[8px_8px_0_0_rgba(0,44,91,0.8)] relative">
+      <div className="bg-[#ECECE2] border-2 border-[#002C5B] p-3 md:p-6 max-w-md w-full shadow-[8px_8px_0_0_rgba(0,44,91,0.8)] relative">
         {/* Botón de cerrar */}
         {onClose && (
           <button 

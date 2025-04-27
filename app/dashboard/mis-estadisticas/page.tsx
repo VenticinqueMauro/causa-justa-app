@@ -118,21 +118,21 @@ export default function BeneficiaryStatsPage() {
         <>
           {/* Tarjetas de resumen */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+            <div className="bg-white p-3 md:p-6 rounded-lg shadow-md border-l-4 border-green-500">
               <h3 className="text-sm font-medium text-gray-500 mb-1">Campañas totales</h3>
               <p className="text-3xl font-bold">{stats.campaigns.totalCampaigns}</p>
               <div className="text-xs text-gray-500 mt-2">{stats.campaigns.verifiedCampaigns} verificadas</div>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+            <div className="bg-white p-3 md:p-6 rounded-lg shadow-md border-l-4 border-blue-500">
               <h3 className="text-sm font-medium text-gray-500 mb-1">Campañas destacadas</h3>
               <p className="text-3xl font-bold">{stats.campaigns.featuredCampaigns}</p>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500">
+            <div className="bg-white p-3 md:p-6 rounded-lg shadow-md border-l-4 border-purple-500">
               <h3 className="text-sm font-medium text-gray-500 mb-1">Donaciones recibidas</h3>
               <p className="text-3xl font-bold">{stats.donations.totalDonations}</p>
               <div className="text-xs text-gray-500 mt-2">{stats.donations.completedDonations} completadas</div>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
+            <div className="bg-white p-3 md:p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
               <h3 className="text-sm font-medium text-gray-500 mb-1">Monto total recaudado</h3>
               <p className="text-3xl font-bold">{formatCurrency(stats.donations.totalAmount)}</p>
               <div className="text-xs text-gray-500 mt-2">{formatCurrency(stats.donations.completedAmount)} completado</div>
@@ -142,7 +142,7 @@ export default function BeneficiaryStatsPage() {
           {/* Estado de campañas y categorías */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Estado de campañas */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="bg-white p-3 md:p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-bold mb-4">Estado de campañas</h2>
               <div className="space-y-4">
                 <div>
@@ -191,7 +191,7 @@ export default function BeneficiaryStatsPage() {
             </div>
 
             {/* Campañas por categoría */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="bg-white p-3 md:p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-bold mb-4">Campañas por categoría</h2>
               <div className="space-y-4">
                 {Object.entries(stats.campaigns.campaignsByCategory).map(([category, count]) => (
@@ -221,7 +221,7 @@ export default function BeneficiaryStatsPage() {
           </div>
 
           {/* Donaciones por mes */}
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="bg-white p-3 md:p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-4">Donaciones por mes</h2>
             {stats.donations.donationsByMonth.length === 0 ? (
               <p className="text-gray-500 text-center py-4">No hay datos disponibles</p>
@@ -262,7 +262,7 @@ export default function BeneficiaryStatsPage() {
           </div>
 
           {/* Campañas por mes */}
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="bg-white p-3 md:p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-4">Campañas por mes</h2>
             {stats.campaigns.campaignsByMonth.length === 0 ? (
               <p className="text-gray-500 text-center py-4">No hay datos disponibles</p>

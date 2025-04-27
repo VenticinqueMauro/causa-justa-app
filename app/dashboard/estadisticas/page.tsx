@@ -135,22 +135,22 @@ export default function StatsPage() {
         <>
           {/* Tarjetas de resumen */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+            <div className="bg-white p-3 md:p-6 rounded-lg shadow-md border-l-4 border-blue-500">
               <h3 className="text-sm font-medium text-gray-500 mb-1">Usuarios totales</h3>
               <p className="text-3xl font-bold">{stats.users.totalUsers}</p>
               <div className="text-xs text-gray-500 mt-2">{stats.users.verifiedUsers} verificados</div>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+            <div className="bg-white p-3 md:p-6 rounded-lg shadow-md border-l-4 border-green-500">
               <h3 className="text-sm font-medium text-gray-500 mb-1">Campañas totales</h3>
               <p className="text-3xl font-bold">{stats.campaigns.totalCampaigns}</p>
               <div className="text-xs text-gray-500 mt-2">{stats.campaigns.verifiedCampaigns} verificadas</div>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500">
+            <div className="bg-white p-3 md:p-6 rounded-lg shadow-md border-l-4 border-purple-500">
               <h3 className="text-sm font-medium text-gray-500 mb-1">Donaciones realizadas</h3>
               <p className="text-3xl font-bold">{stats.donations.totalDonations}</p>
               <div className="text-xs text-gray-500 mt-2">{stats.donations.completedDonations} completadas</div>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
+            <div className="bg-white p-3 md:p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
               <h3 className="text-sm font-medium text-gray-500 mb-1">Monto total recaudado</h3>
               <p className="text-3xl font-bold">{formatCurrency(stats.donations.totalAmount)}</p>
               <div className="text-xs text-gray-500 mt-2">{formatCurrency(stats.donations.completedAmount)} completado</div>
@@ -159,7 +159,7 @@ export default function StatsPage() {
 
           {/* Distribución de usuarios */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="bg-white p-3 md:p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-bold mb-4">Distribución de usuarios</h2>
               <div className="space-y-4">
                 <div>
@@ -222,7 +222,7 @@ export default function StatsPage() {
             </div>
 
             {/* Estado de campañas */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="bg-white p-3 md:p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-bold mb-4">Estado de campañas</h2>
               <div className="space-y-4">
                 <div>
@@ -300,7 +300,7 @@ export default function StatsPage() {
           </div>
 
           {/* Donaciones por mes */}
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="bg-white p-3 md:p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-4">Donaciones por mes</h2>
             {stats.donations.donationsByMonth.length === 0 ? (
               <p className="text-gray-500 text-center py-4">No hay datos disponibles</p>

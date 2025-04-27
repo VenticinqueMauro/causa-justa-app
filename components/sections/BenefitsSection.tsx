@@ -38,7 +38,7 @@ const BenefitsSection = () => {
           {benefits.map((benefit, index) => (
             <div
               key={index}
-              className="flex flex-col items-center text-center p-6 border-2 border-[#002C5B] bg-white shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)] transform transition-all duration-200"
+              className="flex flex-col items-center text-center p-3 md:p-6 border-2 border-[#002C5B] bg-white shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)] transform transition-all duration-200"
             >
               <div className="flex h-16 w-16 items-center justify-center border-2 border-[#002C5B] bg-[#EDFCA7] shadow-[3px_3px_0_0_rgba(0,44,91,0.8)]">
                 {getIconComponent(benefit.icon)}

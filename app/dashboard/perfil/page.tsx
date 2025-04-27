@@ -369,7 +369,7 @@ export default function ProfilePage() {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="bg-white p-3 md:p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-4">Información Personal</h2>
             
             <form onSubmit={handleSubmit}>
@@ -585,7 +585,7 @@ export default function ProfilePage() {
         </div>
         
         <div>
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="bg-white p-3 md:p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-4">Seguridad</h2>
             
             <div className="space-y-4">

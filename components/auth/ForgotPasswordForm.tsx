@@ -82,7 +82,7 @@ export default function ForgotPasswordForm() {
   }, [shouldShowToast, toastMessage, toastType, showToast]); // Dependencias estables
 
   return (
-    <div className="bg-white border-2 border-[#002C5B] p-6 shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]">
+    <div className="bg-white border-2 border-[#002C5B] p-3 md:p-6 shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]">
       {formState.errors?._form && !showMaintenanceMessage && (
         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
           {formState.errors._form.join(', ')}

@@ -448,7 +448,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Encabezado con saludo personalizado */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-white rounded-lg shadow-sm p-3 md:p-6">
         <h1 className="text-2xl font-bold text-gray-900">¡Bienvenido, {user?.fullName || 'Usuario'}!</h1>
         <p className="mt-1 text-sm text-gray-500">
           {new Date().toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}

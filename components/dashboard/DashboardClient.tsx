@@ -75,7 +75,7 @@ export default function DashboardClient({
   // Mostrar mensaje de redirección para usuarios DONOR
   if (user.role === 'DONOR') {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 flex-col p-6">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 flex-col p-3 md:p-6">
         <div className="bg-white rounded-lg shadow-md p-8 max-w-md text-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Acceso no disponible</h2>
           <p className="text-gray-600 mb-6">
@@ -297,7 +297,7 @@ export default function DashboardClient({
         </header>
         
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-3 md:p-6">
           {children}
         </main>
       </div>

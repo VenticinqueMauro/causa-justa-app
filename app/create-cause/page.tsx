@@ -304,7 +304,7 @@ export default function CreateCausePage() {
           Volver al inicio
         </Link>
         
-        <div className={`border-2 ${termsAccepted ? 'border-green-500 shadow-[5px_5px_0_0_rgba(34,197,94,0.8)]' : 'border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]'} p-6 bg-white mb-8 transition-all duration-300`}>
+        <div className={`border-2 ${termsAccepted ? 'border-green-500 shadow-[5px_5px_0_0_rgba(34,197,94,0.8)]' : 'border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]'}  p-3 md:p-6 bg-white mb-8 transition-all duration-300`}>
           <h2 className="text-xl font-bold text-[#002C5B] mb-4">
             {termsAccepted ? 'Listo para conectar MercadoPago' : 'Conexión con MercadoPago requerida'}
           </h2>
@@ -402,7 +402,7 @@ export default function CreateCausePage() {
       {/* Modal para cambio de rol */}
       {showRoleChangeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="relative w-full max-w-md bg-white border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)] p-6">
+          <div className="relative w-full max-w-md bg-white border-2 border-[#002C5B] shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]  p-3 md:p-6">
             <button 
               onClick={() => setShowRoleChangeModal(false)} 
               className="absolute right-2 top-2 text-[#002C5B] hover:text-[#002C5B]/80"

@@ -23,7 +23,7 @@ export default function VerifyEmailPage() {
                 </BrutalHeading>
               </div>
               
-              <div className="bg-white border-2 border-[#002C5B] p-6 shadow-[5px_5px_0_0_rgba(0,44,91,0.8)] mb-8">
+              <div className="bg-white border-2 border-[#002C5B] p-3 md:p-6 shadow-[5px_5px_0_0_rgba(0,44,91,0.8)] mb-8">
                 <p className="text-[#002C5B]/80 mb-6">
                   Hemos enviado un correo electrónico de verificación a la dirección que proporcionaste. 
                   Por favor, revisa tu bandeja de entrada y sigue las instrucciones para activar tu cuenta.

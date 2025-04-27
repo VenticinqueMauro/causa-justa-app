@@ -98,7 +98,7 @@ export default function RoleSelectionPage() {
   return (
     <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white border-2 border-[#002C5B] p-6 shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]">
+        <div className="bg-white border-2 border-[#002C5B] p-3 md:p-6 shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]">
           <h1 className="text-2xl font-bold text-[#002C5B] mb-6 text-center">
             Selecciona tu tipo de usuario
           </h1>
