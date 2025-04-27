@@ -36,233 +36,98 @@ export default function Image() {
       <div
         style={{
           fontSize: 32,
-          background: 'linear-gradient(135deg, #ECECE2 0%, #FFFFFF 100%)', // Gradiente sutil
+          background: colors.secondary, // Fondo azul oscuro como en la imagen
           width: '100%',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          padding: '50px',
+          padding: '60px',
           fontFamily: 'Inter, sans-serif',
-          position: 'relative', // Para posicionamiento absoluto de elementos decorativos
+          position: 'relative',
+          color: colors.primary,
         }}
       >
-        {/* Elementos decorativos de fondo */}
+        {/* Logo en la esquina superior derecha */}
         <div style={{
           position: 'absolute',
-          top: '20px',
-          right: '20px',
-          width: '150px',
-          height: '150px',
-          borderRadius: '50%',
-          background: `${colors.primary}20`, // Color primario con opacidad
-          zIndex: 0,
-        }} />
-        
-        <div style={{
-          position: 'absolute',
-          bottom: '40px',
-          left: '60px',
-          width: '100px',
-          height: '100px',
-          borderRadius: '50%',
-          background: `${colors.accent}15`, // Color de acento con opacidad
-          zIndex: 0,
-        }} />
-        
-        {/* Logo y nombre de la marca */}
-        <div style={{ 
-          fontSize: 64, 
-          fontWeight: 'bold', 
-          color: colors.primary,
-          marginBottom: '20px',
+          top: '40px',
+          right: '60px',
           display: 'flex',
           alignItems: 'center',
-          gap: '24px',
-          zIndex: 1,
-          position: 'relative',
+          gap: '16px',
         }}>
+          {/* Cuadro con corazón */}
           <div style={{
-            width: '90px',
-            height: '90px',
-            backgroundColor: colors.white,
-            border: `3px solid ${colors.primary}`,
-            boxShadow: `6px 6px 0px 0px ${colors.primary}`,
+            width: '60px',
+            height: '60px',
+            border: `2px solid ${colors.primary}`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            borderRadius: '12px',
+            borderRadius: '0px',
           }}>
-            {/* Corazón estilizado con los colores de la marca */}
-            <div style={{
-              width: '50px',
-              height: '50px',
-              background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.darkAccent} 100%)`,
-              clipPath: 'path("M25,50 C0,35 0,0 25,0 C50,0 50,35 25,50 Z M25,50 C50,35 50,0 25,0")',
-              transform: 'rotate(45deg)',
-              position: 'relative',
-            }} />
+            {/* Corazón blanco */}
+            <svg width="36" height="36" viewBox="0 0 24 24" fill={colors.primary} xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: '32px', marginBottom: '-12px', fontWeight: '500' }}>Por una</div>
-            <div style={{ fontSize: '72px', letterSpacing: '-1px' }}>Causa Justa</div>
+          
+          {/* Texto "POR UNA CAUSA JUSTA" */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            lineHeight: '1.1',
+          }}>
+            <div style={{ display: 'block' }}>POR UNA</div>
+            <div style={{ display: 'block' }}>CAUSA JUSTA</div>
           </div>
         </div>
         
-        {/* Contenido principal - Mensaje principal y CTA */}
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          flex: 1, 
-          background: colors.white,
-          border: `4px solid ${colors.primary}`,
-          borderRadius: '16px',
-          padding: '40px',
-          boxShadow: `10px 10px 0px 0px ${colors.primary}`,
-          justifyContent: 'center',
-          alignItems: 'center',
-          textAlign: 'center',
-          zIndex: 1,
-          position: 'relative',
-          margin: '10px 0 30px 0',
-        }}>
-          {/* Mensaje principal */}
+        {/* Espacio para centrar el contenido principal */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+          {/* Título principal grande */}
           <div style={{ 
-            fontSize: 72, 
+            fontSize: 96, 
             fontWeight: 'bold', 
-            color: colors.primary,
-            marginBottom: '30px',
             lineHeight: 1.1,
-            maxWidth: '90%',
+            marginBottom: '40px',
             letterSpacing: '-1px',
+            maxWidth: '90%',
+            display: 'flex',
+            flexDirection: 'column',
+            textAlign: 'center'
           }}>
-            Recauda fondos para tu causa
+            <div style={{ display: 'block', fontWeight: 'bold' }}>DONA PARA CUALQUIER CAUSA</div>
           </div>
           
-          {/* Descripción */}
+          {/* Descripción en recuadro con estilo brutal */}
           <div style={{ 
-            fontSize: 36, 
-            color: colors.text,
-            marginBottom: '40px',
+            fontSize: 28, 
             lineHeight: 1.4,
             maxWidth: '85%',
             fontWeight: '500',
-          }}>
-            Plataforma de recaudación de fondos para todo tipo de causas: viajes, estudios, emergencias o proyectos personales
-          </div>
-          
-          {/* Botón de llamada a la acción con estilo brutal */}
-          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
             backgroundColor: colors.white,
             color: colors.primary,
-            padding: '16px 40px',
-            borderRadius: '8px',
-            fontSize: 32,
-            fontWeight: 'bold',
+            padding: '24px 32px',
             border: `3px solid ${colors.primary}`,
+            borderRadius: '0px',
             boxShadow: `6px 6px 0px 0px ${colors.primary}`,
             marginTop: '20px',
-            position: 'relative',
-            transform: 'rotate(-2deg)',
+            textAlign: 'center'
           }}>
-            ¡Crea tu causa ahora!
-          </div>
-          
-          {/* Categorías */}
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: '14px',
-            marginTop: '40px',
-          }}>
-            {['Salud', 'Educación', 'Viajes', 'Estudios', 'Emergencias', 'Proyectos', 'Solidaridad'].map((category, index) => {
-              // Alternamos entre diferentes estilos para las categorías
-              const style = index % 3 === 0 ? {
-                backgroundColor: colors.primary,
-                color: colors.white,
-                border: 'none'
-              } : index % 3 === 1 ? {
-                backgroundColor: colors.white,
-                color: colors.primary,
-                border: `2px solid ${colors.primary}`
-              } : {
-                backgroundColor: colors.accent,
-                color: colors.white,
-                border: 'none'
-              };
-              
-              return (
-                <div key={category} style={{
-                  ...style,
-                  padding: '8px 20px',
-                  borderRadius: '30px', // Pill shape
-                  fontSize: 24,
-                  fontWeight: '500',
-                  boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
-                }}>
-                  {category}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        
-        {/* Pie de página */}
-        <div style={{ 
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          width: '100%',
-          marginTop: '10px',
-          zIndex: 1,
-        }}>
-          <div style={{ 
-            fontSize: 28,
-            fontWeight: 'bold',
-            color: colors.primary,
-          }}>
-            causajusta.org
-          </div>
-          
-          <div style={{
-            display: 'flex',
-            gap: '15px',
-          }}>
-            {/* Iconos de redes sociales con los colores de la marca */}
-            {[
-              { icon: '📱', bg: colors.primary },
-              { icon: '📧', bg: colors.accent },
-              { icon: '🌐', bg: colors.primary }
-            ].map((item, index) => (
-              <div key={index} style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                backgroundColor: item.bg,
-                color: colors.white,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '20px',
-                boxShadow: '0px 2px 4px rgba(0,0,0,0.2)',
-              }}>
-                {item.icon}
-              </div>
-            ))}
+            <div style={{ display: 'block' }}>Plataforma de recaudación de fondos para todo tipo de causas: viajes, estudios, emergencias o proyectos personales y solidarios</div>
+            <div style={{ display: 'block' }}></div>
+            <div style={{ display: 'block' }}></div>
           </div>
         </div>
       </div>
     ),
-    { 
-      ...size,
-      // Optimizaciones necesarias para evitar errores de renderizado
-      emoji: 'twemoji',
-      debug: false,
-      headers: {
-        'Cache-Control': 'public, max-age=86400, s-maxage=86400', // Caché por 1 día
-        'Content-Type': 'image/jpeg', // Forzar el tipo de contenido para mejor compatibilidad
-        'Content-Disposition': 'inline; filename="causa-justa-home.jpg"' // Ayuda con la compatibilidad
-      }
-    }
+    {
+      ...size
+    },
   );
 }
