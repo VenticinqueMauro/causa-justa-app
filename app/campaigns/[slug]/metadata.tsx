@@ -19,8 +19,22 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   // Obtener la categoría formateada
   const categoryLabel = getCategoryLabel(campaign.category as CampaignCategory);
   
-  // Construir la URL absoluta para la imagen OG
+  // Construir la URL base para URLs absolutas
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://causa-justa-app.vercel.app';
+  
+  // Obtener la URL de la imagen real de la campaña (si existe)
+  const campaignImageUrl = campaign.images && campaign.images.length > 0
+    ? campaign.images[0]
+    : null;
+    
+  // Convertir a URL absoluta si es necesario
+  const absoluteCampaignImageUrl = campaignImageUrl
+    ? (campaignImageUrl.startsWith('http')
+        ? campaignImageUrl
+        : `${baseUrl}${campaignImageUrl}`)
+    : null;
+  
+  // URL de la imagen OG generada dinámicamente como fallback
   const ogImageUrl = `${baseUrl}/campaigns/${params.slug}/opengraph-image`;
 
   // Construir la URL absoluta para la campaña
@@ -55,23 +69,24 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       url: campaignUrl,
       siteName: 'Causa Justa',
       images: [
+        // Priorizar la imagen real de la campaña si existe
+        ...(absoluteCampaignImageUrl
+          ? [
+              {
+                url: absoluteCampaignImageUrl,
+                width: 1200,
+                height: 630,
+                alt: `Campaña: ${campaign.title}`,
+              },
+            ]
+          : []),
+        // Incluir siempre la imagen OG generada dinámicamente como fallback
         {
           url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: `Campaña: ${campaign.title} - ${description}`,
         },
-        // Agregar también la primera imagen de la campaña si existe
-        ...(campaign.images && campaign.images.length > 0
-          ? [
-              {
-                url: campaign.images[0],
-                width: 800,
-                height: 600,
-                alt: `Imagen de la campaña: ${campaign.title}`,
-              },
-            ]
-          : []),
       ],
       locale: 'es_AR',
       type: 'website',
@@ -80,7 +95,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       card: 'summary_large_image',
       title: campaign.title,
       description: description,
-      images: [ogImageUrl],
+      // Usar la imagen real de la campaña para Twitter si existe, de lo contrario usar la imagen OG
+      images: [absoluteCampaignImageUrl || ogImageUrl],
       creator: '@causajusta',
       site: '@causajusta',
     },

@@ -9,7 +9,7 @@ export const size = {
   height: 630,
 };
 
-export const contentType = 'image/png';
+export const contentType = 'image/jpeg'; // Cambiado a JPEG para mejor compatibilidad
 
 // Texto alternativo para la imagen
 export const alt = 'Campaña de recaudación de fondos en Causa Justa';
@@ -67,8 +67,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         debug: false, // Deshabilitar en producción
         headers: {
           'Cache-Control': 'public, max-age=86400, immutable',
-          'Content-Type': 'image/png', // Forzar el tipo de contenido para WhatsApp
-          'Content-Disposition': 'inline; filename="causa-justa-default.png"' // Ayuda con la compatibilidad
+          'Content-Type': 'image/jpeg', // Cambiado a JPEG para mejor compatibilidad
+          'Content-Disposition': 'inline; filename="causa-justa-default.jpg"' // Ayuda con la compatibilidad
         }
       }
     );
@@ -97,6 +97,14 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const imageUrl = campaign.images && campaign.images.length > 0
     ? campaign.images[0]
     : '/images/default-campaign.jpg';
+    
+  // Asegurarse de que la URL de la imagen sea absoluta
+  const absoluteImageUrl = imageUrl.startsWith('http') 
+    ? imageUrl 
+    : `${process.env.NEXT_PUBLIC_APP_URL || 'https://causa-justa-app.vercel.app'}${imageUrl}`;
+  
+  // En Edge Runtime no podemos usar Buffer, así que simplemente usaremos la URL
+  // para mostrar la imagen. ImageResponse se encargará de cargarla.
   
   // Generar la imagen OG
   // Asegurarse de que la imagen se genera con alta calidad para WhatsApp
@@ -158,20 +166,33 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             justifyContent: 'center',
             backgroundColor: '#f0f0f0',
           }}>
-            {/* No podemos usar next/image aquí, así que usamos un placeholder */}
-            <div style={{ 
-              fontSize: 24, 
-              color: '#002C5B',
-              textAlign: 'center',
-              padding: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%',
-            }}>
-              {/* Mostrar texto del título con emojis que representen la categoría */}
-              {getCategoryEmoji(campaign.category as CampaignCategory)} {campaign.title}
-            </div>
+            {/* Intentamos mostrar la imagen real de la campaña */}
+            {absoluteImageUrl ? (
+              <img 
+                src={absoluteImageUrl}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+                alt={campaign.title}
+              />
+            ) : (
+              // Si no tenemos la imagen, mostramos un placeholder
+              <div style={{ 
+                fontSize: 24, 
+                color: '#002C5B',
+                textAlign: 'center',
+                padding: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+              }}>
+                {/* Mostrar texto del título con emojis que representen la categoría */}
+                {getCategoryEmoji(campaign.category as CampaignCategory)} {campaign.title}
+              </div>
+            )}
           </div>
           
           {/* Información de la campaña */}
@@ -265,8 +286,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       debug: false, // Deshabilitar en producción
       headers: {
         'Cache-Control': 'public, max-age=3600, s-maxage=3600', // Caché por 1 hora
-        'Content-Type': 'image/png', // Forzar el tipo de contenido para WhatsApp
-        'Content-Disposition': `inline; filename="${campaign.slug}.png"` // Ayuda con la compatibilidad
+        'Content-Type': 'image/jpeg', // Cambiado a JPEG para mejor compatibilidad
+        'Content-Disposition': `inline; filename="${campaign.slug}.jpg"` // Ayuda con la compatibilidad
       }
       // La propiedad quality no está disponible en ImageResponse
     }
