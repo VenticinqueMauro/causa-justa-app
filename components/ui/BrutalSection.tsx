@@ -18,7 +18,7 @@ const BrutalSection = ({
   };
 
   return (
-    <section className={`py-16 ${variantStyles[variant]} ${className}`} {...props}>
+    <section className={`py-8 ${variantStyles[variant]} ${className}`} {...props}>
       {children}
     </section>
   );
