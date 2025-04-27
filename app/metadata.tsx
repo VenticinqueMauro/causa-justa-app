@@ -13,15 +13,15 @@ export const metadata: Metadata = {
     siteName: 'Causa Justa',
     images: [
       {
-        // Imagen generada dinámicamente
-        url: 'https://causa-justa-app.vercel.app/opengraph-image',
+        // Imagen estática desde la carpeta public
+        url: 'https://causa-justa-app.vercel.app/preview.jpg',
         width: 1200,
         height: 630,
         alt: 'Causa Justa - Plataforma de recaudación de fondos para todo tipo de causas',
       },
-      // También podemos incluir una imagen estática como respaldo
+      // Imagen generada dinámicamente como respaldo
       {
-        url: 'https://causa-justa-app.vercel.app/images/og-image.jpg',
+        url: 'https://causa-justa-app.vercel.app/opengraph-image',
         width: 1200,
         height: 630,
         alt: 'Causa Justa - Plataforma de recaudación de fondos',
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Causa Justa - Plataforma de recaudación de fondos',
     description: 'Plataforma de recaudación de fondos para todo tipo de causas',
-    images: ['https://causa-justa-app.vercel.app/opengraph-image'],
+    images: ['https://causa-justa-app.vercel.app/preview.jpg'],
     creator: '@causajusta',
     site: '@causajusta',
   },

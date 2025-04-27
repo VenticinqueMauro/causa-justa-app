@@ -25,6 +25,8 @@ const colors = {
   accent: '#FF5C39',     // Naranja/Coral para acentos
   text: '#2D3748',       // Gris oscuro para texto
   white: '#FFFFFF',      // Blanco
+  lightBlue: '#E5F0FF',  // Azul claro para fondos
+  darkAccent: '#E64A19', // Naranja más oscuro
 };
 
 // Función para generar la imagen OG estática para la página principal
@@ -90,13 +92,15 @@ export default function Image() {
             justifyContent: 'center',
             borderRadius: '12px',
           }}>
+            {/* Corazón estilizado con los colores de la marca */}
             <div style={{
-              fontSize: '50px',
-              color: colors.primary,
-              textAlign: 'center',
-            }}>
-              ❤️
-            </div>
+              width: '50px',
+              height: '50px',
+              background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.darkAccent} 100%)`,
+              clipPath: 'path("M25,50 C0,35 0,0 25,0 C50,0 50,35 25,50 Z M25,50 C50,35 50,0 25,0")',
+              transform: 'rotate(45deg)',
+              position: 'relative',
+            }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: '32px', marginBottom: '-12px', fontWeight: '500' }}>Por una</div>
@@ -146,16 +150,19 @@ export default function Image() {
             Plataforma de recaudación de fondos para todo tipo de causas: viajes, estudios, emergencias o proyectos personales
           </div>
           
-          {/* Botón de llamada a la acción */}
+          {/* Botón de llamada a la acción con estilo brutal */}
           <div style={{
-            backgroundColor: colors.accent,
-            color: colors.white,
+            backgroundColor: colors.white,
+            color: colors.primary,
             padding: '16px 40px',
             borderRadius: '8px',
             fontSize: 32,
             fontWeight: 'bold',
-            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
-            marginTop: '10px',
+            border: `3px solid ${colors.primary}`,
+            boxShadow: `6px 6px 0px 0px ${colors.primary}`,
+            marginTop: '20px',
+            position: 'relative',
+            transform: 'rotate(-2deg)',
           }}>
             ¡Crea tu causa ahora!
           </div>
@@ -168,18 +175,35 @@ export default function Image() {
             gap: '14px',
             marginTop: '40px',
           }}>
-            {['Salud', 'Educación', 'Viajes', 'Estudios', 'Emergencias', 'Proyectos', 'Solidaridad'].map((category, index) => (
-              <div key={category} style={{
-                backgroundColor: index % 2 === 0 ? colors.primary : colors.accent,
+            {['Salud', 'Educación', 'Viajes', 'Estudios', 'Emergencias', 'Proyectos', 'Solidaridad'].map((category, index) => {
+              // Alternamos entre diferentes estilos para las categorías
+              const style = index % 3 === 0 ? {
+                backgroundColor: colors.primary,
                 color: colors.white,
-                padding: '8px 20px',
-                borderRadius: '30px', // Pill shape
-                fontSize: 24,
-                fontWeight: '500',
-              }}>
-                {category}
-              </div>
-            ))}
+                border: 'none'
+              } : index % 3 === 1 ? {
+                backgroundColor: colors.white,
+                color: colors.primary,
+                border: `2px solid ${colors.primary}`
+              } : {
+                backgroundColor: colors.accent,
+                color: colors.white,
+                border: 'none'
+              };
+              
+              return (
+                <div key={category} style={{
+                  ...style,
+                  padding: '8px 20px',
+                  borderRadius: '30px', // Pill shape
+                  fontSize: 24,
+                  fontWeight: '500',
+                  boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+                }}>
+                  {category}
+                </div>
+              );
+            })}
           </div>
         </div>
         
@@ -204,20 +228,25 @@ export default function Image() {
             display: 'flex',
             gap: '15px',
           }}>
-            {/* Iconos de redes sociales simplificados */}
-            {['📱', '📧', '🌐'].map((icon) => (
-              <div key={icon} style={{
+            {/* Iconos de redes sociales con los colores de la marca */}
+            {[
+              { icon: '📱', bg: colors.primary },
+              { icon: '📧', bg: colors.accent },
+              { icon: '🌐', bg: colors.primary }
+            ].map((item, index) => (
+              <div key={index} style={{
                 width: '40px',
                 height: '40px',
                 borderRadius: '50%',
-                backgroundColor: colors.primary,
+                backgroundColor: item.bg,
                 color: colors.white,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '20px',
+                boxShadow: '0px 2px 4px rgba(0,0,0,0.2)',
               }}>
-                {icon}
+                {item.icon}
               </div>
             ))}
           </div>
