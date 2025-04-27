@@ -22,11 +22,11 @@ export const runtime = 'edge';
 const colors = {
   primary: '#002C5B',    // Azul oscuro
   secondary: '#ECECE2',  // Beige claro
-  accent: '#FF5C39',     // Naranja/Coral para acentos
+  accent: '#EDFCA7',     // Amarillo claro para acentos
   text: '#2D3748',       // Gris oscuro para texto
   white: '#FFFFFF',      // Blanco
   lightBlue: '#E5F0FF',  // Azul claro para fondos
-  darkAccent: '#E64A19', // Naranja más oscuro
+  darkAccent: '#002C5B', // Azul oscuro para acentos fuertes
 };
 
 /**
