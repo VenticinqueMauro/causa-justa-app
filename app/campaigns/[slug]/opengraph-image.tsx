@@ -11,6 +11,9 @@ export const size = {
 
 export const contentType = 'image/png';
 
+// Texto alternativo para la imagen
+export const alt = 'Campaña de recaudación de fondos en Causa Justa';
+
 // Configuración de revalidación
 export const revalidate = 3600; // Revalidar cada hora
 
@@ -63,7 +66,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         emoji: 'twemoji', // Soporte para emojis consistentes
         debug: false, // Deshabilitar en producción
         headers: {
-          'Cache-Control': 'public, max-age=86400, immutable'
+          'Cache-Control': 'public, max-age=86400, immutable',
+          'Content-Type': 'image/png', // Forzar el tipo de contenido para WhatsApp
+          'Content-Disposition': 'inline; filename="causa-justa-default.png"' // Ayuda con la compatibilidad
         }
       }
     );
@@ -94,6 +99,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     : '/images/default-campaign.jpg';
   
   // Generar la imagen OG
+  // Asegurarse de que la imagen se genera con alta calidad para WhatsApp
   return new ImageResponse(
     (
       <div
@@ -106,6 +112,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           flexDirection: 'column',
           padding: '40px',
           fontFamily: 'Inter, sans-serif',
+          position: 'relative', // Importante para posicionamiento absoluto de elementos hijos
         }}
       >
         {/* Encabezado con logo y categoría */}
@@ -257,8 +264,11 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       emoji: 'twemoji', // Soporte para emojis consistentes
       debug: false, // Deshabilitar en producción
       headers: {
-        'Cache-Control': 'public, max-age=3600, s-maxage=3600' // Caché por 1 hora
+        'Cache-Control': 'public, max-age=3600, s-maxage=3600', // Caché por 1 hora
+        'Content-Type': 'image/png', // Forzar el tipo de contenido para WhatsApp
+        'Content-Disposition': `inline; filename="${campaign.slug}.png"` // Ayuda con la compatibilidad
       }
+      // La propiedad quality no está disponible en ImageResponse
     }
   );
 }
