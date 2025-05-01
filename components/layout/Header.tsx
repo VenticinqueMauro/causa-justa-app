@@ -167,10 +167,10 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-4 xl:gap-6">
-            <Link href="/campaigns" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 whitespace-nowrap">Causas</Link>
-            <Link href="#" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 whitespace-nowrap">Cómo funciona</Link>
-            <Link href="#" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 whitespace-nowrap">Sobre nosotros</Link>
-            <Link href="#" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 whitespace-nowrap">Contacto</Link>
+            <Link href="/#campaigns" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 whitespace-nowrap">Causas</Link>
+            <Link href="/#how-it-works" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 whitespace-nowrap">Cómo funciona</Link>
+            <Link href="/#benefits" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 whitespace-nowrap">Por qué elegirnos</Link>
+            <Link href="/#security-section" className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 whitespace-nowrap">Seguridad</Link>
           </nav>
 
           {/* Right side: Auth buttons or user menu */}
@@ -222,32 +222,32 @@ const Header = () => {
           <div className="container mx-auto px-4 py-3">
             <nav className="flex flex-col space-y-3">
               <Link 
-                href="#" 
+                href="/#campaigns" 
                 className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Causas
               </Link>
               <Link 
-                href="#" 
+                href="/#how-it-works" 
                 className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Cómo funciona
               </Link>
               <Link 
-                href="#" 
+                href="/#benefits" 
                 className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Sobre nosotros
+                Por qué elegirnos
               </Link>
               <Link 
-                href="#" 
+                href="/#security-section" 
                 className="text-sm font-medium text-[#002C5B] hover:text-[#002C5B]/80 py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Contacto
+                Seguridad
               </Link>
               {/* StartCause button in mobile menu */}
               <div className="py-2">

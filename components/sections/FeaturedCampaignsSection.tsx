@@ -10,7 +10,7 @@ interface FeaturedCampaignsSectionProps {
 
 const FeaturedCampaignsSection = ({ campaigns }: FeaturedCampaignsSectionProps) => {
   return (
-    <BrutalSection variant="alt" className="border-y-2 border-[#002C5B]">
+    <BrutalSection id="campaigns" variant="alt" className="border-y-2 border-[#002C5B]">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
           <BrutalHeading className="text-3xl md:text-4xl">Causas destacadas</BrutalHeading>

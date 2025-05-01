@@ -10,7 +10,7 @@ interface Step {
 
 const StepsSection = () => {
   return (
-    <BrutalSection variant="alt">
+    <BrutalSection variant="alt" className="border-t-2 border-[#002C5B]" id="how-it-works">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
           <BrutalHeading className="text-3xl md:text-4xl">Cómo funciona</BrutalHeading>

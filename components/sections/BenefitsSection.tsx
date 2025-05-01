@@ -1,5 +1,5 @@
 import React from "react";
-import { Shield, CheckCircle, Users } from "lucide-react";
+import { Shield, CheckCircle, Users, CreditCard } from "lucide-react";
 import BrutalSection from "../ui/BrutalSection";
 import BrutalHeading from "../ui/BrutalHeading";
 import { benefits } from "@/data/sampleData";
@@ -16,6 +16,8 @@ const getIconComponent = (iconName: string) => {
       return <Shield className="h-8 w-8 text-[#002C5B]" />;
     case "check-circle":
       return <CheckCircle className="h-8 w-8 text-[#002C5B]" />;
+    case "credit-card":
+      return <CreditCard className="h-8 w-8 text-[#002C5B]" />;
     case "users":
       return <Users className="h-8 w-8 text-[#002C5B]" />;
     default:
@@ -25,8 +27,8 @@ const getIconComponent = (iconName: string) => {
 
 const BenefitsSection = () => {
   return (
-    <BrutalSection>
-      <div className="container mx-auto px-4">
+    <BrutalSection id="benefits">
+      <div className="container mx-auto px-4 ">
         <div className="mb-12 text-center">
           <BrutalHeading className="text-3xl md:text-4xl">¿Por qué elegir Causa Justa?</BrutalHeading>
           <p className="mt-4 text-gray-600 max-w-2xl mx-auto pl-4 italic">
@@ -34,7 +36,7 @@ const BenefitsSection = () => {
             organizaciones
           </p>
         </div>
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {benefits.map((benefit, index) => (
             <div
               key={index}

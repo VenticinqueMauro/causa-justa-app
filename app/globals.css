@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Scroll suave para navegación */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4rem; /* Compensar la altura del header fijo */
+}
+
 /* Tipografía para títulos y botones */
 h1, h2, h3, h4, h5, h6,
 button, .btn, .call-to-action {

@@ -8,8 +8,11 @@ import BenefitsSection from "@/components/sections/BenefitsSection";
 import CTASection from "@/components/sections/CTASection";
 import FeaturedCampaignsSection from "@/components/sections/FeaturedCampaignsSection";
 import HeroSection from "@/components/sections/HeroSection";
+import SecuritySection from "@/components/sections/SecuritySection";
+import StatsSection from "@/components/sections/StatsSection";
 import StepsSection from "@/components/sections/StepsSection";
 import TestimonialsSection from "@/components/sections/TestimonialsSection";
+import VerificationProcessSection from "@/components/sections/VerificationProcessSection";
 
 // Types
 import { Campaign } from "@/types/campaign";
@@ -60,8 +63,11 @@ export default async function Home() {
         <HeroSection />
         <FeaturedCampaignsSection campaigns={campaigns} />
         <BenefitsSection />
-        <TestimonialsSection />
         <StepsSection />
+        <SecuritySection />
+        <VerificationProcessSection />
+        <StatsSection />
+        <TestimonialsSection />
         <CTASection />
       </main>
       

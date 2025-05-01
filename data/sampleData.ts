@@ -92,17 +92,22 @@ export const campaigns: Campaign[] = [
 export const benefits = [
   {
     title: "100% Transparente",
-    description: "Seguimiento detallado de cada donación y reportes periódicos sobre el uso de los fondos.",
+    description: "Facilitamos la comunicación directa entre donantes y beneficiarios para que puedas ver el impacto de tu ayuda.",
     icon: "shield",
   },
   {
     title: "Causas verificadas",
-    description: "Todas las organizaciones y causas pasan por un riguroso proceso de verificación.",
+    description: "Revisamos cada causa para asegurar que esté bien documentada y cumpla con nuestras políticas comunitarias.",
     icon: "check-circle",
   },
   {
+    title: "Pagos seguros",
+    description: "Utilizamos MercadoPago para garantizar transacciones seguras y proteger tu información financiera con encriptación de datos.",
+    icon: "credit-card",
+  },
+  {
     title: "Comunidad solidaria",
-    description: "Forma parte de una comunidad comprometida con el cambio social positivo.",
+    description: "Forma parte de una comunidad comprometida con el cambio social positivo. Más de 15,000 donantes activos confían en nosotros.",
     icon: "users",
   },
 ];

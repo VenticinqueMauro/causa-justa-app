@@ -8,11 +8,14 @@ const HeroSection = () => {
     <BrutalSection className="relative overflow-hidden py-20 md:py-28">
       <div className="container mx-auto px-4 relative z-10 flex flex-col items-center text-center">
         <h1 className="max-w-3xl text-4xl font-bold uppercase tracking-tight text-[#002C5B] sm:text-5xl md:text-6xl border-b-4 border-[#EDFCA7] pb-2 mb-2">
-          Conectando corazones con causas que importan
+          Por una Causa Justa
         </h1>
+        <h2 className="max-w-3xl text-2xl font-bold tracking-tight text-[#002C5B] sm:text-3xl mt-2">
+          Conectando corazones con causas que importan
+        </h2>
         <p className="mt-6 max-w-2xl text-lg text-[#002C5B] border-2 border-[#002C5B] bg-white p-4 shadow-[5px_5px_0_0_rgba(0,44,91,0.3)]">
           Ayuda a transformar vidas a través de donaciones seguras y transparentes. Cada contribución marca la
-          diferencia en nuestra comunidad.
+          diferencia en nuestra comunidad, con la seguridad de MercadoPago y verificación completa de cada causa.
         </p>
         <div className="mt-10 flex flex-col gap-4 sm:flex-row">
           <BrutalButton variant="secondary" className="text-base">
