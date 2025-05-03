@@ -3,6 +3,7 @@ import { CheckCircle, Clock, FileText, Shield } from "lucide-react";
 import BrutalSection from "../ui/BrutalSection";
 import BrutalHeading from "../ui/BrutalHeading";
 import BrutalButton from "../ui/BrutalButton";
+import StartCauseButton from "../actions/StartCauseButton";
 
 const VerificationProcessSection = () => {
   return (
@@ -82,9 +83,9 @@ const VerificationProcessSection = () => {
             <p className="text-gray-600 mb-4 max-w-2xl mx-auto text-sm">
               Recuerda: La transparencia es clave para generar confianza. Cuanta más información proporciones, más probabilidades tendrás de recibir donaciones.
             </p>
-            <BrutalButton variant="outline" className="text-sm" href="/crear-causa">
-              Crear una causa
-            </BrutalButton>
+            <div className="flex justify-center">
+              <StartCauseButton variant="outline" size="sm" className="text-sm" text="Crear una causa" />
+            </div>
           </div>
         </div>
       </div>

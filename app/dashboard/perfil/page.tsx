@@ -66,12 +66,22 @@ export default function ProfilePage() {
       
       try {
         setIsLoading(true);
-        const token = await getToken();
-        if (!token) throw new Error('No se encontró token de autenticación');
+        // Intentar obtener el token de autenticación
+        let token = await getToken();
+        
+        // Si no hay token, mostrar mensaje de error y redirigir al login
+        if (!token) {
+          console.error('No se encontró token de autenticación');
+          showToast('Sesión expirada. Por favor, inicia sesión nuevamente.', 'error');
+          setTimeout(() => router.push('/login'), 2000);
+          setIsLoading(false);
+          return;
+        }
         
         const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
         const baseUrl = apiUrl?.endsWith('/') ? apiUrl : `${apiUrl}/`;
         
+        // Intentar obtener el perfil con el token actual
         const response = await fetch(`${baseUrl}profile`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -79,12 +89,107 @@ export default function ProfilePage() {
           },
         });
         
-        if (!response.ok) {
-          throw new Error('Error al obtener perfil de usuario');
+        // Si la respuesta es 401 (Unauthorized), podría ser un token expirado
+        if (response.status === 401) {
+          console.log('Token posiblemente expirado, intentando renovar...');
+          
+          // Intentar refrescar el token manualmente desde localStorage
+          const refreshToken = localStorage.getItem('refresh_token');
+          if (refreshToken) {
+            try {
+              const refreshResponse = await fetch(`${baseUrl}auth/refresh`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  refreshToken: refreshToken
+                }),
+              });
+              
+              if (refreshResponse.ok) {
+                const refreshData = await refreshResponse.json();
+                if (refreshData.access_token) {
+                  // Actualizar token en localStorage y cookies
+                  localStorage.setItem('auth_token', refreshData.access_token);
+                  document.cookie = `token=${refreshData.access_token}; path=/; max-age=86400; SameSite=Lax`;
+                  
+                  // Si hay un nuevo refresh token, actualizarlo también
+                  if (refreshData.refresh_token) {
+                    localStorage.setItem('refresh_token', refreshData.refresh_token);
+                    document.cookie = `refresh_token=${refreshData.refresh_token}; path=/; max-age=86400; SameSite=Lax`;
+                  }
+                  
+                  // Intentar nuevamente con el nuevo token
+                  token = refreshData.access_token;
+                  const retryResponse = await fetch(`${baseUrl}profile`, {
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                      'Content-Type': 'application/json',
+                    },
+                  });
+                  
+                  if (retryResponse.ok) {
+                    const data = await retryResponse.json();
+                    // Procesar directamente los datos del perfil
+                    setUserProfile(data);
+                    setForm({
+                      fullName: data.fullName || '',
+                      email: data.email || '',
+                      cuitOrDni: data.cuitOrDni || '',
+                      phone: data.phone || '',
+                      location: data.location || '',
+                      profilePicture: data.profilePicture || null,
+                    });
+                    
+                    // Manejar correctamente la foto de perfil
+                    if (data.profilePicture) {
+                      console.log('Foto de perfil encontrada:', data.profilePicture);
+                      
+                      // Verificar si la URL es relativa o absoluta
+                      if (!data.profilePicture.startsWith('http')) {
+                        const fullUrl = `${baseUrl}${data.profilePicture.startsWith('/') ? data.profilePicture.substring(1) : data.profilePicture}`;
+                        setProfilePicture(fullUrl);
+                      } else {
+                        setProfilePicture(data.profilePicture);
+                      }
+                    }
+                    
+                    // Mostrar mensaje de verificación si el usuario no está verificado
+                    if (data.verified === false) {
+                      setShowVerificationMessage(true);
+                    }
+                    
+                    setIsLoading(false);
+                    return;
+                  }
+                }
+              }
+            } catch (refreshError) {
+              console.error('Error al refrescar el token:', refreshError);
+            }
+          }
+          
+          // Si llegamos aquí, no se pudo refrescar el token
+          showToast('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.', 'error');
+          setTimeout(() => router.push('/login'), 2000);
+          setIsLoading(false);
+          return;
         }
         
+        // Manejar otros errores de la API
+        if (!response.ok) {
+          console.error(`Error al obtener perfil: ${response.status} ${response.statusText}`);
+          showToast('No se pudo cargar tu perfil. Intenta nuevamente más tarde.', 'error');
+          setIsLoading(false);
+          return;
+        }
+        
+        // Procesar los datos del perfil si todo está bien
         const data = await response.json();
         console.log('Perfil obtenido:', data);
+        
+        // Actualizar el estado con los datos del perfil
         setUserProfile(data);
         setForm({
           fullName: data.fullName || '',

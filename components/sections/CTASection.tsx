@@ -18,7 +18,7 @@ const CTASection = () => {
           <StartCauseButton 
             variant="secondary" 
             size="md"
-            className="text-base" 
+            className="text-base flex justify-center" 
             showIcon={true}
             iconPosition="left"
           />
