@@ -104,7 +104,9 @@ interface CampaignsResponse {
   };
 }
 
-async function getCampaigns(searchParams: Record<string, string | string[] | undefined>): Promise<CampaignsResponse> {
+async function getCampaigns(searchParams: Record<string, string | string[] | undefined> | Promise<Record<string, string | string[] | undefined>>): Promise<CampaignsResponse> {
+  // Asegurarse de que searchParams esté resuelto
+  const resolvedParams = searchParams instanceof Promise ? await searchParams : searchParams;
   try {
     const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
     if (!apiUrl) {
@@ -117,9 +119,9 @@ async function getCampaigns(searchParams: Record<string, string | string[] | und
     params.append('status', 'VERIFIED');
     
     // Agregar parámetros de búsqueda si existen
-    const page = typeof searchParams.page === 'string' ? searchParams.page : '1';
-    const category = typeof searchParams.category === 'string' ? searchParams.category : undefined;
-    const search = typeof searchParams.search === 'string' ? searchParams.search : undefined;
+    const page = typeof resolvedParams.page === 'string' ? resolvedParams.page : '1';
+    const category = typeof resolvedParams.category === 'string' ? resolvedParams.category : undefined;
+    const search = typeof resolvedParams.search === 'string' ? resolvedParams.search : undefined;
     
     params.append('page', page);
     params.append('limit', '9'); // 9 campañas por página (3x3 grid)
@@ -199,10 +201,10 @@ export const revalidate = 3600; // Revalidar cada hora
 
 export default async function CampaignsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   // En Next.js 15, searchParams es ahora asincrónico y debe ser await
-  const resolvedSearchParams = await searchParams;
+  // Pasamos searchParams directamente a getCampaigns, que se encargará de resolverlo
   
   // Obtener campañas con los parámetros de búsqueda
-  const { items: campaigns, meta } = await getCampaigns(resolvedSearchParams);
+  const { items: campaigns, meta } = await getCampaigns(searchParams);
   
   // Obtener categorías disponibles
   const availableCategories = await getAvailableCategories();

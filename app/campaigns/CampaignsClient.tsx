@@ -38,10 +38,21 @@ const CampaignsClient = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   
-  // Obtener valores iniciales de los parámetros de URL
-  const initialCategory = searchParams.get('category') as CampaignCategory | null;
-  const initialSearch = searchParams.get('search') || '';
-  const initialPage = parseInt(searchParams.get('page') || '1', 10);
+  // Obtener valores iniciales de los parámetros de URL de forma segura
+  // En Next.js 15, searchParams puede ser asíncrono, así que usamos una función segura
+  const getParamSafely = (name: string, defaultValue: string = ''): string => {
+    try {
+      const value = searchParams.get(name);
+      return value !== null ? value : defaultValue;
+    } catch (error) {
+      console.error(`Error al obtener parámetro ${name}:`, error);
+      return defaultValue;
+    }
+  };
+  
+  const initialCategory = getParamSafely('category') as CampaignCategory | null;
+  const initialSearch = getParamSafely('search', '');
+  const initialPage = parseInt(getParamSafely('page', '1'), 10);
   
   // Estado para los filtros
   const [selectedCategory, setSelectedCategory] = useState<string | null>(initialCategory);
@@ -49,13 +60,22 @@ const CampaignsClient = ({
   const [currentPage, setCurrentPage] = useState(initialPage);
   
   // Función para actualizar la URL con los filtros
+  // Usamos un enfoque más directo para evitar problemas con searchParams en Next.js 15
   const updateUrlParams = (params: { 
     category?: string | null; 
     search?: string; 
     page?: number;
   }) => {
     startTransition(() => {
-      const newParams = new URLSearchParams(searchParams.toString());
+      // Crear un nuevo objeto URLSearchParams desde cero en lugar de usar searchParams
+      // Esto evita cualquier problema con searchParams siendo asincrónico en Next.js 15
+      const newParams = new URLSearchParams();
+      
+      // Copiar los parámetros actuales de la URL del navegador
+      const currentParams = new URLSearchParams(window.location.search);
+      currentParams.forEach((value, key) => {
+        newParams.set(key, value);
+      });
       
       // Actualizar categoría
       if (params.category === null) {
@@ -104,6 +124,9 @@ const CampaignsClient = ({
       // Construir URL con parámetros
       const params = new URLSearchParams();
       params.append('status', 'VERIFIED');
+      
+      // Usar valores del estado local en lugar de leer searchParams
+      // Esto evita problemas con searchParams en Next.js 15
       params.append('page', currentPage.toString());
       params.append('limit', '9'); // Mostrar 9 campañas por página
       
@@ -138,21 +161,15 @@ const CampaignsClient = ({
   };
   
   // Efecto para cargar campañas cuando cambian los filtros
-  // Solo se ejecuta cuando los filtros cambian, no en la carga inicial
+  // Simplificamos este efecto para evitar problemas con searchParams en Next.js 15
   useEffect(() => {
-    // Verificar si los parámetros actuales son diferentes de los iniciales
-    const initialParams = new URLSearchParams(window.location.search);
-    const initialCategoryParam = initialParams.get('category');
-    const initialSearchParam = initialParams.get('search') || '';
-    const initialPageParam = parseInt(initialParams.get('page') || '1', 10);
+    // Usamos una bandera para evitar la carga inicial
+    const isInitialRender = selectedCategory === initialCategory && 
+                           searchTerm === initialSearch && 
+                           currentPage === initialPage;
     
-    const paramsChanged = 
-      selectedCategory !== initialCategoryParam ||
-      searchTerm !== initialSearchParam ||
-      currentPage !== initialPageParam;
-    
-    // Solo hacer fetch si los parámetros han cambiado desde la carga inicial
-    if (paramsChanged) {
+    // Solo hacer fetch si no es la carga inicial (ya tenemos los datos iniciales de SSR)
+    if (!isInitialRender) {
       fetchCampaigns();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

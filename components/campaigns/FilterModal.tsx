@@ -3,7 +3,7 @@
 import { CampaignCategory } from '@/types/enums';
 import { getCategoryLabel } from '@/utils/campaign-categories';
 import { AccessibilityIcon, Activity, AlertTriangle, Baby, Cat, GraduationCap, Heart, Home, Leaf, MoreHorizontal, Paintbrush, Store, UserPlus, Users, Utensils, X } from 'lucide-react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface FilterModalProps {
   isOpen: boolean;
@@ -39,40 +39,51 @@ const FilterModal = ({
   selectedCategory,
   onSelectCategory
 }: FilterModalProps) => {
-  if (!isOpen) return null;
-
+  // Usar useRef para evitar problemas con hooks condicionales
+  const modalRef = useRef<HTMLDivElement>(null);
+  
+  // Prevenir scroll del body cuando el modal está abierto
+  useEffect(() => {
+    // Solo ejecutar este efecto si isOpen cambia a true
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      
+      // Función para manejar clics fuera del modal
+      const handleOutsideClick = (e: MouseEvent) => {
+        if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+          onClose();
+        }
+      };
+      
+      // Agregar event listener
+      document.addEventListener('mousedown', handleOutsideClick);
+      
+      // Cleanup
+      return () => {
+        document.body.style.overflow = '';
+        document.removeEventListener('mousedown', handleOutsideClick);
+      };
+    } else {
+      // Restaurar overflow cuando el modal se cierra
+      document.body.style.overflow = '';
+      return () => {};
+    }
+  }, [isOpen, onClose]);
+  
+  // Manejador para seleccionar categoría
   const handleCategorySelect = (category: string | null) => {
     onSelectCategory(category);
     onClose();
   };
-
-  // Prevenir scroll del body cuando el modal está abierto
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
-
-  // Manejador para cerrar el modal al hacer clic fuera
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    // Solo cerrar si el clic fue directamente en el backdrop, no en sus hijos
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+  
+  // No renderizar nada si el modal está cerrado
+  if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/50"
-      onClick={handleBackdropClick}
-    >
-      <div className="bg-white border-2 border-[#002C5B] shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)] w-[90%] max-w-md max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/50">
+      <div 
+        ref={modalRef}
+        className="bg-white border-2 border-[#002C5B] shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)] w-[90%] max-w-md max-h-[90vh] flex flex-col">
         <div className="sticky top-0 flex items-center justify-between p-4 border-b-2 border-[#002C5B] bg-white z-10">
           <h2 className="text-lg font-bold text-[#002C5B]">Filtrar por categoría</h2>
           <button 
