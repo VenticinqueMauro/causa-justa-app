@@ -45,7 +45,7 @@ const RelatedCampaignsSlider: React.FC<RelatedCampaignsSliderProps> = ({
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between mb-6">
           <BrutalHeading className="text-2xl md:text-3xl">{title}</BrutalHeading>
-          <div className="flex space-x-2">
+          <div className="hidden md:inline-flex space-x-2">
             {showPrevButton ? (
               <Link 
                 href={getPageUrl(currentPage - 1)}
