@@ -35,6 +35,7 @@ export interface AuthResponseDto {
     role: UserRole;
     verified: boolean;
     needsRoleSelection?: boolean;
+    authMethod?: 'email' | 'google';
   }
 }
 

@@ -19,6 +19,7 @@ export interface User {
   role: UserRole; // Usando el enum UserRole en lugar de string
   profilePicture?: string;
   verified?: boolean;
+  authMethod?: 'email' | 'google'; // Método de autenticación del usuario
 }
 
 interface AuthContextType {
@@ -106,8 +107,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (decodedToken && decodedToken.fullName && (!parsedUser.fullName || parsedUser.fullName === parsedUser.email.split('@')[0])) {
               parsedUser.fullName = decodedToken.fullName;
               console.log('Actualizando nombre completo desde JWT:', decodedToken.fullName);
+            }
+            
+            // Asegurarse de que el campo authMethod esté establecido
+            if (!parsedUser.authMethod) {
+              // Determinar el método de autenticación basado en el origen del token
+              const isGoogleAuth = decodedToken && (decodedToken.provider === 'google' || 
+                                                   decodedToken.iss?.includes('google') ||
+                                                   decodedToken.email_verified === true);
               
-              // Actualizar el usuario almacenado con el nombre completo correcto
+              parsedUser.authMethod = isGoogleAuth ? 'google' as 'google' : 'email' as 'email';
+              console.log(`Método de autenticación determinado para usuario almacenado: ${parsedUser.authMethod}`);
+              
+              // Actualizar el usuario almacenado con el método de autenticación
               localStorage.setItem('auth_user', JSON.stringify(parsedUser));
               document.cookie = `auth_user=${JSON.stringify(parsedUser)}; path=/; max-age=86400; SameSite=Lax`;
             }
@@ -256,6 +268,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.log('Nombre completo extraído del token JWT:', decodedToken.fullName);
       }
       
+      // Asegurarse de que el campo authMethod esté establecido
+      if (!userData.authMethod) {
+        // Determinar el método de autenticación basado en la URL actual o en el origen del token
+        const isGoogleAuth = (
+          window.location.pathname.includes('/auth/google') || 
+          (decodedToken && decodedToken.provider === 'google')
+        );
+        
+        userData.authMethod = isGoogleAuth ? 'google' as 'google' : 'email' as 'email';
+        console.log(`Método de autenticación determinado: ${userData.authMethod}`);
+      }
+      
       // Verificar si el usuario necesita seleccionar un rol (autenticación con Google)
       const extendedUserData = userData as User & { needsRoleSelection?: boolean };
       
@@ -287,7 +311,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(userData);
       setIsLoading(false);
       
-      console.log('Usuario autenticado:', userData.fullName);
+      console.log('Usuario autenticado:', userData.fullName, 'Método:', userData.authMethod);
     } catch (err) {
       console.error('Error during login:', err);
     }

@@ -589,18 +589,21 @@ export default function ProfilePage() {
             <h2 className="text-xl font-bold mb-4">Seguridad</h2>
             
             <div className="space-y-4">
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-1">Cambiar contraseña</h3>
-                <p className="text-sm text-gray-500 mb-3">
-                  Actualiza tu contraseña para mantener tu cuenta segura
-                </p>
-                <Link
-                  href="/auth/change-password"
-                  className="inline-block px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors"
-                >
-                  Cambiar contraseña
-                </Link>
-              </div>
+              {/* Mostrar opción de cambiar contraseña solo para usuarios autenticados con email */}
+              {user?.authMethod !== 'google' && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-1">Cambiar contraseña</h3>
+                  <p className="text-sm text-gray-500 mb-3">
+                    Actualiza tu contraseña para mantener tu cuenta segura
+                  </p>
+                  <Link
+                    href="/auth/change-password"
+                    className="inline-block px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors"
+                  >
+                    Cambiar contraseña
+                  </Link>
+                </div>
+              )}
               
               <div className="pt-4 border-t border-gray-200">
                 <h3 className="text-sm font-medium text-gray-700 mb-1">Información de la cuenta</h3>

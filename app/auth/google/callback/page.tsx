@@ -61,7 +61,8 @@ function GoogleCallbackContent() {
             fullName: payload.name || payload.email.split('@')[0] || '',
             role: payload.role || 'DONOR',
             verified: payload.verified || false,
-            profilePicture: payload.profilePicture || null
+            profilePicture: payload.profilePicture || null,
+            authMethod: 'google' as 'google' // Establecer explícitamente el método de autenticación como Google
           };
 
           console.log('Datos de usuario extraídos del token:', userData);

@@ -82,11 +82,17 @@ export default function LoginForm() {
           localStorage.setItem('refresh_token', refreshToken);
           document.cookie = `refresh_token=${refreshToken}; path=/; max-age=86400; SameSite=Lax`;
           
+          // Añadir el campo authMethod al objeto de usuario
+          const userWithAuthMethod = {
+            ...formState.data.user,
+            authMethod: 'email' as 'email'
+          };
+          
           // Guardar datos de usuario en cookie
-          document.cookie = `auth_user=${JSON.stringify(formState.data.user)}; path=/; max-age=86400; SameSite=Lax`;
+          document.cookie = `auth_user=${JSON.stringify(userWithAuthMethod)}; path=/; max-age=86400; SameSite=Lax`;
           
           // Actualizar el contexto de autenticación con el token y refresh token
-          login(formState.data.access_token, refreshToken, formState.data.user);
+          login(formState.data.access_token, refreshToken, userWithAuthMethod);
           
           // Verificar si hay una redirección guardada
           const redirectPath = localStorage.getItem('redirectAfterLogin');

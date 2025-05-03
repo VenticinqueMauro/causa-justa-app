@@ -227,7 +227,7 @@ export default function PerfilDonorPage() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1 flex items-center">
+                  <label className="text-sm font-medium mb-1 flex items-center">
                     <User size={16} className="mr-2" /> Nombre completo
                   </label>
                   <input
@@ -241,7 +241,7 @@ export default function PerfilDonorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 flex items-center">
+                  <label className="text-sm font-medium mb-1 flex items-center">
                     <Mail size={16} className="mr-2" /> Correo electrónico
                   </label>
                   <input
@@ -253,7 +253,7 @@ export default function PerfilDonorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 flex items-center">
+                  <label className="text-sm font-medium mb-1 flex items-center">
                     <Phone size={16} className="mr-2" /> Teléfono
                   </label>
                   <input
@@ -267,7 +267,7 @@ export default function PerfilDonorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 flex items-center">
+                  <label className="text-sm font-medium mb-1 flex items-center">
                     <MapPin size={16} className="mr-2" /> Ubicación
                   </label>
                   <input
@@ -294,18 +294,21 @@ export default function PerfilDonorPage() {
               </form>
             </div>
 
-            <div className="bg-white border-2 border-black p-3 md:p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-              <h2 className="text-xl font-bold mb-4">Seguridad</h2>
-              <p className="text-sm text-gray-500 mb-4">
-                Actualiza tu contraseña para mantener tu cuenta segura.
-              </p>
-              <Link
-                href="/auth/change-password"
-                className="inline-block px-4 py-2 bg-black text-white rounded border-2 border-black hover:bg-gray-800 transition"
-              >
-                Cambiar contraseña
-              </Link>
-            </div>
+            {/* Mostrar opción de cambiar contraseña solo para usuarios autenticados con email */}
+            {user?.authMethod !== 'google' && (
+              <div className="bg-white border-2 border-black p-3 md:p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                <h2 className="text-xl font-bold mb-4">Seguridad</h2>
+                <p className="text-sm text-gray-500 mb-4">
+                  Actualiza tu contraseña para mantener tu cuenta segura.
+                </p>
+                <Link
+                  href="/auth/change-password"
+                  className="inline-block px-4 py-2 bg-black text-white rounded border-2 border-black hover:bg-gray-800 transition"
+                >
+                  Cambiar contraseña
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
