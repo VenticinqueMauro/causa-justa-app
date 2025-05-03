@@ -11,8 +11,15 @@ interface FeaturedCampaignsSectionProps {
 }
 
 const FeaturedCampaignsSection = ({ campaigns }: FeaturedCampaignsSectionProps) => {
-  // Asegurarnos de que siempre tengamos al menos 3 campañas para mostrar
-  const displayCampaigns = campaigns.slice(0, 3);
+  // Encontrar la campaña destacada (isFeatured=true) o usar la primera si no hay ninguna
+  const featuredCampaign = campaigns.find(campaign => campaign.isFeatured) || campaigns[0];
+  
+  // Obtener el resto de campañas (excluyendo la destacada)
+  const otherCampaigns = campaigns.filter(campaign => campaign !== featuredCampaign).slice(0, 2);
+  
+  // Si no hay suficientes campañas adicionales, rellenar con la destacada repetida (solo para evitar errores)
+  const secondaryCampaigns = otherCampaigns.length >= 2 ? otherCampaigns : 
+    [...otherCampaigns, ...Array(2 - otherCampaigns.length).fill(featuredCampaign)];
   
   return (
     <BrutalSection id="campaigns" variant="alt" className="border-y-2 border-[#002C5B]">
@@ -30,7 +37,7 @@ const FeaturedCampaignsSection = ({ campaigns }: FeaturedCampaignsSectionProps) 
             <div className="md:w-1/2 flex">
               <div className="w-full">
                 <CampaignCard 
-                  campaign={displayCampaigns[0]} 
+                  campaign={featuredCampaign} 
                   featured={true} 
                   className="h-full"
                 />
@@ -41,12 +48,12 @@ const FeaturedCampaignsSection = ({ campaigns }: FeaturedCampaignsSectionProps) 
             <div className="md:w-1/2 flex flex-col gap-6">
               {/* Primera campaña secundaria */}
               <div className="flex-1">
-                <CampaignCard campaign={displayCampaigns[1]} className="h-full" />
+                <CampaignCard campaign={secondaryCampaigns[0]} className="h-full" />
               </div>
               
               {/* Segunda campaña secundaria */}
               <div className="flex-1">
-                <CampaignCard campaign={displayCampaigns[2]} className="h-full" />
+                <CampaignCard campaign={secondaryCampaigns[1]} className="h-full" />
               </div>
             </div>
           </div>
