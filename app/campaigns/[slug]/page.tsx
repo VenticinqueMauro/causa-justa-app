@@ -12,8 +12,9 @@ import { Campaign } from '@/types/campaign';
 import { CampaignCategory } from '@/types/enums';
 import { getCategoryLabel } from '@/utils/campaign-categories';
 import { generateMetadata as baseGenerateMetadata } from '@/utils/metadata';
-import { getCampaignBySlug } from './utils';
+import { getCampaignBySlug, getRandomVerifiedCampaigns } from './utils';
 import ShareButton from '@/components/ui/ShareButton';
+import RelatedCampaignsSection from '@/components/campaigns/RelatedCampaignsSection';
 
 // La función getCampaignBySlug ahora se importa desde ./utils
 
@@ -156,13 +157,18 @@ export async function generateStaticParams() {
   }
 }
 
+// Volvemos a static para mejorar el rendimiento, ya que la paginación ahora se maneja en el cliente
 export const dynamic = 'force-static';
 export const revalidate = 3600; // Revalidar cada hora
 
-export default async function CampaignDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function CampaignDetailPage({ params, searchParams }: { params: Promise<{ slug: string }>, searchParams: { [key: string]: string | string[] | undefined } }) {
   // En Next.js 15, los parámetros son ahora asincónicos y deben ser await
   // Ver: https://nextjs.org/docs/app/guides/upgrading/version-15#params--searchparams
   const { slug } = await params;
+
+  // Obtener parámetros de paginación para campañas relacionadas
+  const page = searchParams.page ? parseInt(searchParams.page as string, 10) : 1;
+  const seed = searchParams.seed as string || undefined;
 
   console.log('Buscando campaña con slug/id:', slug);
   const campaign = await getCampaignBySlug(slug);
@@ -173,6 +179,10 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
   }
 
   console.log('Campaña encontrada:', campaign.title);
+
+  // Obtener campañas relacionadas aleatorias (verificadas y excluyendo la actual)
+  const { campaigns: relatedCampaigns, totalPages } = await getRandomVerifiedCampaigns(campaign.id || '', 4, page, seed);
+  console.log(`Obtenidas ${relatedCampaigns.length} campañas relacionadas, página ${page} de ${totalPages}`);
 
   // Calcular el progreso de la campaña
   const progress = campaign.goalAmount && campaign.currentAmount !== undefined
@@ -288,6 +298,18 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             </div>
           </div>
         </BrutalSection>
+        
+        {/* Campañas relacionadas con paginación del lado del cliente */}
+        {relatedCampaigns.length > 0 && (
+          <BrutalSection className="py-8 md:py-12">
+            <RelatedCampaignsSection 
+              initialCampaigns={relatedCampaigns} 
+              initialTotalPages={totalPages} 
+              campaignSlug={slug}
+              initialSeed={seed}
+            />
+          </BrutalSection>
+        )}
       </main>
       <Footer />
     </div>

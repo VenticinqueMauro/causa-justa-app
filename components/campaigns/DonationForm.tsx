@@ -295,6 +295,7 @@ export default function DonationForm({ campaignId, campaignTitle }: DonationForm
         <BrutalButton
           type="submit"
           className="w-full"
+          variant='secondary'
           disabled={isLoading || !watchAmount || watchAmount < 1}
         >
           {isLoading ? 'Procesando...' : 'Donar ahora'}
