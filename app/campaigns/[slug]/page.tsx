@@ -161,14 +161,15 @@ export async function generateStaticParams() {
 export const dynamic = 'force-static';
 export const revalidate = 3600; // Revalidar cada hora
 
-export default async function CampaignDetailPage({ params, searchParams }: { params: Promise<{ slug: string }>, searchParams: { [key: string]: string | string[] | undefined } }) {
+export default async function CampaignDetailPage({ params, searchParams }: { params: Promise<{ slug: string }>, searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   // En Next.js 15, los parámetros son ahora asincónicos y deben ser await
   // Ver: https://nextjs.org/docs/app/guides/upgrading/version-15#params--searchparams
   const { slug } = await params;
+  const searchParamsData = await searchParams;
 
   // Obtener parámetros de paginación para campañas relacionadas
-  const page = searchParams.page ? parseInt(searchParams.page as string, 10) : 1;
-  const seed = searchParams.seed as string || undefined;
+  const page = searchParamsData.page ? parseInt(searchParamsData.page as string, 10) : 1;
+  const seed = searchParamsData.seed as string || undefined;
 
   console.log('Buscando campaña con slug/id:', slug);
   const campaign = await getCampaignBySlug(slug);
