@@ -30,7 +30,7 @@ async function getCampaigns(): Promise<Campaign[]> {
     
     const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
     const response = await fetch(`${baseUrl}campaigns?status=VERIFIED&limit=5`, {
-      next: { revalidate: 3600 }, 
+      next: { revalidate: 60 }, 
       headers: {
         'Content-Type': 'application/json',
       },

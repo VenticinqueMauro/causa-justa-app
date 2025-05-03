@@ -19,6 +19,7 @@ const workSans = Work_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://causa-justa-app.vercel.app'),
   title: {
     template: '%s | Por una Causa Justa',
     default: 'Por una Causa Justa | Plataforma de recaudación de fondos para todo tipo de causas',

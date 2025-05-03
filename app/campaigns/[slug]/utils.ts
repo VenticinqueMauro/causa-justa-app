@@ -16,7 +16,7 @@ export async function getCampaignBySlug(slugOrId: string): Promise<Campaign | nu
     
     // Intentar primero obtener por ID directo (para casos donde el slug es en realidad un ID)
     let response = await fetch(`${baseUrl}campaigns/${slugOrId}`, {
-      next: { revalidate: 3600 }, // Revalidar cada hora
+      next: { revalidate: 60 }, // Revalidar cada hora
       headers: {
         'Content-Type': 'application/json',
       },
@@ -26,7 +26,7 @@ export async function getCampaignBySlug(slugOrId: string): Promise<Campaign | nu
     if (!response.ok && response.status === 404) {
       console.log('Campaña no encontrada por ID, intentando por slug...');
       response = await fetch(`${baseUrl}campaigns?search=${encodeURIComponent(slugOrId)}&status=VERIFIED`, {
-        next: { revalidate: 3600 }, // Revalidar cada hora
+        next: { revalidate: 60 }, // Revalidar cada hora
         headers: {
           'Content-Type': 'application/json',
         },

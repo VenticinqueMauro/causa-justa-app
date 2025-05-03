@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
     try {
       const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
       const response = await fetch(`${baseUrl}campaigns?status=VERIFIED&isFeatured=true&limit=5`, {
-        next: { revalidate: 3600 },
+        next: { revalidate: 60 },
       });
       
       if (response.ok) {
@@ -137,7 +137,7 @@ async function getCampaigns(searchParams: Record<string, string | string[] | und
     
     const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
     const response = await fetch(`${baseUrl}campaigns?${params.toString()}`, {
-      next: { revalidate: 3600 }, // Revalidar cada hora
+      next: { revalidate: 60 }, // Revalidar cada hora
       headers: {
         'Content-Type': 'application/json',
       },
