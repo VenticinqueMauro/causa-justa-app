@@ -56,7 +56,7 @@ const VerificationProcessSection = () => {
           </div>
         </div>
 
-        <div className="mt-10 border-2 border-dashed border-[#002C5B] bg-white p-6">
+        <div className="mt-10 border-2 border-dashed border-[#002C5B] bg-white p-6 max-w-5xl mx-auto">
           <h3 className="text-xl font-bold text-[#002C5B] uppercase mb-4 text-center">Recomendaciones para crear una causa exitosa</h3>
           <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
             <div className="flex flex-col items-center">

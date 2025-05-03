@@ -27,15 +27,15 @@ const SecuritySection = () => {
             <p className="text-gray-600 mb-4">
               Procesamos todas las donaciones a través de MercadoPago, la plataforma de pagos más segura de Latinoamérica.
             </p>
-            <div className="flex items-center gap-4 mt-4">
+            <div className="flex flex-col md:flex-row items-center gap-4 mt-4">
               <div className="flex items-center justify-center bg-[#FFF] text-white font-bold px-4 py-2 rounded">
                 <Image src="/mercadopago-logo.png" alt="MercadoPago" width={90} height={90} />
               </div>
               <div className="flex flex-wrap gap-2">
-                <span className="inline-block bg-gray-100 px-3 py-1 text-sm text-gray-700 rounded border border-gray-200">Tarjetas de crédito</span>
-                <span className="inline-block bg-gray-100 px-3 py-1 text-sm text-gray-700 rounded border border-gray-200">Tarjetas de débito</span>
-                <span className="inline-block bg-gray-100 px-3 py-1 text-sm text-gray-700 rounded border border-gray-200">Transferencia bancaria</span>
-                <span className="inline-block bg-gray-100 px-3 py-1 text-sm text-gray-700 rounded border border-gray-200">Efectivo</span>
+                <span className="inline-block bg-gray-100 px-3 py-1 text-xs md:text-sm text-gray-700 rounded border border-gray-200">Tarjetas de crédito</span>
+                <span className="inline-block bg-gray-100 px-3 py-1 text-xs md:text-sm text-gray-700 rounded border border-gray-200">Tarjetas de débito</span>
+                <span className="inline-block bg-gray-100 px-3 py-1 text-xs md:text-sm text-gray-700 rounded border border-gray-200">Transferencia bancaria</span>
+                <span className="inline-block bg-gray-100 px-3 py-1 text-xs md:text-sm text-gray-700 rounded border border-gray-200">Efectivo</span>
               </div>
             </div>
           </div>
@@ -70,16 +70,16 @@ const SecuritySection = () => {
 
         {/* Comisiones y modelo de negocio */}
         <div className="mt-8 border-2 border-[#002C5B] bg-white p-6 shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)]">
-          <h3 className="text-xl font-bold text-[#002C5B] uppercase mb-4">Comisiones Transparentes</h3>
+          <h3 className="text-xl font-bold text-[#002C5B] uppercase mb-4">Estructura de Comisiones</h3>
           <div className="flex flex-col md:flex-row">
             <div className="flex-1 md:pr-6">
               <p className="font-medium text-[#002C5B] mb-2">
-                Modelo de comisiones diseñado para ser completamente transparente:
+                Nuestro modelo de comisiones es claro y directo:
               </p>
               <ul className="list-disc pl-5 text-gray-600">
                 <li><span className="font-medium">5% de comisión</span> por donación exitosa para mantener la plataforma</li>
                 <li><span className="font-medium">+ costos de procesamiento</span> de MercadoPago (aprox 3.99%)</li>
-                <li>Opción para que el donante cubra las comisiones</li>
+                <li>Todas las comisiones se detallan en cada transacción</li>
               </ul>
             </div>
             
@@ -87,12 +87,12 @@ const SecuritySection = () => {
             
             <div className="flex-1 md:pl-6 mt-6 md:mt-0">
               <p className="font-medium text-[#002C5B] mb-2">
-                Transparencia en la plataforma:
+                Seguridad en cada donación:
               </p>
               <ul className="list-disc pl-5 text-gray-600">
                 <li>Transferencias directas a cuentas de MercadoPago verificadas</li>
-                <li>Los beneficiarios pueden compartir actualizaciones</li>
-                <li>Sistema de mensajes entre donantes y beneficiarios</li>
+                <li>Los beneficiarios pueden compartir actualizaciones sobre el progreso</li>
+                <li>Historial completo de donaciones en tu perfil</li>
               </ul>
             </div>
           </div>

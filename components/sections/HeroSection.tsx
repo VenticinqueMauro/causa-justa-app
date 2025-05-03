@@ -1,7 +1,9 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import BrutalSection from "../ui/BrutalSection";
 import BrutalButton from "../ui/BrutalButton";
+import StartCauseButton from "../actions/StartCauseButton";
 
 const HeroSection = () => {
   return (
@@ -18,10 +20,15 @@ const HeroSection = () => {
           diferencia en nuestra comunidad, con la seguridad de MercadoPago y verificación completa de cada causa.
         </p>
         <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-          <BrutalButton variant="secondary" className="text-base">
-            Iniciar una causa
-          </BrutalButton>
-          <BrutalButton variant="outline" className="text-base">
+          <StartCauseButton
+            variant="secondary"
+            size="md"
+            className="text-base"
+            text="Iniciar una causa"
+            showIcon={true}
+            iconPosition="left"
+          />
+          <BrutalButton variant="outline" className="text-base" href="/campaigns">
             Explorar causas
           </BrutalButton>
         </div>
