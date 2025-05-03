@@ -29,8 +29,8 @@ async function getCampaigns(): Promise<Campaign[]> {
     }
     
     const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
-    const response = await fetch(`${baseUrl}campaigns?status=VERIFIED&limit=3`, {
-      next: { revalidate: 3600 }, // Revalidar cada hora en lugar de 'no-store'
+    const response = await fetch(`${baseUrl}campaigns?status=VERIFIED&limit=5`, {
+      next: { revalidate: 3600 }, 
       headers: {
         'Content-Type': 'application/json',
       },
