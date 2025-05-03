@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CampaignCategory } from '@/types';
 import { getCategoryOptions } from '@/utils/campaign-categories';
+import BrutalButton from '@/components/ui/BrutalButton';
 
 interface CreateCauseForm {
   title: string;
@@ -88,11 +89,44 @@ export default function CreateCausePage() {
 
   const handleConnectMercadoPago = async () => {
     try {
-      const token = await getToken();
-      if (!token) throw new Error('No se encontró token de autenticación');
+      setIsLoading(true);
+      setError(null);
+      
+      // Obtener token de múltiples fuentes (similar a StartCauseButton)
+      console.log('Intentando obtener token de autenticación...');
+      
+      // 1. Intentar obtener token usando getToken() del contexto
+      let token = await getToken();
+      console.log('Token desde getToken():', token ? 'Obtenido' : 'No disponible');
+      
+      // 2. Si no hay token, intentar obtenerlo de las cookies
+      if (!token) {
+        const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('token='));
+        if (tokenCookie) {
+          token = tokenCookie.split('=')[1];
+          console.log('Token obtenido de cookies');
+        }
+      }
+      
+      // 3. Si aún no hay token, intentar obtenerlo de localStorage
+      if (!token) {
+        const localStorageToken = localStorage.getItem('auth_token');
+        if (localStorageToken) {
+          token = localStorageToken;
+          console.log('Token obtenido de localStorage');
+        }
+      }
+      
+      // Verificar si se obtuvo un token
+      if (!token) {
+        console.error('No se pudo obtener el token de autenticación de ninguna fuente');
+        throw new Error('No se encontró token de autenticación. Por favor, inicia sesión nuevamente.');
+      }
       
       const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
       const baseUrl = apiUrl?.endsWith('/') ? apiUrl : `${apiUrl}/`;
+      
+      console.log('Conectando con MercadoPago:', `${baseUrl}mercadopago/connect`);
       
       const response = await fetch(`${baseUrl}mercadopago/connect`, {
         method: 'GET',
@@ -102,21 +136,70 @@ export default function CreateCausePage() {
         },
       });
       
+      // Clonar la respuesta para poder leerla como texto para depuración
+      const responseText = await response.clone().text();
+      console.log('Respuesta completa del servidor:', responseText);
+      
       if (!response.ok) {
-        throw new Error('Error al conectar con MercadoPago');
+        throw new Error(`Error al conectar con MercadoPago: ${response.status} ${response.statusText}`);
       }
       
-      const data = await response.json();
+      // Intentar parsear la respuesta como JSON
+      let data;
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+        console.log('Datos parseados:', data);
+      } catch (parseError) {
+        console.error('Error al parsear respuesta JSON:', parseError);
+        // Si no es JSON válido, verificar si es una URL directa
+        if (responseText && responseText.includes('http')) {
+          console.log('La respuesta parece ser una URL directa');
+          window.location.href = responseText.trim();
+          return;
+        }
+        throw new Error('Formato de respuesta no válido');
+      }
       
-      // Redirigir al usuario a la URL de autorización de MercadoPago
+      // Buscar la URL de redirección en diferentes formatos posibles
+      let redirectUrl = null;
+      
+      // Registrar todas las propiedades para depuración
+      console.log('Propiedades disponibles en la respuesta:');
+      for (const key in data) {
+        console.log(`- ${key}: ${typeof data[key] === 'object' ? JSON.stringify(data[key]) : data[key]}`);
+      }
+      
+      // Verificar todos los posibles nombres de propiedad para la URL
       if (data.authUrl) {
-        window.location.href = data.authUrl;
+        redirectUrl = data.authUrl;
+        console.log('URL encontrada en data.authUrl');
+      } else if (data.redirectUrl) {
+        redirectUrl = data.redirectUrl;
+        console.log('URL encontrada en data.redirectUrl');
+      } else if (data.redirect_url) {
+        redirectUrl = data.redirect_url;
+        console.log('URL encontrada en data.redirect_url');
+      } else if (data.url) {
+        redirectUrl = data.url;
+        console.log('URL encontrada en data.url');
+      } else if (typeof data === 'string' && data.includes('http')) {
+        redirectUrl = data;
+        console.log('URL encontrada directamente en data como string');
+      }
+      
+      // Si encontramos una URL, redirigir
+      if (redirectUrl) {
+        console.log('Redirigiendo a:', redirectUrl);
+        window.location.href = redirectUrl;
       } else {
+        console.error('No se encontró URL de redirección en la respuesta');
         throw new Error('No se recibió URL de autorización');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error connecting to MercadoPago:', err);
-      setError('No se pudo conectar con MercadoPago. Intente nuevamente.');
+      setError(err.message || 'No se pudo conectar con MercadoPago. Intente nuevamente.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -260,14 +343,16 @@ export default function CreateCausePage() {
             </div>
           )}
           
-          <button
+          <BrutalButton
+            variant="secondary"
+            size="lg"
             onClick={handleConnectMercadoPago}
-            className="px-6 py-3 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
             disabled={isLoading}
+            className="w-full md:w-auto"
           >
             {isLoading ? (
               <span className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -276,7 +361,7 @@ export default function CreateCausePage() {
             ) : (
               'Conectar con MercadoPago'
             )}
-          </button>
+          </BrutalButton>
         </div>
       </div>
     );
