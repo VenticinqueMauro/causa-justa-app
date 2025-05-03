@@ -46,12 +46,12 @@ const CampaignCard = ({ campaign, featured = false, className = '' }: CampaignCa
 
           {featured ? (
             <>
-              <p className="text-sm md:text-base line-clamp-2 text-gray-600">{campaign.shortDescription}</p>
-              <p className="text-base md:text-lg text-gray-600 line-clamp-none flex-grow mt-4">{campaign.description}</p>
+              <p className="text-base md:text-lg line-clamp-2 text-gray-600">{campaign.shortDescription}</p>
+              <p className="text-sm md:text-base text-gray-600 line-clamp-none flex-grow mt-4">"{campaign.description}"</p>
               <p className="text-xs text-gray-500 italic mt-1">→ Haz clic para ver más detalles</p>
             </>
           ) : (
-            <p className="text-sm line-clamp-2 text-gray-600">{campaign.shortDescription}</p>
+            <p className="text-base line-clamp-2 text-gray-600">{campaign.shortDescription}</p>
           )}
           <div className="mt-4 space-y-2">
             <div className="flex items-center justify-between text-xs">

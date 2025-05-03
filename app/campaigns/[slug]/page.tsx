@@ -167,10 +167,6 @@ export default async function CampaignDetailPage({ params, searchParams }: { par
   const { slug } = await params;
   const searchParamsData = await searchParams;
 
-  // Obtener parámetros de paginación para campañas relacionadas
-  const page = searchParamsData.page ? parseInt(searchParamsData.page as string, 10) : 1;
-  const seed = searchParamsData.seed as string || undefined;
-
   console.log('Buscando campaña con slug/id:', slug);
   const campaign = await getCampaignBySlug(slug);
 
@@ -182,8 +178,8 @@ export default async function CampaignDetailPage({ params, searchParams }: { par
   console.log('Campaña encontrada:', campaign.title);
 
   // Obtener campañas relacionadas aleatorias (verificadas y excluyendo la actual)
-  const { campaigns: relatedCampaigns, totalPages } = await getRandomVerifiedCampaigns(campaign.id || '', 4, page, seed);
-  console.log(`Obtenidas ${relatedCampaigns.length} campañas relacionadas, página ${page} de ${totalPages}`);
+  const { campaigns: relatedCampaigns } = await getRandomVerifiedCampaigns(campaign.id || '', 4);
+  console.log(`Obtenidas ${relatedCampaigns.length} campañas relacionadas`);
 
   // Calcular el progreso de la campaña
   const progress = campaign.goalAmount && campaign.currentAmount !== undefined
@@ -300,14 +296,12 @@ export default async function CampaignDetailPage({ params, searchParams }: { par
           </div>
         </BrutalSection>
         
-        {/* Campañas relacionadas con paginación del lado del cliente */}
+        {/* Campañas relacionadas sin paginación */}
         {relatedCampaigns.length > 0 && (
           <BrutalSection className="py-8 md:py-12">
             <RelatedCampaignsSection 
-              initialCampaigns={relatedCampaigns} 
-              initialTotalPages={totalPages} 
+              campaigns={relatedCampaigns} 
               campaignSlug={slug}
-              initialSeed={seed}
             />
           </BrutalSection>
         )}

@@ -31,7 +31,7 @@ const ServerRelatedCampaigns = ({
     <div className="w-full py-8 md:py-12">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between mb-6">
-          <BrutalHeading className="text-2xl md:text-3xl">{title}</BrutalHeading>
+          <BrutalHeading className="text-center md:text-start text-xl md:text-3xl">{title}</BrutalHeading>
           <PaginationControls 
             currentPage={currentPage}
             totalPages={totalPages}
