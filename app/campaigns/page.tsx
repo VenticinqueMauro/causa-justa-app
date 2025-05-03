@@ -122,9 +122,10 @@ async function getCampaigns(searchParams: Record<string, string | string[] | und
     const page = typeof resolvedParams.page === 'string' ? resolvedParams.page : '1';
     const category = typeof resolvedParams.category === 'string' ? resolvedParams.category : undefined;
     const search = typeof resolvedParams.search === 'string' ? resolvedParams.search : undefined;
+    const limit = typeof resolvedParams.limit === 'string' ? resolvedParams.limit : '50'; // Aumentado a 50 para mostrar más campañas
     
     params.append('page', page);
-    params.append('limit', '9'); // 9 campañas por página (3x3 grid)
+    params.append('limit', limit); // Usar el límite proporcionado o 50 por defecto
     
     if (category) {
       params.append('category', category);

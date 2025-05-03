@@ -436,10 +436,8 @@ export default function StartCauseButton({
       setShowErrorModal(false);
       setIsChangingRole(false);
       
-      // Esperar un momento y luego intentar iniciar la causa nuevamente
-      setTimeout(() => {
-        handleStartCause();
-      }, 500);
+      // Mostrar mensaje informativo en lugar de iniciar automáticamente
+      showToast('Ahora puedes iniciar una causa. Haz clic nuevamente en el botón.', 'success');
       
     } catch (error) {
       console.error('Error al actualizar el rol:', error);

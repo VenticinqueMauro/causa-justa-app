@@ -128,7 +128,7 @@ const CampaignsClient = ({
       // Usar valores del estado local en lugar de leer searchParams
       // Esto evita problemas con searchParams en Next.js 15
       params.append('page', currentPage.toString());
-      params.append('limit', '9'); // Mostrar 9 campañas por página
+      params.append('limit', '50'); // Aumentado a 50 para mostrar más campañas
       
       if (selectedCategory) {
         params.append('category', selectedCategory);

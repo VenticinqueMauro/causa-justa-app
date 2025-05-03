@@ -161,14 +161,74 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchStats = async () => {
-      if (!user) return;
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
       
       try {
         setIsLoading(true);
         
-        const token = await getToken();
+        // Intentar refrescar el token manualmente antes de hacer cualquier solicitud
+        let token = await getToken();
+        
+        // Si no hay token o hay algún problema, intentar refrescar manualmente
+        if (!token) {
+          console.log('No se pudo obtener un token válido, intentando refrescar manualmente...');
+          
+          // Intentar obtener el refresh token
+          const refreshToken = localStorage.getItem('refresh_token');
+          if (refreshToken) {
+            try {
+              const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
+              if (apiUrl) {
+                const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
+                
+                const response = await fetch(`${baseUrl}auth/refresh`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    refreshToken: refreshToken
+                  }),
+                  credentials: 'include',
+                });
+                
+                if (response.ok) {
+                  const data = await response.json();
+                  if (data.access_token) {
+                    // Actualizar cookies y localStorage
+                    document.cookie = `token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
+                    localStorage.setItem('auth_token', data.access_token);
+                    
+                    // Usar el nuevo token
+                    token = data.access_token;
+                    console.log('Token refrescado manualmente con éxito');
+                  }
+                }
+              }
+            } catch (error) {
+              console.error('Error al refrescar manualmente el token:', error);
+            }
+          }
+        }
+        
+        // Verificar nuevamente si tenemos un token válido
+        if (!token) {
+          console.error('No se pudo obtener un token válido después de intentar refrescar');
+          setIsLoading(false);
+          return;
+        }
+        
         const apiUrl = process.env.NEXT_PUBLIC_NEST_API_URL;
-        const baseUrl = apiUrl?.endsWith('/') ? apiUrl : `${apiUrl}/`;
+        if (!apiUrl) {
+          console.error('URL de API no configurada');
+          setIsLoading(false);
+          return;
+        }
+        
+        const baseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
         
         console.log('Fetching stats for role:', user.role);
         console.log('API URL:', baseUrl);
