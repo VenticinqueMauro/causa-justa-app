@@ -56,10 +56,16 @@ export default function LoginForm() {
     }
   }, []);
 
+  // Referencia para rastrear el estado anterior del formulario
+  const formStateRef = React.useRef(formState);
+  
   // Efecto para detectar cambios en formState y preparar el toast
-  useEffect(() => {
-    // Solo configurar el toast si hay un mensaje
-    if (formState.message) {
+  useEffect(() => {    
+    // Solo configurar el toast si hay un mensaje y si el formState ha cambiado
+    if (formState.message && formStateRef.current !== formState) {
+      // Actualizar la referencia para evitar procesar el mismo formState múltiples veces
+      formStateRef.current = formState;
+      
       if (formState.success) {
         setToastMessage(formState.message);
         setToastType('success');
@@ -98,13 +104,14 @@ export default function LoginForm() {
           const redirectPath = localStorage.getItem('redirectAfterLogin');
           
           // Redirigir al usuario después de un inicio de sesión exitoso
+          // Usar window.location.href en lugar de router.push para evitar bucles de redirección
           setTimeout(() => {
             if (redirectPath) {
               console.log('Redirigiendo a:', redirectPath);
               localStorage.removeItem('redirectAfterLogin'); // Limpiar después de usar
-              router.push(redirectPath);
+              window.location.href = redirectPath;
             } else {
-              router.push('/');
+              window.location.href = '/';
             }
           }, 500); // Pequeño retraso para asegurar que el contexto se actualice antes de la redirección
         }
@@ -112,20 +119,26 @@ export default function LoginForm() {
         const errorMsg = formState.errors?._form?.[0] || formState.message || 'Error en el inicio de sesión.';
         setToastMessage(errorMsg);
         setToastType('error');
+        // Activar el toast solo para errores (los éxitos se manejan con redirección)
+        setShouldShowToast(true);
       }
-      // Activar el toast
-      setShouldShowToast(true);
     }
-  }, [formState, router, login]); // Dependencias estables
+  }, [formState]); // Solo depender de formState
 
   // Efecto separado para mostrar el toast
   useEffect(() => {
-    if (shouldShowToast && toastMessage) {
-      showToast(toastMessage, toastType);
-      // Resetear para no mostrar el mismo toast múltiples veces
-      setShouldShowToast(false);
+    // Solo mostrar toast para errores, ya que los éxitos se manejan con redirección
+    if (shouldShowToast && toastMessage && toastType === 'error') {
+      // Usar setTimeout para evitar posibles problemas de sincronización
+      const timeoutId = setTimeout(() => {
+        showToast(toastMessage, toastType);
+        // Resetear para no mostrar el mismo toast múltiples veces
+        setShouldShowToast(false);
+      }, 0);
+      
+      return () => clearTimeout(timeoutId);
     }
-  }, [shouldShowToast, toastMessage, toastType, showToast]); // Dependencias estables
+  }, [shouldShowToast, toastMessage, toastType, showToast]);
 
   return (
     <div className="bg-white border-2 border-[#002C5B] p-3 md:p-6 shadow-[5px_5px_0_0_rgba(0,44,91,0.8)]">
