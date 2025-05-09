@@ -3,6 +3,9 @@ import { Nunito, Work_Sans } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
 import { AuthProvider } from "@/contexts/AuthContext";
+import LenisProvider from "@/components/providers/LenisProvider";
+import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
+import ScrollProgressBar from "@/components/ui/ScrollProgressBar";
 
 // Cargamos Nunito para títulos y botones
 const nunito = Nunito({
@@ -128,7 +131,11 @@ export default function RootLayout({
       >
         <AuthProvider>
           <ToastProvider>
-            {children}
+            <LenisProvider>
+              {children}
+              <ScrollToTopButton threshold={500} />
+              <ScrollProgressBar color="#002C5B" height={3} />
+            </LenisProvider>
           </ToastProvider>
         </AuthProvider>
       </body>
