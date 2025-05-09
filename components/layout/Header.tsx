@@ -98,7 +98,7 @@ const FloatingStartCauseButton = () => {
   };
   
   return (
-    <div className="fixed bottom-5 right-3 md:bottom-20 md:right-10 z-[9999]">
+    <div className="fixed bottom-5 right-3 md:bottom-[100px] md:right-10 z-[9999]">
       <button 
         className={`
           flex items-center bg-[#EDFCA7] border-2 border-[#002C5B] shadow-[4px_4px_0_0_rgba(0,44,91,0.8)]

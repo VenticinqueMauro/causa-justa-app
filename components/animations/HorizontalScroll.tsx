@@ -33,25 +33,37 @@ export default function HorizontalScroll({
       const viewportHeight = window.innerHeight;
       const sectionHeight = containerRef.current.offsetHeight;
       const sectionTop = containerRect.top;
+      
+      // Improved calculation that works better on all screen sizes
+      // This ensures the animation progresses based on the container's position in the viewport
       const sectionProgress = Math.min(
         Math.max(
-          (viewportHeight - sectionTop) / (viewportHeight + sectionHeight),
+          (viewportHeight - sectionTop) / (viewportHeight + sectionHeight * 0.8),
           0
         ),
         1
       );
       
-      // Apply easing to the progress
-      progressRef.current += (sectionProgress - progressRef.current) * 0.1;
+      // Apply smoother easing to the progress
+      progressRef.current += (sectionProgress - progressRef.current) * 0.08;
       
       // Calculate the horizontal scroll position
       const scrollWidth = scrollRef.current.scrollWidth;
       const containerWidth = scrollRef.current.offsetWidth;
-      const maxScroll = scrollWidth - containerWidth;
-      const scrollPos = maxScroll * progressRef.current * speed;
       
-      // Apply the transform with hardware acceleration
-      scrollRef.current.style.transform = `translate3d(${-scrollPos}px, 0, 0)`;
+      // Ensure we have content that needs scrolling
+      const maxScroll = Math.max(0, scrollWidth - containerWidth);
+      
+      // Adjust speed based on screen width to ensure consistent experience
+      const adjustedSpeed = speed * (Math.min(1920, window.innerWidth) / 1200);
+      
+      // Only apply scrolling if there's content that overflows
+      if (maxScroll > 0) {
+        const scrollPos = maxScroll * progressRef.current * adjustedSpeed;
+        
+        // Apply the transform with hardware acceleration
+        scrollRef.current.style.transform = `translate3d(${-scrollPos}px, 0, 0)`;
+      }
     }
   });
 
@@ -76,6 +88,7 @@ export default function HorizontalScroll({
         style={{ 
           display: 'flex',
           flexWrap: 'nowrap',
+          transition: 'transform 0.05s linear',
         }}
       >
         {children}

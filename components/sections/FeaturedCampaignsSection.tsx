@@ -44,7 +44,8 @@ const FeaturedCampaignsSection = ({ campaigns }: FeaturedCampaignsSectionProps) 
       />
       
       <div className="container mx-auto px-4 relative z-10">
-        <RevealSection animation="fade-down" delay={100} duration={800}>
+        {/* Aumentamos el threshold a 0.5 para que la animación comience cuando la mitad del elemento sea visible */}
+        <RevealSection animation="fade-down" delay={100} duration={800} threshold={0.5}>
           <div className="mb-10 text-center max-w-3xl mx-auto">
             <BrutalHeading className="text-3xl md:text-4xl">Causas destacadas</BrutalHeading>
             <p className="mt-4 text-gray-600 max-w-2xl mx-auto pl-4 italic">
@@ -53,7 +54,8 @@ const FeaturedCampaignsSection = ({ campaigns }: FeaturedCampaignsSectionProps) 
           </div>
         </RevealSection>
         
-        <RevealSection animation="fade-right" delay={200} duration={800}>
+        {/* Aumentamos el threshold a 0.5 para que la animación comience cuando la mitad del elemento sea visible */}
+        <RevealSection animation="fade-right" delay={200} duration={800} threshold={0.5}>
           <div className="text-start my-8">
               <BrutalLink className="inline-flex items-center" href="/campaigns">
                 Ver todas las causas
@@ -65,8 +67,14 @@ const FeaturedCampaignsSection = ({ campaigns }: FeaturedCampaignsSectionProps) 
         </RevealSection>
         <div className="mb-12">
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Campaña principal destacada a la izquierda - determina la altura */}
-            <RevealSection animation="fade-right" delay={300} duration={1000} className="md:w-1/2 flex">
+            {/* Campaña principal destacada a la izquierda - aparece primero */}
+            <RevealSection 
+              animation="fade-right" 
+              delay={300} 
+              duration={1000} 
+              className="md:w-1/2 flex" 
+              threshold={0.6}
+            >
               <div className="w-full">
                 <CampaignCard
                   campaign={featuredCampaign}
@@ -76,15 +84,27 @@ const FeaturedCampaignsSection = ({ campaigns }: FeaturedCampaignsSectionProps) 
               </div>
             </RevealSection>
 
-            {/* Contenedor de las dos campañas de la derecha - se adapta a la altura de la izquierda */}
+            {/* Contenedor de las dos campañas de la derecha - aparecen después */}
             <div className="md:w-1/2 flex flex-col gap-6">
               {/* Primera campaña secundaria */}
-              <RevealSection animation="fade-left" delay={400} duration={1000} className="flex-1">
+              <RevealSection 
+                animation="fade-left" 
+                delay={400} 
+                duration={1000} 
+                className="flex-1" 
+                threshold={0.6}
+              >
                 <CampaignCard campaign={secondaryCampaigns[0]} className="h-full" />
               </RevealSection>
 
               {/* Segunda campaña secundaria */}
-              <RevealSection animation="fade-left" delay={500} duration={1000} className="flex-1">
+              <RevealSection 
+                animation="fade-left" 
+                delay={500} 
+                duration={1000} 
+                className="flex-1" 
+                threshold={0.6}
+              >
                 <CampaignCard campaign={secondaryCampaigns[1]} className="h-full" />
               </RevealSection>
             </div>
