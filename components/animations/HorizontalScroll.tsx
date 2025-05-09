@@ -84,7 +84,7 @@ export default function HorizontalScroll({
     <div ref={containerRef} className={`overflow-hidden ${containerClassName}`}>
       <div 
         ref={scrollRef} 
-        className={`flex flex-nowrap ${className}`}
+        className={`flex flex-nowrap justify-center ${className}`}
         style={{ 
           display: 'flex',
           flexWrap: 'nowrap',

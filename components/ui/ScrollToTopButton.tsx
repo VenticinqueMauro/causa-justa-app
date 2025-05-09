@@ -32,7 +32,7 @@ export default function ScrollToTopButton({
   return (
     <button
       onClick={scrollToTop}
-      className={`fixed bottom-8 right-8 p-3 bg-[#002C5B] text-white rounded-full shadow-lg border-2 border-[#EDFCA7] z-50 transition-all duration-300 ${
+      className={`fixed bottom-20 right-3 md:bottom-8 md:right-8 p-3 bg-[#002C5B] text-white rounded-full shadow-lg border-2 border-[#EDFCA7] z-50 transition-all duration-300 ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
       } ${className}`}
       aria-label="Volver al inicio"

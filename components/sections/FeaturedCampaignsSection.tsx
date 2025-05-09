@@ -17,7 +17,7 @@ interface FeaturedCampaignsSectionProps {
 
 const FeaturedCampaignsSection = ({ campaigns }: FeaturedCampaignsSectionProps) => {
   const parallaxBgRef = useParallax<HTMLDivElement>({
-    speed: 0.03,
+    speed: 0.05,
     direction: 'down',
     maxMovement: 30,
   });
@@ -37,10 +37,6 @@ const FeaturedCampaignsSection = ({ campaigns }: FeaturedCampaignsSectionProps) 
       <div 
         ref={parallaxBgRef} 
         className="absolute inset-0 opacity-5 z-0 pointer-events-none" 
-        style={{
-          backgroundImage: 'url("/pattern-dots.png")',
-          backgroundRepeat: 'repeat',
-        }}
       />
       
       <div className="container mx-auto px-4 relative z-10">
@@ -70,8 +66,8 @@ const FeaturedCampaignsSection = ({ campaigns }: FeaturedCampaignsSectionProps) 
             {/* Campaña principal destacada a la izquierda - aparece primero */}
             <RevealSection 
               animation="fade-right" 
-              delay={300} 
-              duration={1000} 
+              delay={100} 
+              duration={500} 
               className="md:w-1/2 flex" 
               threshold={0.6}
             >
@@ -89,8 +85,8 @@ const FeaturedCampaignsSection = ({ campaigns }: FeaturedCampaignsSectionProps) 
               {/* Primera campaña secundaria */}
               <RevealSection 
                 animation="fade-left" 
-                delay={400} 
-                duration={1000} 
+                delay={200} 
+                duration={500} 
                 className="flex-1" 
                 threshold={0.6}
               >
@@ -100,8 +96,8 @@ const FeaturedCampaignsSection = ({ campaigns }: FeaturedCampaignsSectionProps) 
               {/* Segunda campaña secundaria */}
               <RevealSection 
                 animation="fade-left" 
-                delay={500} 
-                duration={1000} 
+                delay={400} 
+                duration={500} 
                 className="flex-1" 
                 threshold={0.6}
               >
