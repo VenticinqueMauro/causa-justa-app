@@ -1,4 +1,6 @@
-import React from "react";
+
+'use client';
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Campaign } from "@/types/campaign";
@@ -12,6 +14,14 @@ interface CampaignCardProps {
 }
 
 const CampaignCard = ({ campaign, featured = false, className = '' }: CampaignCardProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  const toggleDescription = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsExpanded(!isExpanded);
+    return false;
+  };
   // Usar el monto actual si está disponible, de lo contrario calcular un valor de ejemplo
   const raised = campaign.currentAmount !== undefined ? campaign.currentAmount :
     (campaign.goalAmount ? Math.floor(campaign.goalAmount * 0.6) : 0); // 60% de la meta como fallback
@@ -19,7 +29,8 @@ const CampaignCard = ({ campaign, featured = false, className = '' }: CampaignCa
   const campaignUrl = `/campaigns/${campaign.slug || campaign.id || ''}`;
 
   return (
-    <Link href={campaignUrl} passHref className={`block cursor-pointer ${className}`}>
+    <div className={`block cursor-pointer ${className}`}>
+      <Link href={campaignUrl} passHref className="block">
       <div className={`group relative overflow-hidden border-2 border-[#002C5B] bg-white transition-all transform shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)]  w-full flex flex-col h-full ${!featured && 'max-w-2xl'} mx-auto`}>
         {/* Contenedor de imagen con mayor altura y efecto de zoom al pasar el cursor */}
         <div className={`overflow-hidden border-b-2 border-[#002C5B] relative ${featured ? 'h-[260px]' : 'h-[180px]'}`}>
@@ -47,11 +58,40 @@ const CampaignCard = ({ campaign, featured = false, className = '' }: CampaignCa
           {featured ? (
             <>
               <p className="text-base md:text-lg line-clamp-2 text-gray-600">{campaign.shortDescription}</p>
-              <p className="text-sm md:text-base text-gray-600 line-clamp-none flex-grow mt-4">"{campaign.description}"</p>
+              <div className="relative mt-4 overflow-hidden">
+                <div className={`text-sm md:text-base text-gray-600 flex-grow transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[1000px]' : 'max-h-[4.5rem] md:max-h-[1000px]'}`}>
+                  <p>"{campaign.description}"</p>
+                </div>
+                <div className={`md:hidden absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white via-white/50 to-transparent transition-opacity duration-100 ${isExpanded ? 'opacity-0' : 'opacity-100'}`}></div>
+              </div>
+              <div className="md:hidden relative z-10 mt-1">
+                <button 
+                  onClick={toggleDescription}
+                  className="flex items-center text-xs text-[#002C5B] font-medium bg-white py-1 hover:underline focus:outline-none transition-all duration-300 ease-in-out"
+                >
+                  {isExpanded ? (
+                    <>
+                      Mostrar menos
+                      <svg className="ml-1 w-4 h-4 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </>
+                  ) : (
+                    <>
+                      Leer más
+                      <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </>
+                  )}
+                </button>
+              </div>
               <p className="text-xs text-gray-500 italic mt-1">→ Haz clic para ver más detalles</p>
             </>
           ) : (
-            <p className="text-base line-clamp-2 text-gray-600">{campaign.shortDescription}</p>
+            <div className="relative">
+              <p className="text-base line-clamp-2 text-gray-600">{campaign.shortDescription}</p>
+            </div>
           )}
           <div className="mt-4 space-y-2">
             <div className="flex items-center justify-between text-xs">
@@ -84,6 +124,7 @@ const CampaignCard = ({ campaign, featured = false, className = '' }: CampaignCa
         </div>
       </div>
     </Link>
+    </div>
   );
 };
 
