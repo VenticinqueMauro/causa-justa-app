@@ -47,9 +47,12 @@ const StatsSection = () => {
   // Refs for animations and interactions
   const sectionRef = useRef<HTMLDivElement>(null);
   const statsRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollContentRef = useRef<HTMLDivElement>(null);
   const [animated, setAnimated] = useState(false);
   const [displayedValues, setDisplayedValues] = useState<string[]>(stats.map(() => "0"));
   const [visibleStats, setVisibleStats] = useState<boolean[]>(stats.map(() => false));
+  const progressRef = useRef(0);
 
   // Parallax effect for the title section
   const titleRef = useParallax<HTMLDivElement>({
@@ -212,7 +215,7 @@ const StatsSection = () => {
     return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
   };
 
-  // Use Lenis for scroll-based interactions
+  // Use Lenis for horizontal scroll effect (opposite direction of BenefitsSection)
   useLenis(({ scroll, progress }) => {
     // Apply subtle rotation to stats cards based on scroll position
     statsRefs.current.forEach((ref, index) => {
@@ -232,8 +235,59 @@ const StatsSection = () => {
         ref.style.transition = 'transform 0.3s ease-out';
       }
     });
+    
+    // Horizontal scroll effect (opposite direction of BenefitsSection)
+    if (!scrollContainerRef.current || !scrollContentRef.current) return;
+    
+    const containerRect = scrollContainerRef.current.getBoundingClientRect();
+    
+    // Only apply horizontal scroll when the container is in view
+    if (containerRect.bottom > 0 && containerRect.top < window.innerHeight) {
+      // Calculate how far through the section we've scrolled (0-1)
+      const viewportHeight = window.innerHeight;
+      const sectionHeight = scrollContainerRef.current.offsetHeight;
+      const sectionTop = containerRect.top;
+      
+      // Calculate section progress (0-1)
+      const sectionProgress = Math.min(
+        Math.max(
+          (viewportHeight - sectionTop) / (viewportHeight + sectionHeight * 0.8),
+          0
+        ),
+        1
+      );
+      
+      // Apply smoother easing to the progress
+      progressRef.current += (sectionProgress - progressRef.current) * 0.08;
+      
+      // Calculate the horizontal scroll position
+      const scrollWidth = scrollContentRef.current.scrollWidth;
+      const containerWidth = scrollContentRef.current.offsetWidth;
+      
+      // Ensure we have content that needs scrolling
+      const maxScroll = Math.max(0, scrollWidth - containerWidth);
+      
+      // Siempre aplicar el efecto de scroll, incluso en pantallas grandes
+      // Opposite direction of BenefitsSection (right to left)
+      const scrollPos = maxScroll * (1 - progressRef.current) * 0.8;
+      
+      // Apply the transform with hardware acceleration
+      scrollContentRef.current.style.transform = `translate3d(${-scrollPos}px, 0, 0)`;
+    }
   });
 
+  // Set up initial styles for better performance
+  useEffect(() => {
+    if (!scrollContentRef.current) return;
+    
+    scrollContentRef.current.style.willChange = 'transform';
+    
+    return () => {
+      if (scrollContentRef.current) {
+        scrollContentRef.current.style.willChange = '';
+      }
+    };
+  }, []);
 
   return (
     <BrutalSection variant="alt" className="py-12 border-t-2 border-[#002C5B] overflow-hidden" ref={sectionRef}>
@@ -249,41 +303,58 @@ const StatsSection = () => {
           </RevealSection>
         </div>
         
-        <div className="grid gap-8 md:grid-cols-4">
-          {stats.map((stat, index) => (
-            <RevealSection 
-              key={index} 
-              animation={index % 2 === 0 ? "zoom-in" : "zoom-in"} 
-              delay={300 + index * 100} 
-              duration={800}
-              once={false}
-              threshold={0.7}
-              className={`transition-all duration-700 ${!visibleStats[index] ? 'opacity-0 translate-y-16' : 'opacity-100 translate-y-0'}`}
-            >
-              <div
-                ref={(el) => { statsRefs.current[index] = el; }}
-                className={`
-                  flex flex-col items-center border-2 border-[#002C5B] bg-white p-3 md:p-6 text-center 
-                  shadow-[5px_5px_0_0_rgba(0,44,91,0.3)] transition-all duration-300`}
+        {/* Horizontal scroll container for stats cards */}
+        <div className="relative overflow-hidden py-8" ref={scrollContainerRef}>
+          {/* Optional scroll indicators */}
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-16 h-full bg-gradient-to-r from-gray-100 to-transparent z-10 pointer-events-none"></div>
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-16 h-full bg-gradient-to-l from-gray-100 to-transparent z-10 pointer-events-none"></div>
+          
+          <div 
+            ref={scrollContentRef} 
+            className="flex flex-nowrap justify-center gap-8 px-4 pb-4 mx-auto"
+            style={{ 
+              display: 'flex',
+              flexWrap: 'nowrap',
+              transition: 'transform 0.05s linear',
+              width: 'max-content', // Asegura que el contenido mantenga su ancho natural
+              minWidth: '100%' // Asegura que ocupe al menos el ancho completo
+            }}
+          >
+            {stats.map((stat, index) => (
+              <div 
+                key={index} 
+                className={`flex-shrink-0 w-[280px] md:w-[280px] transition-all duration-700 ${!visibleStats[index] ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
+                style={{
+                  // Add a slight rotation to each card for visual interest
+                  transform: `rotate(${index % 2 === 0 ? '1deg' : '-1deg'})`,
+                }}
               >
-                <div className="mb-3 flex h-12 w-12 items-center justify-center border-2 border-[#002C5B] bg-[#EDFCA7] shadow-[3px_3px_0_0_rgba(0,44,91,0.8)]">
-                  {stat.icon}
+                <div
+                  ref={(el) => { statsRefs.current[index] = el; }}
+                  className={`
+                    flex flex-col items-center border-2 border-[#002C5B] bg-white p-3 md:p-6 text-center 
+                    shadow-[5px_5px_0_0_rgba(0,44,91,0.3)] transition-all duration-300 h-full
+                  `}
+                >
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center border-2 border-[#002C5B] bg-[#EDFCA7] shadow-[3px_3px_0_0_rgba(0,44,91,0.8)]">
+                    {stat.icon}
+                  </div>
+                  <div className="relative">
+                    <span className="text-4xl font-bold text-[#002C5B] counter-value">
+                      {visibleStats[index] ? displayedValues[index] : "0"}
+                    </span>
+                  </div>
+                  <span className="mt-2 text-sm uppercase text-gray-600 font-bold">{stat.label}</span>
+                  {stat.description && (
+                    <span className="mt-2 text-xs text-gray-500">{stat.description}</span>
+                  )}
+                  
+                  {/* Decorative elements */}
+                  <div className={`absolute -z-10 ${index % 2 === 0 ? '-left-2' : '-right-2'} -bottom-2 h-12 w-12 bg-[#EDFCA7] opacity-20 rounded-full blur-xl`} />
                 </div>
-                <div className="relative">
-                  <span className="text-4xl font-bold text-[#002C5B] counter-value">
-                    {visibleStats[index] ? displayedValues[index] : "0"}
-                  </span>
-                </div>
-                <span className="mt-2 text-sm uppercase text-gray-600 font-bold">{stat.label}</span>
-                {stat.description && (
-                  <span className="mt-2 text-xs text-gray-500">{stat.description}</span>
-                )}
-                
-                {/* Decorative elements */}
-                <div className={`absolute -z-10 ${index % 2 === 0 ? '-left-2' : '-right-2'} -bottom-2 h-12 w-12 bg-[#EDFCA7] opacity-20 rounded-full blur-xl`} />
               </div>
-            </RevealSection>
-          ))}
+            ))}
+          </div>
         </div>
         
         <RevealSection animation="fade-up" delay={700} duration={1000}>
