@@ -57,19 +57,14 @@ const SecuritySection = () => {
     <BrutalSection variant="alt" id="security-section" className="border-b-2 border-[#002C5B] overflow-hidden">
       <div className="container mx-auto px-4">
         <div ref={titleRef} className="mb-12 text-center">
-          <RevealSection animation="fade-down" duration={1000}>
             <BrutalHeading className="text-3xl md:text-4xl">Seguridad y Transparencia</BrutalHeading>
-          </RevealSection>
-          <RevealSection animation="fade-up" delay={200} duration={800}>
             <p className="mt-4 text-gray-600 max-w-2xl mx-auto pl-4 italic">
               Tu tranquilidad es nuestra prioridad. Conoce cómo protegemos tus donaciones
             </p>
-          </RevealSection>
         </div>
 
         <div className="grid gap-8 md:grid-cols-2">
           {/* Métodos de pago */}
-          <RevealSection animation="fade-right" delay={300} duration={1000}>
             <div 
               ref={card1Ref}
               className="border-2 border-[#002C5B] bg-white p-6 shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)] transition-all duration-300 h-full"
@@ -95,10 +90,8 @@ const SecuritySection = () => {
                 </div>
               </div>
             </div>
-          </RevealSection>
 
           {/* Certificaciones de seguridad */}
-          <RevealSection animation="fade-left" delay={500} duration={1000}>
             <div 
               ref={card2Ref}
               className="border-2 border-[#002C5B] bg-white p-6 shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)] transition-all duration-300 h-full"
@@ -113,31 +106,23 @@ const SecuritySection = () => {
                 Tu información personal y financiera está protegida con los más altos estándares de seguridad digital.
               </p>
               <div className="flex flex-col items-start gap-4 mt-4">
-                <RevealSection animation="fade-up" delay={600} duration={600}>
                   <div className="flex items-center">
                     <Lock className="h-5 w-5 text-green-600 mr-2" />
                     <span className="text-sm font-medium">Conexión SSL</span>
                   </div>
-                </RevealSection>
-                <RevealSection animation="fade-up" delay={700} duration={600}>
                   <div className="flex items-center">
                     <Shield className="h-5 w-5 text-green-600 mr-2" />
                     <span className="text-sm font-medium">Datos encriptados</span>
                   </div>
-                </RevealSection>
-                <RevealSection animation="fade-up" delay={800} duration={600}>
                   <div className="flex items-center">
                     <AlertCircle className="h-5 w-5 text-green-600 mr-2" />
                     <span className="text-sm font-medium">Monitoreo 24/7</span>
                   </div>
-                </RevealSection>
               </div>
             </div>
-          </RevealSection>
         </div>
 
         {/* Comisiones y modelo de negocio */}
-        <RevealSection animation="fade-up" delay={700} duration={1200}>
           <div 
             ref={bottomCardRef}
             className="mt-8 border-2 border-[#002C5B] bg-white p-6 shadow-[5px_5px_0px_0px_rgba(0,44,91,0.8)] transition-all duration-300"
@@ -149,15 +134,9 @@ const SecuritySection = () => {
                   Nuestro modelo de comisiones es claro y directo:
                 </p>
                 <ul className="list-disc pl-5 text-gray-600">
-                  <RevealSection animation="fade-right" delay={800} duration={600}>
-                    <li><span className="font-medium">5% de comisión</span> por donación exitosa para mantener la plataforma</li>
-                  </RevealSection>
-                  <RevealSection animation="fade-right" delay={900} duration={600}>
-                    <li><span className="font-medium">+ costos de procesamiento</span> de MercadoPago (aprox 3.99%)</li>
-                  </RevealSection>
-                  <RevealSection animation="fade-right" delay={1000} duration={600}>
-                    <li>Todas las comisiones se detallan en cada transacción</li>
-                  </RevealSection>
+                  <li><span className="font-medium">5% de comisión</span> por donación exitosa para mantener la plataforma</li>
+                  <li><span className="font-medium">+ costos de procesamiento</span> de MercadoPago (aprox 3.99%)</li>
+                  <li>Todas las comisiones se detallan en cada transacción</li>
                 </ul>
               </div>
               
@@ -168,20 +147,13 @@ const SecuritySection = () => {
                   Seguridad en cada donación:
                 </p>
                 <ul className="list-disc pl-5 text-gray-600">
-                  <RevealSection animation="fade-left" delay={800} duration={600}>
-                    <li>Transferencias directas a cuentas de MercadoPago verificadas</li>
-                  </RevealSection>
-                  <RevealSection animation="fade-left" delay={900} duration={600}>
-                    <li>Los beneficiarios pueden compartir actualizaciones sobre el progreso</li>
-                  </RevealSection>
-                  <RevealSection animation="fade-left" delay={1000} duration={600}>
-                    <li>Historial completo de donaciones en tu perfil</li>
-                  </RevealSection>
+                  <li>Transferencias directas a cuentas de MercadoPago verificadas</li>
+                  <li>Los beneficiarios pueden compartir actualizaciones sobre el progreso</li>
+                  <li>Historial completo de donaciones en tu perfil</li>
                 </ul>
               </div>
             </div>
           </div>
-        </RevealSection>
       </div>
     </BrutalSection>
   );

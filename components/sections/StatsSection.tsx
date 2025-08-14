@@ -293,14 +293,10 @@ const StatsSection = () => {
     <BrutalSection variant="alt" className="py-12 border-t-2 border-[#002C5B] overflow-hidden" ref={sectionRef}>
       <div className="container mx-auto px-4">
         <div ref={titleRef} className="mb-12 text-center">
-          <RevealSection animation="fade-down" duration={1000}>
             <BrutalHeading className="text-3xl md:text-4xl">Nuestro Impacto</BrutalHeading>
-          </RevealSection>
-          <RevealSection animation="fade-up" delay={200} duration={800}>
             <p className="mt-4 text-gray-600 max-w-2xl mx-auto pl-4 italic">
               Cifras que demuestran nuestro compromiso con la transparencia y el cambio social
             </p>
-          </RevealSection>
         </div>
         
         {/* Horizontal scroll container for stats cards */}
@@ -357,7 +353,6 @@ const StatsSection = () => {
           </div>
         </div>
         
-        <RevealSection animation="fade-up" delay={700} duration={1000}>
           <div className="mt-10 text-center">
             <p className="text-[#002C5B] mb-4 max-w-2xl mx-auto border-2 border-dashed border-[#002C5B] bg-white p-3 rotate-[0.3deg] transform">
               Publicamos informes trimestrales de impacto y mantenemos un seguimiento transparente de todas las causas financiadas.
@@ -371,7 +366,6 @@ const StatsSection = () => {
               <ArrowRight className="ml-2 h-4 w-4" />
             </BrutalButton>
           </div>
-        </RevealSection>
       </div>
     </BrutalSection>
   );

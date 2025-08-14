@@ -216,14 +216,12 @@ const StepsSection = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         {/* RevealSection para el título - Mantenido */}
-        <RevealSection animation="fade-down" delay={100} duration={800} threshold={0.5}>
-          <div className="mb-16 text-center">
+        <div className="mb-16 text-center">
             <BrutalHeading className="text-3xl md:text-5xl">Cómo funciona</BrutalHeading>
             <p className="mt-6 text-gray-600 max-w-2xl mx-auto pl-4 italic text-lg">
               En tres simples pasos puedes comenzar a ayudar o recibir apoyo para tu causa
             </p>
           </div>
-        </RevealSection>
 
 
         {/* Steps container */}
@@ -240,13 +238,8 @@ const StepsSection = () => {
 
             {steps.map((step, index) => (
               // RevealSection para la entrada de cada paso - Mantenido
-              <RevealSection
+              <div
                 key={index}
-                animation="fade-up"
-                delay={100 * index} // Stagger delay
-                duration={800}
-                threshold={0.3}
-                once={false} // Animación se repite al scrollear
               >
                 <div
                   className={`relative flex flex-col md:flex-row items-center md:items-start gap-6 mb-16 md:mb-24 transition-all duration-500 ease-out ${index <= activeStepIndex ? 'opacity-100' : 'opacity-30' // Reducimos la opacidad de los pasos futuros/pasados
@@ -305,7 +298,7 @@ const StepsSection = () => {
                     </div>
                   </div>
                 </div>
-              </RevealSection>
+              </div>
             ))}
           </div>
         </div>

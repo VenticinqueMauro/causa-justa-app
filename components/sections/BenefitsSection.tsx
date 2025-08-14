@@ -33,7 +33,6 @@ const BenefitsSection = () => {
   return (
     <BrutalSection id="benefits">
       <div className="container mx-auto px-4">
-        <RevealSection animation="fade-down" delay={100} duration={800}>
           <div className="mb-12 text-center">
             <BrutalHeading className="text-3xl md:text-4xl">¿Por qué elegir Causa Justa?</BrutalHeading>
             <p className="mt-4 text-gray-600 max-w-2xl mx-auto pl-4 italic">
@@ -41,7 +40,6 @@ const BenefitsSection = () => {
               organizaciones
             </p>
           </div>
-        </RevealSection>
         
         {/* Horizontal scroll container for benefits cards */}
         <div className="relative overflow-hidden py-8">
